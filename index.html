@@ -37,7 +37,7 @@ const CONFIG = {
   // 2. Copy the "Embed code" src URL and paste it below.
   // 3. Make sure the calendar is set to "Public" or shared with viewers.
   // Leave as empty string ('') to hide the calendar embed tab.
-  calendarEmbedSrc: '',
+  calendarEmbedSrc: 'https://calendar.google.com/calendar/embed?src=c_e98b827964cc1a0fd1a64efed1ca21c342c6fca20a69307feecc048cd92ce624%40group.calendar.google.com&ctz=America%2FDenver',
 
   // Announcements (add/remove objects; newest first)
   announcements: [
@@ -850,7 +850,7 @@ function buildFullCal() {
   const cont = document.getElementById('calendar-content');
 
   if (CONFIG.calendarEmbedSrc) {
-    cont.innerHTML = `<div class="cal-embed"><iframe src="${CONFIG.calendarEmbedSrc}&mode=MONTH&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23181818&color=%23FFFFFF" height="520"></iframe></div>`;
+    cont.innerHTML = `<div class="cal-embed"><iframe src="${CONFIG.calendarEmbedSrc}&mode=MONTH&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1&bgcolor=%23FFFFFF" height="640"></iframe></div>`;
     return;
   }
 
