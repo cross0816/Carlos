@@ -175,7 +175,8 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
 /* PAGES */
 .page{display:none;padding:22px 26px;flex:1;}
-.page.active{display:block;}
+.page.active{display:block;animation:fadeIn .18s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 .slabel{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.22em;color:var(--t3);margin-bottom:14px;}
 
 /* CARD */
@@ -354,7 +355,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .cal-setup ol{margin:12px 0 0 18px;}
 .cal-setup li{margin-bottom:6px;}
 
-/* RESPONSIVE */
+/* BOTTOM TAB BAR (mobile only) */
+.tab-bar{display:none;}
+
+/* RESPONSIVE — tablet */
 @media(max-width:960px){
   .sidebar{width:54px;}
   .brand,.nav-label,.sidebar-mtn,.sidebar-ft,.brand-sub{display:none;}
@@ -369,12 +373,68 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   .pg{grid-template-columns:1fr;}
   .wfh{flex-direction:column;gap:14px;}
 }
+
+/* RESPONSIVE — phone */
 @media(max-width:600px){
-  .topbar{padding:12px 14px;}
-  .page{padding:14px;}
+  /* Hide desktop sidebar entirely; show bottom tab bar */
+  .sidebar{display:none;}
+  .main{margin-left:0;}
+
+  /* Bottom tab bar */
+  .tab-bar{
+    display:flex;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:#1A2535;
+    border-top:1px solid rgba(255,255,255,.1);
+    z-index:200;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tab-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;
+    padding:10px 4px 8px;gap:4px;
+    cursor:pointer;color:rgba(255,255,255,.4);
+    font-family:'Arial Narrow',Arial,sans-serif;font-size:9px;
+    font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+    border:none;background:none;transition:color .12s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tab-item svg{width:20px;height:20px;flex-shrink:0;}
+  .tab-item.active{color:#FFFFFF;}
+  .tab-item.active svg{color:var(--gold);}
+
+  /* Topbar — hide logo, just show page title */
+  .topbar{padding:12px 16px;}
+  .topbar img,.topbar svg[role="img"]{display:none;}
+  .topbar > div:first-child > div[style*="width:1px"]{display:none;}
+  #page-title{font-size:15px;letter-spacing:.12em;}
+
+  /* Page content — account for tab bar */
+  .page{padding:14px 14px 90px;}
+
+  /* Cards — bigger tap targets & text */
+  .card{padding:18px 16px;border-radius:8px;}
+  .clabel{font-size:10px;margin-bottom:10px;}
+
+  /* Dashboard */
+  .dash-grid{grid-template-columns:1fr;gap:12px;}
+  .cal-card{grid-column:span 1;}
+
+  /* Outdoor conditions — stack vertically */
+  .dash-conds{flex-direction:column;gap:0;}
+  .dash-cond-divider{width:100%;height:1px;background:var(--border);margin:0;}
+  .dash-cond-item{padding:14px 0;}
+  .dash-cond-val{font-size:22px;}
+
+  /* Weather */
   .wg{grid-template-columns:1fr;}
+  .wc-temp{font-size:52px;}
+
+  /* Schedule / other grids */
   .fcg{grid-template-columns:1fr 1fr;}
   .conds{grid-template-columns:1fr;}
+  .wfh{flex-direction:column;gap:14px;}
+  .dg{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -981,6 +1041,42 @@ buildSchedule();
 buildTodaySchedule();
 setDateLabel();
 fetchWeather().then(applyWeather);
+
+// Sync tab bar active state with page navigation
+(function(){
+  const orig = window.gotoPage;
+  window.gotoPage = function(id, el) {
+    orig(id, el);
+    document.querySelectorAll('.tab-item').forEach(t => {
+      t.classList.toggle('active', t.dataset.page === id);
+    });
+  };
+})();
 </script>
+
+<!-- BOTTOM TAB BAR (phones only) -->
+<nav class="tab-bar">
+  <button class="tab-item active" data-page="dashboard" onclick="gotoPage('dashboard',this)">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7A1 1 0 003 11h1v6a1 1 0 001 1h4v-4h2v4h4a1 1 0 001-1v-6h1a1 1 0 00.707-1.707l-7-7z"/></svg>
+    Home
+  </button>
+  <button class="tab-item" data-page="student" onclick="gotoPage('student',this)">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+    Student
+  </button>
+  <button class="tab-item" data-page="calendar" onclick="gotoPage('calendar',this)">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+    Calendar
+  </button>
+  <button class="tab-item" data-page="schedule" onclick="gotoPage('schedule',this)">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+    Schedule
+  </button>
+  <button class="tab-item" data-page="weather" onclick="gotoPage('weather',this)">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
+    Weather
+  </button>
+</nav>
+
 </body>
 </html>
