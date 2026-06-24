@@ -482,30 +482,6 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         <div class="sl" id="sched-mini"></div>
       </div>
 
-      <div class="card">
-        <div class="clabel">Recent Announcements</div>
-        <div class="ann-list" id="ann-mini"></div>
-      </div>
-
-      <div class="card wc">
-        <div class="clabel">Today's Weather</div>
-        <div class="wc-temp" id="wc-temp">—</div>
-        <div class="wc-cond" id="wc-cond">Loading…</div>
-        <div class="wc-loc" id="wc-loc"></div>
-        <div class="wc-rows" id="wc-rows"></div>
-      </div>
-
-      <div class="card cal-card">
-        <div class="cal-head">
-          <div class="cal-mo" id="cal-mo-label"></div>
-          <div class="calnav">
-            <button onclick="shiftCal(-1)">&#8249;</button>
-            <button onclick="shiftCal(1)">&#8250;</button>
-          </div>
-        </div>
-        <div class="cal-grid" id="mini-cal"></div>
-      </div>
-
       <!-- Outdoor Activity Conditions — full width -->
       <div class="card" style="grid-column:span 2;">
         <div class="clabel">Outdoor Activity Conditions — Today</div>
@@ -528,6 +504,30 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
             <div class="dash-cond-sub" id="dc-evening-sub"></div>
           </div>
         </div>
+      </div>
+
+      <div class="card">
+        <div class="clabel">Recent Announcements</div>
+        <div class="ann-list" id="ann-mini"></div>
+      </div>
+
+      <div class="card wc">
+        <div class="clabel">Today's Weather</div>
+        <div class="wc-temp" id="wc-temp">—</div>
+        <div class="wc-cond" id="wc-cond">Loading…</div>
+        <div class="wc-loc" id="wc-loc"></div>
+        <div class="wc-rows" id="wc-rows"></div>
+      </div>
+
+      <div class="card cal-card">
+        <div class="cal-head">
+          <div class="cal-mo" id="cal-mo-label"></div>
+          <div class="calnav">
+            <button onclick="shiftCal(-1)">&#8249;</button>
+            <button onclick="shiftCal(1)">&#8250;</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="mini-cal"></div>
       </div>
 
     </div>
