@@ -26,10 +26,10 @@ const CONFIG = {
   },
   // CXA location — used for weather
   location: {
-    label:     'Colorado Springs, CO',
-    elevation: '6,035 ft',
-    lat:       38.8339,
-    lon:       -104.8214,
+    label:     'Carbondale, CO',
+    elevation: '6,181 ft',
+    lat:       39.4019,
+    lon:       -107.2116,
     timezone:  'America/Denver'
   },
   // Google Calendar embed:
@@ -130,41 +130,41 @@ const CONFIG = {
 
 <style>
 :root{
-  --bg:#0A0A0A;--surface:#111;--card:#181818;--border:#262626;
-  --t1:#F0F0F0;--t2:#A0A0A0;--t3:#4A4A4A;
-  --accent:#FFFFFF;--gold:#D4A820;--gold-dim:#8A6C10;
-  --ok:#4CAF50;--warn:#F0A030;
-  --sw:210px;--r:4px;
+  --bg:#F5F6F8;--surface:#FFFFFF;--card:#FFFFFF;--border:#E4E7EC;
+  --t1:#1A2535;--t2:#5A6A80;--t3:#A0AABB;
+  --accent:#1A2535;--gold:#C4880A;--gold-dim:#8A6010;
+  --ok:#2E7D32;--warn:#E67C00;
+  --sw:210px;--r:5px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
 body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;}
 
 /* SIDEBAR */
-.sidebar{width:var(--sw);background:var(--surface);border-right:1px solid var(--border);position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:100;}
-.brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
-.brand-cxa{font-family:'Arial Narrow',Arial,sans-serif;font-size:30px;font-weight:900;letter-spacing:.1em;color:var(--accent);line-height:1;text-transform:uppercase;}
-.brand-sub{font-size:9px;text-transform:uppercase;letter-spacing:.22em;color:var(--t3);margin-top:3px;}
+.sidebar{width:var(--sw);background:#1A2535;border-right:none;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:100;}
+.brand{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);}
+.brand-cxa{font-family:'Arial Narrow',Arial,sans-serif;font-size:30px;font-weight:900;letter-spacing:.1em;color:#FFFFFF;line-height:1;text-transform:uppercase;}
+.brand-sub{font-size:9px;text-transform:uppercase;letter-spacing:.22em;color:rgba(255,255,255,.35);margin-top:3px;}
 .nav{flex:1;padding:10px 0;}
-.ni{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;color:var(--t3);font-family:'Arial Narrow',Arial,sans-serif;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;border-left:2px solid transparent;transition:color .12s,background .12s;user-select:none;}
-.ni:hover{color:var(--t2);background:rgba(255,255,255,.03);}
-.ni.active{color:var(--accent);border-left-color:var(--accent);background:rgba(255,255,255,.05);}
+.ni{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.4);font-family:'Arial Narrow',Arial,sans-serif;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;border-left:2px solid transparent;transition:color .12s,background .12s;user-select:none;}
+.ni:hover{color:rgba(255,255,255,.75);background:rgba(255,255,255,.06);}
+.ni.active{color:#FFFFFF;border-left-color:var(--gold);background:rgba(255,255,255,.08);}
 .ni svg{width:15px;height:15px;flex-shrink:0;}
-.sidebar-mtn{line-height:0;opacity:.07;}
-.sidebar-ft{padding:12px 20px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);line-height:1.6;}
+.sidebar-mtn{line-height:0;opacity:.12;}
+.sidebar-ft{padding:12px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:rgba(255,255,255,.3);line-height:1.6;}
 
 /* MAIN */
 .main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;}
 
 /* TOPBAR */
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,.05);}
 .topbar-title{font-family:'Arial Narrow',Arial,sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:var(--t2);}
 .topbar-r{display:flex;align-items:center;gap:12px;}
 .notif{position:relative;background:none;border:1px solid var(--border);border-radius:var(--r);padding:6px;cursor:pointer;color:var(--t2);line-height:0;}
-.notif:hover{background:var(--card);}
+.notif:hover{background:var(--bg);}
 .ndot{position:absolute;top:3px;right:3px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:2px solid var(--surface);}
 .parent-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);}
-.avatar{width:30px;height:30px;background:var(--card);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:900;color:var(--accent);flex-shrink:0;}
+.avatar{width:30px;height:30px;background:#1A2535;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:900;color:#FFFFFF;flex-shrink:0;}
 
 /* PAGES */
 .page{display:none;padding:22px 26px;flex:1;}
@@ -179,26 +179,27 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
 
 /* Student card */
-.sc{background:var(--accent);border:none;color:#0A0A0A;position:relative;overflow:hidden;}
-.sc .clabel{color:rgba(0,0,0,.35);}
-.sc-wm{position:absolute;right:-10px;bottom:-22px;font-family:'Arial Narrow',Arial,sans-serif;font-size:130px;font-weight:900;color:rgba(0,0,0,.05);line-height:1;letter-spacing:-.05em;user-select:none;pointer-events:none;}
-.sc-name{font-family:'Arial Narrow',Arial,sans-serif;font-size:34px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:#0A0A0A;line-height:1;margin-bottom:4px;text-wrap:balance;}
-.sc-grade{font-family:'Arial Narrow',Arial,sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.18em;color:rgba(0,0,0,.4);margin-bottom:20px;}
+.sc{background:#1A2535;border:none;color:#FFFFFF;position:relative;overflow:hidden;}
+.sc .clabel{color:rgba(255,255,255,.35);}
+.sc-wm{position:absolute;right:-10px;bottom:-22px;font-family:'Arial Narrow',Arial,sans-serif;font-size:130px;font-weight:900;color:rgba(255,255,255,.04);line-height:1;letter-spacing:-.05em;user-select:none;pointer-events:none;}
+.sc-name{font-family:'Arial Narrow',Arial,sans-serif;font-size:34px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:#FFFFFF;line-height:1;margin-bottom:4px;text-wrap:balance;}
+.sc-grade{font-family:'Arial Narrow',Arial,sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,255,255,.45);margin-bottom:20px;}
 .sc-stats{display:flex;gap:22px;flex-wrap:wrap;}
 .sc-stat{display:flex;flex-direction:column;gap:1px;}
-.sc-sl{font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:rgba(0,0,0,.32);}
-.sc-sv{font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:700;color:#0A0A0A;}
+.sc-sl{font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,255,255,.32);}
+.sc-sv{font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:700;color:#FFFFFF;}
 
 /* Weather */
-.wc{background:var(--card);border:1px solid var(--border);}
-.wc-temp{font-family:'Arial Narrow',Arial,sans-serif;font-size:50px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent);}
-.wc-cond{font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--t2);margin-top:3px;}
-.wc-loc{font-size:10.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;margin-top:2px;}
+.wc{background:linear-gradient(145deg,#1e3a5f,#2563a8);border:none;color:#FFFFFF;}
+.wc .clabel{color:rgba(255,255,255,.45);}
+.wc-temp{font-family:'Arial Narrow',Arial,sans-serif;font-size:50px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:#FFFFFF;}
+.wc-cond{font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.75);margin-top:3px;}
+.wc-loc{font-size:10.5px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.14em;margin-top:2px;}
 .wc-rows{margin-top:14px;display:flex;flex-direction:column;gap:5px;}
 .wc-row{display:flex;justify-content:space-between;font-size:12px;}
-.wk{color:var(--t3);}
-.wv{color:var(--t2);font-weight:500;font-variant-numeric:tabular-nums;}
-.wc-loading{color:var(--t3);font-size:13px;margin-top:16px;}
+.wk{color:rgba(255,255,255,.45);}
+.wv{color:rgba(255,255,255,.85);font-weight:500;font-variant-numeric:tabular-nums;}
+.wc-loading{color:rgba(255,255,255,.5);font-size:13px;margin-top:16px;}
 
 /* Announcements mini */
 .ann-list{display:flex;flex-direction:column;}
@@ -256,10 +257,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .aff{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:11px;border-top:1px solid var(--border);font-size:11px;color:var(--t3);}
 
 /* Student */
-.sh{background:var(--accent);border-radius:var(--r);padding:26px 28px;color:#0A0A0A;margin-bottom:12px;position:relative;overflow:hidden;}
-.sh::after{content:'CXA';position:absolute;right:-8px;bottom:-26px;font-family:'Arial Narrow',Arial,sans-serif;font-size:148px;font-weight:900;color:rgba(0,0,0,.05);line-height:1;letter-spacing:-.05em;user-select:none;pointer-events:none;}
-.sh-n{font-family:'Arial Narrow',Arial,sans-serif;font-size:42px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#0A0A0A;line-height:1;text-wrap:balance;margin-bottom:4px;}
-.sh-s{font-family:'Arial Narrow',Arial,sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.2em;color:rgba(0,0,0,.38);}
+.sh{background:#1A2535;border-radius:var(--r);padding:26px 28px;color:#FFFFFF;margin-bottom:12px;position:relative;overflow:hidden;}
+.sh::after{content:'CXA';position:absolute;right:-8px;bottom:-26px;font-family:'Arial Narrow',Arial,sans-serif;font-size:148px;font-weight:900;color:rgba(255,255,255,.04);line-height:1;letter-spacing:-.05em;user-select:none;pointer-events:none;}
+.sh-n{font-family:'Arial Narrow',Arial,sans-serif;font-size:42px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#FFFFFF;line-height:1;text-wrap:balance;margin-bottom:4px;}
+.sh-s{font-family:'Arial Narrow',Arial,sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.2em;color:rgba(255,255,255,.4);}
 .dg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
 .dc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
 .dl{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--t3);margin-bottom:6px;}
@@ -293,14 +294,14 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .wen{font-size:12.5px;font-weight:600;color:var(--t1);line-height:1.2;margin-top:1px;}
 
 /* Weather full */
-.wfh{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:30px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;}
-.wft{font-family:'Arial Narrow',Arial,sans-serif;font-size:88px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent);}
-.wfc{font-family:'Arial Narrow',Arial,sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t2);margin-top:6px;}
-.wfl{font-size:10.5px;text-transform:uppercase;letter-spacing:.18em;color:var(--t3);margin-top:3px;}
+.wfh{background:linear-gradient(145deg,#1e3a5f,#2563a8);border:none;border-radius:var(--r);padding:30px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;color:#FFF;}
+.wft{font-family:'Arial Narrow',Arial,sans-serif;font-size:88px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:#FFF;}
+.wfc{font-family:'Arial Narrow',Arial,sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.75);margin-top:6px;}
+.wfl{font-size:10.5px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,255,255,.45);margin-top:3px;}
 .wfm{display:flex;gap:22px;margin-top:20px;}
 .wfmi{display:flex;flex-direction:column;gap:2px;}
-.wfml{font-size:9.5px;text-transform:uppercase;letter-spacing:.18em;color:var(--t3);}
-.wfmv{font-family:'Arial Narrow',Arial,sans-serif;font-size:20px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;}
+.wfml{font-size:9.5px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,255,255,.4);}
+.wfmv{font-family:'Arial Narrow',Arial,sans-serif;font-size:20px;font-weight:700;color:#FFF;font-variant-numeric:tabular-nums;}
 .wficon{font-size:70px;line-height:1;opacity:.85;}
 .fcg{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px;}
 .fcc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;}
@@ -509,7 +510,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   <div id="p-weather" class="page">
     <div class="wfh">
       <div>
-        <div class="clabel">CXA Location Weather</div>
+        <div class="clabel" style="color:rgba(255,255,255,.45)">CXA Location Weather</div>
         <div class="wft" id="wf-temp">—</div>
         <div class="wfc" id="wf-cond">Loading…</div>
         <div class="wfl" id="wf-loc"></div>
@@ -620,7 +621,7 @@ function applyWeather(data) {
     <div class="wfmi"><div class="wfml">Low</div><div class="wfmv">${loToday}°F</div></div>
     <div class="wfmi"><div class="wfml">Wind</div><div class="wfmv">${wind} mph</div></div>
     <div class="wfmi"><div class="wfml">Humidity</div><div class="wfmv">${humid}%</div></div>
-    <div class="wfmi"><div class="wfml">UV Index</div><div class="wfmv">${uv}</div></div>
+    <div class="wfmi"><div class="wfml">UV Index</div><div class="wfmv">${uv} — ${uvRisk(uv)}</div></div>
   `;
 
   // 5-day forecast (indices 1–5, skip today)
@@ -917,13 +918,16 @@ function buildTodaySchedule() {
   }).join('');
 }
 
-// ── DATE LABEL ──
+// ── DATE LABEL & GREETING ──
 function setDateLabel() {
-  const d = new Date();
+  const d   = new Date();
   const mns = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const dns = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const hr  = d.getHours();
+  const greeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  const firstName = CONFIG.parent.name.split(' ')[0];
   document.getElementById('dash-date-label').textContent =
-    `Overview — ${dns[d.getDay()]}, ${mns[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+    `${greeting}, ${firstName}! · ${dns[d.getDay()]}, ${mns[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   document.getElementById('wc-loc').textContent = CONFIG.location.label;
   document.getElementById('wf-loc').textContent = `${CONFIG.location.label} · Elev. ${CONFIG.location.elevation}`;
 }
