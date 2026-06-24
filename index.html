@@ -317,6 +317,14 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .c-warn{color:var(--warn);}
 .condl{font-size:11px;color:var(--t3);margin-top:2px;}
 
+/* Dashboard conditions */
+.dash-conds{display:flex;align-items:stretch;gap:0;}
+.dash-cond-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 12px;text-align:center;gap:4px;}
+.dash-cond-divider{width:1px;background:var(--border);align-self:stretch;margin:4px 0;}
+.dash-cond-val{font-family:'Arial Narrow',Arial,sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;line-height:1;}
+.dash-cond-label{font-size:12px;font-weight:600;color:var(--t2);}
+.dash-cond-sub{font-size:11px;color:var(--t3);margin-top:1px;}
+
 /* Full calendar */
 .fcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
 .fcal-day{min-height:72px;background:var(--card);border:1px solid var(--border);border-radius:3px;padding:5px 7px;cursor:pointer;transition:border-color .1s;}
@@ -496,6 +504,30 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
           </div>
         </div>
         <div class="cal-grid" id="mini-cal"></div>
+      </div>
+
+      <!-- Outdoor Activity Conditions — full width -->
+      <div class="card" style="grid-column:span 2;">
+        <div class="clabel">Outdoor Activity Conditions — Today</div>
+        <div class="dash-conds" id="dash-conditions">
+          <div class="dash-cond-item">
+            <div class="dash-cond-val c-ok" id="dc-morning">—</div>
+            <div class="dash-cond-label">Morning Practice</div>
+            <div class="dash-cond-sub" id="dc-morning-sub"></div>
+          </div>
+          <div class="dash-cond-divider"></div>
+          <div class="dash-cond-item">
+            <div class="dash-cond-val c-ok" id="dc-afternoon">—</div>
+            <div class="dash-cond-label">Afternoon Sessions</div>
+            <div class="dash-cond-sub" id="dc-afternoon-sub"></div>
+          </div>
+          <div class="dash-cond-divider"></div>
+          <div class="dash-cond-item">
+            <div class="dash-cond-val c-ok" id="dc-evening">—</div>
+            <div class="dash-cond-label">Evening Events</div>
+            <div class="dash-cond-sub" id="dc-evening-sub"></div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -681,15 +713,39 @@ function applyWeather(data) {
       </div>`;
   }
 
-  // Conditions
-  const uvVal = uv;
-  const morningOk  = wind < 20 && uvVal < 9;
-  const afternoonOk= wind < 25;
+  // Conditions logic
+  const morningOk   = wind < 20 && uv < 9;
+  const afternoonOk = wind < 25 && uv < 11;
+  const eveningOk   = wind < 25;
+  const stormRisk   = c.weather_code >= 80;
+
+  const morningLabel   = stormRisk ? 'Caution' : morningOk   ? 'Good' : 'Fair';
+  const afternoonLabel = stormRisk ? 'Caution' : afternoonOk ? 'Good' : 'Fair';
+  const eveningLabel   = stormRisk ? 'Caution' : eveningOk   ? 'Good' : 'Fair';
+
+  const morningSub   = stormRisk ? 'Storm risk — check forecast' : `Wind ${wind} mph · UV ${uvRisk(uv)}`;
+  const afternoonSub = stormRisk ? 'Storm risk — check forecast' : `Wind ${wind} mph · ${temp}°F`;
+  const eveningSub   = stormRisk ? 'Storm risk — check forecast' : `${loToday}°F expected low`;
+
+  const cls = l => l === 'Good' ? 'c-ok' : l === 'Fair' ? 'c-warn' : 'c-warn';
+
+  // Weather page conditions
   document.getElementById('conditions').innerHTML = `
-    <div class="condi"><div class="condv ${morningOk?'c-ok':'c-warn'}">${morningOk?'Good':'Fair'}</div><div class="condl">Morning Practice</div></div>
-    <div class="condi"><div class="condv ${afternoonOk?'c-ok':'c-warn'}">${afternoonOk?'Good':'Fair'}</div><div class="condl">Afternoon Sessions</div></div>
-    <div class="condi"><div class="condv c-ok">Good</div><div class="condl">Evening Events</div></div>
+    <div class="condi"><div class="condv ${cls(morningLabel)}">${morningLabel}</div><div class="condl">Morning Practice</div></div>
+    <div class="condi"><div class="condv ${cls(afternoonLabel)}">${afternoonLabel}</div><div class="condl">Afternoon Sessions</div></div>
+    <div class="condi"><div class="condv ${cls(eveningLabel)}">${eveningLabel}</div><div class="condl">Evening Events</div></div>
   `;
+
+  // Dashboard conditions
+  const setDC = (id, subId, label, sub) => {
+    const el = document.getElementById(id);
+    el.textContent = label;
+    el.className = 'dash-cond-val ' + cls(label);
+    document.getElementById(subId).textContent = sub;
+  };
+  setDC('dc-morning',   'dc-morning-sub',   morningLabel,   morningSub);
+  setDC('dc-afternoon', 'dc-afternoon-sub', afternoonLabel, afternoonSub);
+  setDC('dc-evening',   'dc-evening-sub',   eveningLabel,   eveningSub);
 }
 
 // ── RENDER STUDENT ──
