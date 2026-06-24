@@ -172,7 +172,8 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .slabel{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.22em;color:var(--t3);margin-bottom:14px;}
 
 /* CARD */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;transition:border-color .15s,box-shadow .15s;}
+.card[onclick]:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.08);}
 .clabel{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--t3);margin-bottom:12px;}
 
 /* DASHBOARD GRID */
@@ -436,7 +437,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div class="slabel" id="dash-date-label">Overview</div>
     <div class="dash-grid">
 
-      <div class="card sc">
+      <div class="card sc" onclick="gotoPage('student')" style="cursor:pointer;">
         <div class="sc-wm">CXA</div>
         <div class="clabel">Student Profile</div>
         <div class="sc-name" id="sc-name"></div>
@@ -444,13 +445,13 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         <div class="sc-stats" id="sc-stats"></div>
       </div>
 
-      <div class="card">
+      <div class="card" onclick="gotoPage('schedule')" style="cursor:pointer;">
         <div class="clabel" id="today-sched-label">Today's Schedule</div>
         <div class="sl" id="sched-mini"></div>
       </div>
 
       <!-- Outdoor Activity Conditions — full width -->
-      <div class="card" style="grid-column:span 2;">
+      <div class="card" style="grid-column:span 2;cursor:pointer;" onclick="gotoPage('weather')">
         <div class="clabel">Outdoor Activity Conditions — Today</div>
         <div class="dash-conds" id="dash-conditions">
           <div class="dash-cond-item">
@@ -473,12 +474,12 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" onclick="gotoPage('announcements')" style="cursor:pointer;">
         <div class="clabel">Recent Announcements</div>
         <div class="ann-list" id="ann-mini"></div>
       </div>
 
-      <div class="card wc">
+      <div class="card wc" onclick="gotoPage('weather')" style="cursor:pointer;">
         <div class="clabel">Today's Weather</div>
         <div class="wc-temp" id="wc-temp">—</div>
         <div class="wc-cond" id="wc-cond">Loading…</div>
@@ -487,9 +488,9 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       </div>
 
       <div class="card cal-card" style="padding:0;overflow:hidden;">
-        <div class="cal-head" style="padding:14px 18px 10px;margin-bottom:0;border-bottom:1px solid var(--border);">
+        <div class="cal-head" style="padding:14px 18px 10px;margin-bottom:0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="gotoPage('calendar')">
           <div class="cal-mo">Upcoming Events</div>
-          <a onclick="nav('calendar')" style="font-size:11px;color:var(--gold);font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.05em;">VIEW ALL →</a>
+          <a style="font-size:11px;color:var(--gold);font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.05em;">VIEW ALL →</a>
         </div>
         <iframe id="dash-cal-frame"
           src=""
