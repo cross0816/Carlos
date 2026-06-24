@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CXA Parent Portal</title>
+
+<!-- ============================================================
+  CONFIGURATION — edit this block to update student info,
+  location, and Google Calendar embed URL.
+  ============================================================ -->
+<script>
+const CONFIG = {
+  student: {
+    name:   'Brooks Poss',
+    grade:  '4th',
+    age:    11,
+    gender: 'Male',
+    id:     '#0412',
+    dob:    'March 15, 2015',
+    year:   '2025–2026'
+  },
+  parent: {
+    initials: 'CP',
+    name:     'Carlos P.'
+  },
+  // CXA location — used for weather
+  location: {
+    label:     'Colorado Springs, CO',
+    elevation: '6,035 ft',
+    lat:       38.8339,
+    lon:       -104.8214,
+    timezone:  'America/Denver'
+  },
+  // Google Calendar embed:
+  // 1. Open Google Calendar → Settings → (select calendar) → Integrate calendar
+  // 2. Copy the "Embed code" src URL and paste it below.
+  // 3. Make sure the calendar is set to "Public" or shared with viewers.
+  // Leave as empty string ('') to hide the calendar embed tab.
+  calendarEmbedSrc: '',
+
+  // Announcements (add/remove objects; newest first)
+  announcements: [
+    {
+      tag: 'important',
+      title: 'Summer Training Camp Registration Now Open',
+      body: 'Registration for the July Summer Intensive Training Camp is officially open. This three-week program runs July 7–25. Spots are limited to 40 athletes. Early-bird pricing of $395 is available through June 30th — regular pricing after that is $450. Register through the parent portal or contact the office.',
+      date: 'June 23, 2026',
+      author: 'Admin Office',
+      action: 'Action Required'
+    },
+    {
+      tag: 'event',
+      title: 'Uniform Fitting — Saturday, June 28',
+      body: 'All returning athletes are required to attend the official CXA uniform fitting this Saturday, June 28th from 9:00 AM to 12:00 PM at the Main Gymnasium. Check your email for your assigned 30-minute time slot.',
+      date: 'June 21, 2026',
+      author: 'Athletic Director',
+      extra: 'Main Gymnasium'
+    },
+    {
+      tag: 'general',
+      title: 'End-of-Year Awards Night Recap & Photo Gallery',
+      body: 'Thank you to all families who joined us for Awards Night on June 14th. A full photo gallery and video highlights are now in the CXA media library. Congratulations to all award recipients.',
+      date: 'June 15, 2026',
+      author: 'Communications'
+    },
+    {
+      tag: 'event',
+      title: 'Parent & Coach Meet-and-Greet — July 1',
+      body: "We're hosting a casual parent-coach meet-and-greet on July 1st at 6:00 PM in the CXA Multipurpose Room. Great opportunity to meet the coaching staff and preview the 2026–2027 season. Light refreshments served.",
+      date: 'June 10, 2026',
+      author: 'Head Coaching Staff',
+      extra: 'Multipurpose Room · 6:00 PM'
+    }
+  ],
+
+  // Weekly schedule (days: 'mon','tue','wed','thu','fri')
+  schedule: {
+    mon: [
+      { time: '8:00 AM',  name: 'Morning Conditioning', loc: 'Field House A',   stripe: 'white' },
+      { time: '10:30 AM', name: 'Core Academics',        loc: 'Room 204',        stripe: 'gold'  },
+      { time: '1:00 PM',  name: 'Skill Development',     loc: 'Outdoor Courts',  stripe: 'light' },
+      { time: '3:30 PM',  name: 'Team Scrimmage',        loc: 'Main Stadium',    stripe: 'white' }
+    ],
+    tue: [
+      { time: '8:00 AM',  name: 'Speed Training',   loc: 'Track',       stripe: 'white' },
+      { time: '10:30 AM', name: 'STEM Workshop',    loc: 'Lab Room',    stripe: 'gold'  },
+      { time: '1:00 PM',  name: 'Film Review',      loc: 'Media Room',  stripe: 'gray'  },
+      { time: '3:30 PM',  name: 'Open Gym',         loc: 'Field House', stripe: 'light' }
+    ],
+    wed: [
+      { time: '8:00 AM',  name: 'Morning Conditioning', loc: 'Field House A',   stripe: 'white' },
+      { time: '10:30 AM', name: 'Core Academics',        loc: 'Room 204',        stripe: 'gold'  },
+      { time: '1:00 PM',  name: 'Skill Development',     loc: 'Outdoor Courts',  stripe: 'light' },
+      { time: '3:30 PM',  name: 'Team Scrimmage',        loc: 'Main Stadium',    stripe: 'white' }
+    ],
+    thu: [
+      { time: '8:00 AM',  name: 'Strength Training',  loc: 'Weight Room',  stripe: 'white' },
+      { time: '10:30 AM', name: 'Leadership Seminar', loc: 'Room 101',     stripe: 'gold'  },
+      { time: '1:00 PM',  name: 'Tactical Review',    loc: 'Media Room',   stripe: 'gray'  },
+      { time: '3:30 PM',  name: 'Practice Match',     loc: 'Main Stadium', stripe: 'white' }
+    ],
+    fri: [
+      { time: '8:00 AM',  name: 'Recovery Session',      loc: 'Field House',  stripe: 'white' },
+      { time: '10:30 AM', name: 'Academic Review',        loc: 'Room 204',     stripe: 'gold'  },
+      { time: '2:00 PM',  name: 'End-of-Week Assembly',   loc: 'Main Gym',     stripe: 'light' }
+    ]
+  },
+
+  // Academic & athletic progress (0–100)
+  progress: {
+    academic: [
+      { name: 'Mathematics',      score: 94 },
+      { name: 'Language Arts',    score: 88 },
+      { name: 'Science',          score: 91 },
+      { name: 'Social Studies',   score: 82 },
+      { name: 'Physical Ed.',     score: 98 }
+    ],
+    athletic: [
+      { name: 'Speed & Agility',          score: 96 },
+      { name: 'Strength & Conditioning',  score: 89 },
+      { name: 'Team Skills',              score: 92 },
+      { name: 'Leadership',               score: 78 },
+      { name: 'Mental Toughness',         score: 85 }
+    ]
+  }
+};
+</script>
+<!-- ============================================================ -->
+
+<style>
+:root{
+  --bg:#0A0A0A;--surface:#111;--card:#181818;--border:#262626;
+  --t1:#F0F0F0;--t2:#A0A0A0;--t3:#4A4A4A;
+  --accent:#FFFFFF;--gold:#D4A820;--gold-dim:#8A6C10;
+  --ok:#4CAF50;--warn:#F0A030;
+  --sw:210px;--r:4px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);background:var(--surface);border-right:1px solid var(--border);position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:100;}
+.brand{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.brand-cxa{font-family:'Arial Narrow',Arial,sans-serif;font-size:30px;font-weight:900;letter-spacing:.1em;color:var(--accent);line-height:1;text-transform:uppercase;}
+.brand-sub{font-size:9px;text-transform:uppercase;letter-spacing:.22em;color:var(--t3);margin-top:3px;}
+.nav{flex:1;padding:10px 0;}
+.ni{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;color:var(--t3);font-family:'Arial Narrow',Arial,sans-serif;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;border-left:2px solid transparent;transition:color .12s,background .12s;user-select:none;}
+.ni:hover{color:var(--t2);background:rgba(255,255,255,.03);}
+.ni.active{color:var(--accent);border-left-color:var(--accent);background:rgba(255,255,255,.05);}
+.ni svg{width:15px;height:15px;flex-shrink:0;}
+.sidebar-mtn{line-height:0;opacity:.07;}
+.sidebar-ft{padding:12px 20px;border-top:1px solid var(--border);font-size:10px;color:var(--t3);line-height:1.6;}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Arial Narrow',Arial,sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.18em;color:var(--t2);}
+.topbar-r{display:flex;align-items:center;gap:12px;}
+.notif{position:relative;background:none;border:1px solid var(--border);border-radius:var(--r);padding:6px;cursor:pointer;color:var(--t2);line-height:0;}
+.notif:hover{background:var(--card);}
+.ndot{position:absolute;top:3px;right:3px;width:6px;height:6px;background:var(--gold);border-radius:50%;border:2px solid var(--surface);}
+.parent-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);}
+.avatar{width:30px;height:30px;background:var(--card);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:900;color:var(--accent);flex-shrink:0;}
+
+/* PAGES */
+.page{display:none;padding:22px 26px;flex:1;}
+.page.active{display:block;}
+.slabel{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.22em;color:var(--t3);margin-bottom:14px;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;}
+.clabel{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--t3);margin-bottom:12px;}
+
+/* DASHBOARD GRID */
+.dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:12px;}
+
+/* Student card */
+.sc{background:var(--accent);border:none;color:#0A0A0A;position:relative;overflow:hidden;}
+.sc .clabel{color:rgba(0,0,0,.35);}
+.sc-wm{position:absolute;right:-10px;bottom:-22px;font-family:'Arial Narrow',Arial,sans-serif;font-size:130px;font-weight:900;color:rgba(0,0,0,.05);line-height:1;letter-spacing:-.05em;user-select:none;pointer-events:none;}
+.sc-name{font-family:'Arial Narrow',Arial,sans-serif;font-size:34px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:#0A0A0A;line-height:1;margin-bottom:4px;text-wrap:balance;}
+.sc-grade{font-family:'Arial Narrow',Arial,sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.18em;color:rgba(0,0,0,.4);margin-bottom:20px;}
+.sc-stats{display:flex;gap:22px;flex-wrap:wrap;}
+.sc-stat{display:flex;flex-direction:column;gap:1px;}
+.sc-sl{font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:rgba(0,0,0,.32);}
+.sc-sv{font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:700;color:#0A0A0A;}
+
+/* Weather */
+.wc{background:var(--card);border:1px solid var(--border);}
+.wc-temp{font-family:'Arial Narrow',Arial,sans-serif;font-size:50px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent);}
+.wc-cond{font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--t2);margin-top:3px;}
+.wc-loc{font-size:10.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.14em;margin-top:2px;}
+.wc-rows{margin-top:14px;display:flex;flex-direction:column;gap:5px;}
+.wc-row{display:flex;justify-content:space-between;font-size:12px;}
+.wk{color:var(--t3);}
+.wv{color:var(--t2);font-weight:500;font-variant-numeric:tabular-nums;}
+.wc-loading{color:var(--t3);font-size:13px;margin-top:16px;}
+
+/* Announcements mini */
+.ann-list{display:flex;flex-direction:column;}
+.ann-item{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start;cursor:pointer;}
+.ann-item:last-child{border-bottom:none;padding-bottom:0;}
+.ann-item:first-child{padding-top:0;}
+.adot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;}
+.adot.read{background:var(--border);}
+.ac{flex:1;min-width:0;}
+.at{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ad{font-size:11px;color:var(--t3);margin-top:1px;}
+.ap{font-size:12px;color:var(--t2);line-height:1.4;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* Schedule mini */
+.sl{display:flex;flex-direction:column;}
+.si{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.si:last-child{border-bottom:none;padding-bottom:0;}
+.si:first-child{padding-top:0;}
+.stripe{width:2px;border-radius:1px;flex-shrink:0;align-self:stretch;min-height:30px;}
+.sw{background:#FFF;}
+.sg{background:var(--gold);}
+.sgr{background:#666;}
+.sl2{background:#AAA;}
+.stime{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);width:48px;flex-shrink:0;font-variant-numeric:tabular-nums;padding-top:1px;}
+.sinfo{flex:1;}
+.sname{font-size:13px;font-weight:600;color:var(--t1);line-height:1.2;}
+.sloc{font-size:11px;color:var(--t3);margin-top:2px;}
+
+/* Mini calendar */
+.cal-card{grid-column:span 2;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-mo{font-family:'Arial Narrow',Arial,sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);}
+.calnav{display:flex;gap:4px;}
+.calnav button{background:none;border:1px solid var(--border);border-radius:3px;width:26px;height:26px;cursor:pointer;color:var(--t2);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.calnav button:hover{background:var(--surface);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cdow{font-family:'Arial Narrow',Arial,sans-serif;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);text-align:center;padding-bottom:5px;}
+.cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:3px;font-size:12px;color:var(--t2);cursor:pointer;position:relative;transition:background .1s;}
+.cday:hover{background:var(--surface);}
+.cday.other{color:var(--border);}
+.cday.today{background:var(--accent);color:#0A0A0A;font-weight:700;}
+.cday.has-ev::after{content:'';display:block;width:3px;height:3px;border-radius:50%;background:var(--gold);position:absolute;bottom:3px;}
+.cday.today.has-ev::after{background:#0A0A0A;}
+
+/* ─── FULL PAGES ─── */
+
+/* Announcements */
+.afd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:10px;}
+.atag{display:inline-block;font-family:'Arial Narrow',Arial,sans-serif;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;padding:2px 8px;border-radius:2px;margin-bottom:9px;}
+.ti{background:rgba(212,168,32,.12);color:var(--gold);}
+.tg{background:rgba(255,255,255,.06);color:var(--t2);}
+.te{background:rgba(76,175,80,.12);color:var(--ok);}
+.aft{font-family:'Arial Narrow',Arial,sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:var(--t1);margin-bottom:8px;line-height:1.1;text-wrap:balance;}
+.afb{font-size:13.5px;line-height:1.65;color:var(--t2);}
+.aff{display:flex;align-items:center;justify-content:space-between;margin-top:13px;padding-top:11px;border-top:1px solid var(--border);font-size:11px;color:var(--t3);}
+
+/* Student */
+.sh{background:var(--accent);border-radius:var(--r);padding:26px 28px;color:#0A0A0A;margin-bottom:12px;position:relative;overflow:hidden;}
+.sh::after{content:'CXA';position:absolute;right:-8px;bottom:-26px;font-family:'Arial Narrow',Arial,sans-serif;font-size:148px;font-weight:900;color:rgba(0,0,0,.05);line-height:1;letter-spacing:-.05em;user-select:none;pointer-events:none;}
+.sh-n{font-family:'Arial Narrow',Arial,sans-serif;font-size:42px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#0A0A0A;line-height:1;text-wrap:balance;margin-bottom:4px;}
+.sh-s{font-family:'Arial Narrow',Arial,sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.2em;color:rgba(0,0,0,.38);}
+.dg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.dc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.dl{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--t3);margin-bottom:6px;}
+.dv{font-family:'Arial Narrow',Arial,sans-serif;font-size:25px;font-weight:900;text-transform:uppercase;color:var(--t1);line-height:1;}
+.ds{font-size:11px;color:var(--t3);margin-top:4px;}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.pi{margin-bottom:12px;}
+.pi:last-child{margin-bottom:0;}
+.ph{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+.pn{font-size:13px;font-weight:600;color:var(--t1);}
+.ps{font-family:'Arial Narrow',Arial,sans-serif;font-size:14px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;}
+.pb{height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.pf{height:100%;border-radius:2px;background:var(--accent);}
+.pf.gold{background:var(--gold);}
+
+/* Schedule full */
+.wh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.wlbl{font-family:'Arial Narrow',Arial,sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);}
+.wbtn{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:6px 13px;cursor:pointer;font-size:12px;color:var(--t2);font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+.wbtn:hover{background:var(--surface);}
+.wg{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.wc2{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.wch{padding:9px 12px;background:var(--surface);border-bottom:1px solid var(--border);font-family:'Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);}
+.wch.tc{background:var(--accent);color:#0A0A0A;}
+.we{padding:9px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px;}
+.we:last-child{border-bottom:none;}
+.west{width:2px;border-radius:1px;flex-shrink:0;}
+.wei{flex:1;}
+.wet{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);font-variant-numeric:tabular-nums;}
+.wen{font-size:12.5px;font-weight:600;color:var(--t1);line-height:1.2;margin-top:1px;}
+
+/* Weather full */
+.wfh{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:30px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;}
+.wft{font-family:'Arial Narrow',Arial,sans-serif;font-size:88px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent);}
+.wfc{font-family:'Arial Narrow',Arial,sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t2);margin-top:6px;}
+.wfl{font-size:10.5px;text-transform:uppercase;letter-spacing:.18em;color:var(--t3);margin-top:3px;}
+.wfm{display:flex;gap:22px;margin-top:20px;}
+.wfmi{display:flex;flex-direction:column;gap:2px;}
+.wfml{font-size:9.5px;text-transform:uppercase;letter-spacing:.18em;color:var(--t3);}
+.wfmv{font-family:'Arial Narrow',Arial,sans-serif;font-size:20px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;}
+.wficon{font-size:70px;line-height:1;opacity:.85;}
+.fcg{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px;}
+.fcc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;}
+.fcd{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:9px;}
+.fci{font-size:22px;line-height:1;margin-bottom:7px;}
+.fch{font-family:'Arial Narrow',Arial,sans-serif;font-size:21px;font-weight:900;color:var(--t1);font-variant-numeric:tabular-nums;}
+.fcl{font-size:12px;color:var(--t3);font-variant-numeric:tabular-nums;margin-top:1px;}
+.fcon{font-size:11px;color:var(--t2);margin-top:4px;}
+.conds{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.condi{text-align:center;}
+.condv{font-family:'Arial Narrow',Arial,sans-serif;font-size:24px;font-weight:900;text-transform:uppercase;}
+.c-ok{color:var(--ok);}
+.c-warn{color:var(--warn);}
+.condl{font-size:11px;color:var(--t3);margin-top:2px;}
+
+/* Full calendar */
+.fcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.fcal-day{min-height:72px;background:var(--card);border:1px solid var(--border);border-radius:3px;padding:5px 7px;cursor:pointer;transition:border-color .1s;}
+.fcal-day:hover{border-color:var(--t3);}
+.fcal-day.today{border-color:var(--accent);}
+.fcal-day.other{background:rgba(255,255,255,.015);}
+.fcdn{font-family:'Arial Narrow',Arial,sans-serif;font-size:12.5px;font-weight:700;color:var(--t2);line-height:1;margin-bottom:3px;}
+.fcal-day.today .fcdn{color:var(--accent);}
+.fcal-day.other .fcdn{color:var(--border);}
+.fcdev{font-size:10px;font-weight:600;color:#0A0A0A;background:var(--accent);border-radius:2px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;}
+.fcdev.eg{background:var(--gold);color:#0A0A0A;}
+.fcdev.em{background:#444;color:var(--t1);}
+
+/* Calendar embed */
+.cal-embed{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.cal-embed iframe{width:100%;border:none;display:block;}
+.cal-setup{padding:24px;color:var(--t2);font-size:14px;line-height:1.7;}
+.cal-setup code{font-family:monospace;font-size:12px;background:var(--surface);border:1px solid var(--border);padding:2px 7px;border-radius:3px;color:var(--t1);}
+.cal-setup ol{margin:12px 0 0 18px;}
+.cal-setup li{margin-bottom:6px;}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .sidebar{width:54px;}
+  .brand,.nav-label,.sidebar-mtn,.sidebar-ft,.brand-sub{display:none;}
+  .main{margin-left:54px;}
+  .ni{justify-content:center;padding:13px 0;border-left:none;border-bottom:2px solid transparent;}
+  .ni.active{border-bottom-color:var(--accent);border-left:none;background:none;}
+  .dash-grid{grid-template-columns:1fr;}
+  .cal-card{grid-column:span 1;}
+  .wg{grid-template-columns:1fr 1fr;}
+  .fcg{grid-template-columns:repeat(3,1fr);}
+  .dg{grid-template-columns:1fr 1fr;}
+  .pg{grid-template-columns:1fr;}
+  .wfh{flex-direction:column;gap:14px;}
+}
+@media(max-width:600px){
+  .topbar{padding:12px 14px;}
+  .page{padding:14px;}
+  .wg{grid-template-columns:1fr;}
+  .fcg{grid-template-columns:1fr 1fr;}
+  .conds{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-cxa">CXA</div>
+    <div class="brand-sub">Colorado Extreme Academy</div>
+  </div>
+  <nav class="nav">
+    <div class="ni active" onclick="gotoPage('dashboard',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7A1 1 0 003 11h1v6a1 1 0 001 1h4v-4h2v4h4a1 1 0 001-1v-6h1a1 1 0 00.707-1.707l-7-7z"/></svg>
+      <span class="nav-label">Dashboard</span>
+    </div>
+    <div class="ni" onclick="gotoPage('student',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+      <span class="nav-label">Student</span>
+    </div>
+    <div class="ni" onclick="gotoPage('announcements',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
+      <span class="nav-label">Announcements</span>
+    </div>
+    <div class="ni" onclick="gotoPage('calendar',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+      <span class="nav-label">Calendar</span>
+    </div>
+    <div class="ni" onclick="gotoPage('schedule',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+      <span class="nav-label">Schedule</span>
+    </div>
+    <div class="ni" onclick="gotoPage('weather',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
+      <span class="nav-label">Weather</span>
+    </div>
+  </nav>
+  <div class="sidebar-mtn">
+    <svg viewBox="0 0 210 64" fill="white"><path d="M0,64 L28,36 L50,52 L84,8 L110,38 L136,22 L162,44 L188,14 L210,32 L210,64 Z"/></svg>
+  </div>
+  <div class="sidebar-ft">
+    <div>CXA Parent Portal</div>
+    <div style="opacity:.55;margin-top:1px">2025–2026</div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-r">
+      <button class="notif" title="Notifications">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
+        <span class="ndot"></span>
+      </button>
+      <div class="parent-chip">
+        <div class="avatar" id="parent-avatar"></div>
+        <span id="parent-name"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <div id="p-dashboard" class="page active">
+    <div class="slabel" id="dash-date-label">Overview</div>
+    <div class="dash-grid">
+
+      <div class="card sc">
+        <div class="sc-wm">CXA</div>
+        <div class="clabel">Student Profile</div>
+        <div class="sc-name" id="sc-name"></div>
+        <div class="sc-grade" id="sc-grade"></div>
+        <div class="sc-stats" id="sc-stats"></div>
+      </div>
+
+      <div class="card wc">
+        <div class="clabel">Today's Weather</div>
+        <div class="wc-temp" id="wc-temp">—</div>
+        <div class="wc-cond" id="wc-cond">Loading…</div>
+        <div class="wc-loc" id="wc-loc"></div>
+        <div class="wc-rows" id="wc-rows"></div>
+      </div>
+
+      <div class="card">
+        <div class="clabel">Recent Announcements</div>
+        <div class="ann-list" id="ann-mini"></div>
+      </div>
+
+      <div class="card">
+        <div class="clabel" id="today-sched-label">Today's Schedule</div>
+        <div class="sl" id="sched-mini"></div>
+      </div>
+
+      <div class="card cal-card">
+        <div class="cal-head">
+          <div class="cal-mo" id="cal-mo-label"></div>
+          <div class="calnav">
+            <button onclick="shiftCal(-1)">&#8249;</button>
+            <button onclick="shiftCal(1)">&#8250;</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="mini-cal"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STUDENT -->
+  <div id="p-student" class="page">
+    <div class="sh">
+      <div class="clabel" style="color:rgba(0,0,0,.35)">Enrolled Student</div>
+      <div class="sh-n" id="sh-name"></div>
+      <div class="sh-s" id="sh-sub"></div>
+    </div>
+    <div class="dg" id="detail-grid"></div>
+    <div class="pg" id="progress-grid"></div>
+  </div>
+
+  <!-- ANNOUNCEMENTS -->
+  <div id="p-announcements" class="page">
+    <div class="slabel">All Announcements</div>
+    <div id="ann-full"></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="p-calendar" class="page">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);" id="fullcal-title"></div>
+      <div style="display:flex;gap:12px;align-items:center;font-size:11px;color:var(--t2);">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:1px;background:var(--accent);display:inline-block;"></span>School</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:1px;background:var(--gold);display:inline-block;"></span>Athletics</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:1px;background:#555;display:inline-block;"></span>Events</span>
+      </div>
+    </div>
+    <div id="calendar-content"></div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div id="p-schedule" class="page">
+    <div class="wh">
+      <div class="wlbl" id="week-label"></div>
+      <div style="display:flex;gap:6px;">
+        <button class="wbtn" onclick="shiftWeek(-1)">&#8249; Prev</button>
+        <button class="wbtn" onclick="shiftWeek(1)">Next &#8250;</button>
+      </div>
+    </div>
+    <div class="wg" id="week-grid"></div>
+  </div>
+
+  <!-- WEATHER -->
+  <div id="p-weather" class="page">
+    <div class="wfh">
+      <div>
+        <div class="clabel">CXA Location Weather</div>
+        <div class="wft" id="wf-temp">—</div>
+        <div class="wfc" id="wf-cond">Loading…</div>
+        <div class="wfl" id="wf-loc"></div>
+        <div class="wfm" id="wf-meta"></div>
+      </div>
+      <div class="wficon" id="wf-icon">⏳</div>
+    </div>
+    <div class="slabel" style="margin-bottom:10px;">5-Day Forecast</div>
+    <div class="fcg" id="forecast-grid"></div>
+    <div class="slabel" style="margin-top:14px;margin-bottom:10px;">Outdoor Activity Conditions</div>
+    <div class="conds" id="conditions"></div>
+  </div>
+
+</div>
+
+<script>
+// ── PAGE NAV ──
+const PAGE_TITLES = {
+  dashboard:'Dashboard',student:'Student Profile',
+  announcements:'Announcements',calendar:'Calendar',
+  schedule:'Schedule',weather:'Weather'
+};
+function gotoPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  const nav = el || document.querySelector(`[onclick*="'${id}'"]`);
+  if (nav) nav.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[id] || '';
+}
+
+// ── WEATHER CODES ──
+function wmoDesc(code) {
+  if (code === 0)            return ['Sunny', '☀️'];
+  if (code <= 2)             return ['Partly Cloudy', '⛅'];
+  if (code === 3)            return ['Overcast', '☁️'];
+  if (code <= 49)            return ['Foggy', '🌫️'];
+  if (code <= 59)            return ['Drizzle', '🌦️'];
+  if (code <= 69)            return ['Rain', '🌧️'];
+  if (code <= 79)            return ['Snow', '❄️'];
+  if (code <= 82)            return ['Rain Showers', '🌦️'];
+  if (code <= 86)            return ['Snow Showers', '🌨️'];
+  if (code <= 99)            return ['Thunderstorm', '⛈️'];
+  return ['Unknown', '🌡️'];
+}
+
+function uvRisk(uv) {
+  if (uv < 3)  return 'Low';
+  if (uv < 6)  return 'Moderate';
+  if (uv < 8)  return 'High';
+  if (uv < 11) return 'Very High';
+  return 'Extreme';
+}
+
+// ── FETCH WEATHER ──
+async function fetchWeather() {
+  const { lat, lon, timezone, label, elevation } = CONFIG.location;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,uv_index` +
+    `&daily=temperature_2m_max,temperature_2m_min,weather_code` +
+    `&temperature_unit=fahrenheit&wind_speed_unit=mph` +
+    `&timezone=${encodeURIComponent(timezone)}&forecast_days=6`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (e) {
+    console.error('Weather fetch failed:', e);
+    return null;
+  }
+}
+
+function applyWeather(data) {
+  if (!data) {
+    document.getElementById('wc-cond').textContent = 'Weather unavailable';
+    document.getElementById('wf-cond').textContent = 'Weather unavailable';
+    return;
+  }
+  const c = data.current;
+  const d = data.daily;
+  const temp   = Math.round(c.temperature_2m);
+  const feels  = Math.round(c.apparent_temperature);
+  const humid  = c.relative_humidity_2m;
+  const wind   = Math.round(c.wind_speed_10m);
+  const uv     = Math.round(c.uv_index || 0);
+  const [desc, icon] = wmoDesc(c.weather_code);
+  const hiToday = Math.round(d.temperature_2m_max[0]);
+  const loToday = Math.round(d.temperature_2m_min[0]);
+  const { label, elevation } = CONFIG.location;
+
+  // Dashboard weather card
+  document.getElementById('wc-temp').textContent = temp + '°';
+  document.getElementById('wc-cond').textContent = desc;
+  document.getElementById('wc-rows').innerHTML = `
+    <div class="wc-row"><span class="wk">Feels like</span><span class="wv">${feels}°F</span></div>
+    <div class="wc-row"><span class="wk">Wind</span><span class="wv">${wind} mph</span></div>
+    <div class="wc-row"><span class="wk">Humidity</span><span class="wv">${humid}%</span></div>
+    <div class="wc-row"><span class="wk">UV Index</span><span class="wv">${uv} — ${uvRisk(uv)}</span></div>
+    <div class="wc-row"><span class="wk">High / Low</span><span class="wv">${hiToday}° / ${loToday}°</span></div>
+  `;
+
+  // Full weather page
+  document.getElementById('wf-temp').textContent = temp + '°F';
+  document.getElementById('wf-cond').textContent = desc;
+  document.getElementById('wf-icon').textContent = icon;
+  document.getElementById('wf-meta').innerHTML = `
+    <div class="wfmi"><div class="wfml">High</div><div class="wfmv">${hiToday}°F</div></div>
+    <div class="wfmi"><div class="wfml">Low</div><div class="wfmv">${loToday}°F</div></div>
+    <div class="wfmi"><div class="wfml">Wind</div><div class="wfmv">${wind} mph</div></div>
+    <div class="wfmi"><div class="wfml">Humidity</div><div class="wfmv">${humid}%</div></div>
+    <div class="wfmi"><div class="wfml">UV Index</div><div class="wfmv">${uv}</div></div>
+  `;
+
+  // 5-day forecast (indices 1–5, skip today)
+  const fcg = document.getElementById('forecast-grid');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  fcg.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const dt   = new Date(d.time[i] + 'T12:00:00');
+    const hi   = Math.round(d.temperature_2m_max[i]);
+    const lo   = Math.round(d.temperature_2m_min[i]);
+    const [dc2, ic2] = wmoDesc(d.weather_code[i]);
+    fcg.innerHTML += `
+      <div class="fcc">
+        <div class="fcd">${days[dt.getDay()]} ${months[dt.getMonth()]} ${dt.getDate()}</div>
+        <div class="fci">${ic2}</div>
+        <div class="fch">${hi}°F</div>
+        <div class="fcl">${lo}°F</div>
+        <div class="fcon">${dc2}</div>
+      </div>`;
+  }
+
+  // Conditions
+  const uvVal = uv;
+  const morningOk  = wind < 20 && uvVal < 9;
+  const afternoonOk= wind < 25;
+  document.getElementById('conditions').innerHTML = `
+    <div class="condi"><div class="condv ${morningOk?'c-ok':'c-warn'}">${morningOk?'Good':'Fair'}</div><div class="condl">Morning Practice</div></div>
+    <div class="condi"><div class="condv ${afternoonOk?'c-ok':'c-warn'}">${afternoonOk?'Good':'Fair'}</div><div class="condl">Afternoon Sessions</div></div>
+    <div class="condi"><div class="condv c-ok">Good</div><div class="condl">Evening Events</div></div>
+  `;
+}
+
+// ── RENDER STUDENT ──
+function renderStudent() {
+  const s = CONFIG.student;
+  const p = CONFIG.parent;
+
+  document.getElementById('parent-avatar').textContent = p.initials;
+  document.getElementById('parent-name').textContent   = p.name;
+
+  // Dashboard card
+  document.getElementById('sc-name').textContent = s.name;
+  document.getElementById('sc-grade').textContent = s.grade + ' Grade · Colorado Extreme Academy';
+  document.getElementById('sc-stats').innerHTML = `
+    <div class="sc-stat"><div class="sc-sl">Age</div><div class="sc-sv">${s.age}</div></div>
+    <div class="sc-stat"><div class="sc-sl">Grade</div><div class="sc-sv">${s.grade}</div></div>
+    <div class="sc-stat"><div class="sc-sl">Gender</div><div class="sc-sv">${s.gender}</div></div>
+    <div class="sc-stat"><div class="sc-sl">ID</div><div class="sc-sv">${s.id}</div></div>
+  `;
+
+  // Student page
+  document.getElementById('sh-name').textContent = s.name;
+  document.getElementById('sh-sub').textContent  = s.grade + ' Grade · Student ID ' + s.id + ' · ' + s.year;
+  document.getElementById('detail-grid').innerHTML = `
+    <div class="dc"><div class="dl">Full Name</div><div class="dv" style="font-size:19px;letter-spacing:.01em">${s.name}</div></div>
+    <div class="dc"><div class="dl">Age</div><div class="dv">${s.age}</div><div class="ds">Born ${s.dob}</div></div>
+    <div class="dc"><div class="dl">Grade</div><div class="dv">${s.grade}</div><div class="ds">${s.year} Academic Year</div></div>
+    <div class="dc"><div class="dl">Gender</div><div class="dv">${s.gender}</div></div>
+  `;
+
+  const pGrid = document.getElementById('progress-grid');
+  ['academic','athletic'].forEach(cat => {
+    const label  = cat === 'academic' ? 'Academic Performance' : 'Athletic Development';
+    const items  = CONFIG.progress[cat];
+    const rows   = items.map(i => {
+      const cls = i.score >= 90 ? '' : ' gold';
+      return `<div class="pi">
+        <div class="ph"><span class="pn">${i.name}</span><span class="ps">${i.score}%</span></div>
+        <div class="pb"><div class="pf${cls}" style="width:${i.score}%"></div></div>
+      </div>`;
+    }).join('');
+    pGrid.innerHTML += `<div class="pc"><div class="clabel">${label}</div>${rows}</div>`;
+  });
+}
+
+// ── RENDER ANNOUNCEMENTS ──
+function tagClass(t) { return t==='important'?'ti':t==='event'?'te':'tg'; }
+
+function renderAnnouncements() {
+  const mini = document.getElementById('ann-mini');
+  const full = document.getElementById('ann-full');
+  const ann  = CONFIG.announcements;
+
+  // mini (first 3)
+  mini.innerHTML = ann.slice(0, 3).map((a, i) => `
+    <div class="ann-item" onclick="gotoPage('announcements')">
+      <div class="adot${i > 0 ? ' read':''}"></div>
+      <div class="ac">
+        <div class="at">${a.title}</div>
+        <div class="ad">${a.date}</div>
+        <div class="ap">${a.body}</div>
+      </div>
+    </div>`).join('');
+
+  // full list
+  full.innerHTML = ann.map(a => `
+    <div class="afd">
+      <span class="atag ${tagClass(a.tag)}">${a.tag}</span>
+      <div class="aft">${a.title}</div>
+      <div class="afb">${a.body}</div>
+      <div class="aff">
+        <span>${a.date} · ${a.author}</span>
+        ${a.action ? `<span class="atag ${tagClass(a.tag)}" style="margin:0">${a.action}</span>` : ''}
+        ${a.extra  ? `<span>${a.extra}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ── CALENDAR ──
+const MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS_S  = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const DAYS_F  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// sample events keyed "YYYY-M-D"
+const CAL_EVENTS = {
+  '2026-6-7':  [{t:'Game Day',        c:''}],
+  '2026-6-10': [{t:'Parent Night',    c:'em'}],
+  '2026-6-14': [{t:'Awards Night',    c:'em'}],
+  '2026-6-17': [{t:'Team Practice',   c:'eg'}],
+  '2026-6-20': [{t:'Scrimmage',       c:'eg'}],
+  '2026-6-24': [{t:'Practice',        c:'eg'}],
+  '2026-6-28': [{t:'Uniform Fitting', c:'em'}],
+  '2026-6-30': [{t:'Camp Deadline',   c:''}],
+};
+
+let calY = new Date().getFullYear(), calM = new Date().getMonth();
+
+function buildMiniCal() {
+  const el  = document.getElementById('mini-cal');
+  const lbl = document.getElementById('cal-mo-label');
+  el.innerHTML = '';
+  lbl.textContent = MONTHS[calM] + ' ' + calY;
+
+  DAYS_S.forEach(d => { el.innerHTML += `<div class="cdow">${d[0]}</div>`; });
+
+  const first = new Date(calY, calM, 1).getDay();
+  const days  = new Date(calY, calM + 1, 0).getDate();
+  const prev  = new Date(calY, calM, 0).getDate();
+  const today = new Date();
+
+  for (let i = 0; i < first; i++) {
+    el.innerHTML += `<div class="cday other">${prev - first + 1 + i}</div>`;
+  }
+  for (let d = 1; d <= days; d++) {
+    const key    = `${calY}-${calM+1}-${d}`;
+    const hasEv  = CAL_EVENTS[key] ? ' has-ev' : '';
+    const isToday= calY===today.getFullYear()&&calM===today.getMonth()&&d===today.getDate();
+    el.innerHTML += `<div class="cday${isToday?' today':''}${hasEv}">${d}</div>`;
+  }
+  const used = first + days;
+  const tail = used % 7 === 0 ? 0 : 7 - (used % 7);
+  for (let d = 1; d <= tail; d++) el.innerHTML += `<div class="cday other">${d}</div>`;
+}
+
+function shiftCal(delta) {
+  calM += delta;
+  if (calM < 0)  { calM = 11; calY--; }
+  if (calM > 11) { calM = 0;  calY++; }
+  buildMiniCal();
+}
+
+function buildFullCal() {
+  const yr = 2026, mo = 5;
+  document.getElementById('fullcal-title').textContent = MONTHS[mo] + ' ' + yr;
+  const cont = document.getElementById('calendar-content');
+
+  if (CONFIG.calendarEmbedSrc) {
+    cont.innerHTML = `<div class="cal-embed"><iframe src="${CONFIG.calendarEmbedSrc}&mode=MONTH&showTitle=0&showNav=0&showDate=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=%23181818&color=%23FFFFFF" height="520"></iframe></div>`;
+    return;
+  }
+
+  // Built-in static calendar
+  let html = '<div class="fcal-grid" style="margin-bottom:3px;">';
+  DAYS_F.forEach(d => { html += `<div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);text-align:center;padding-bottom:5px;">${d}</div>`; });
+  html += '</div><div class="fcal-grid">';
+
+  const first = new Date(yr, mo, 1).getDay();
+  const days  = new Date(yr, mo + 1, 0).getDate();
+  const prev  = new Date(yr, mo, 0).getDate();
+  const today = new Date();
+
+  for (let i = 0; i < first; i++) {
+    html += `<div class="fcal-day other"><div class="fcdn">${prev - first + 1 + i}</div></div>`;
+  }
+  for (let d = 1; d <= days; d++) {
+    const key    = `${yr}-${mo+1}-${d}`;
+    const isT    = yr===today.getFullYear()&&mo===today.getMonth()&&d===today.getDate();
+    const evs    = (CAL_EVENTS[key]||[]).map(e => `<div class="fcdev ${e.c}">${e.t}</div>`).join('');
+    html += `<div class="fcal-day${isT?' today':''}"><div class="fcdn">${d}</div>${evs}</div>`;
+  }
+  const used = first + days;
+  const tail = used % 7 === 0 ? 0 : 7 - (used % 7);
+  for (let d = 1; d <= tail; d++) html += `<div class="fcal-day other"><div class="fcdn">${d}</div></div>`;
+  html += '</div>';
+
+  cont.innerHTML = html +
+    `<div style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;" class="cal-setup">
+      <strong style="color:var(--t1);font-size:13px;">Connect Google Calendar</strong>
+      <p style="margin-top:6px;color:var(--t3);font-size:12px;">To display CXA's live calendar, add their Google Calendar embed URL to the <code>CONFIG.calendarEmbedSrc</code> field in <code>index.html</code>:</p>
+      <ol style="margin-top:10px;font-size:12px;color:var(--t2);">
+        <li>Open Google Calendar → Settings (⚙️) → select the CXA calendar</li>
+        <li>Scroll to <strong>Integrate calendar</strong> → copy the <strong>Embed code</strong></li>
+        <li>Paste the <code>src="..."</code> URL into <code>CONFIG.calendarEmbedSrc</code> in index.html</li>
+      </ol>
+    </div>`;
+}
+
+// ── SCHEDULE ──
+const STRIPE_COLORS = { white:'#FFF', gold:'#D4A820', gray:'#666', light:'#AAA' };
+const DAY_KEYS      = ['mon','tue','wed','thu','fri'];
+const DAY_LABELS    = ['Mon','Tue','Wed','Thu','Fri'];
+
+let weekOffset = 0;
+
+function getWeekDates(offset) {
+  const today = new Date();
+  const dow   = today.getDay(); // 0=sun
+  const monday= new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1) + offset * 7);
+  return DAY_KEYS.map((_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+function buildSchedule() {
+  const dates  = getWeekDates(weekOffset);
+  const today  = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  const start = dates[0];
+  const end   = dates[4];
+  document.getElementById('week-label').textContent =
+    `Week of ${months[start.getMonth()]} ${start.getDate()}–${end.getDate()}, ${start.getFullYear()}`;
+
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+
+  DAY_KEYS.forEach((key, i) => {
+    const dt      = dates[i];
+    const isToday = dt.toDateString() === today.toDateString();
+    const events  = CONFIG.schedule[key] || [];
+    const hd      = `${DAY_LABELS[i]} ${months[dt.getMonth()]} ${dt.getDate()}`;
+
+    let col = `<div class="wc2"><div class="wch${isToday?' tc':''}">${hd}</div>`;
+    events.forEach(ev => {
+      const bg = STRIPE_COLORS[ev.stripe] || '#FFF';
+      col += `<div class="we">
+        <div class="west" style="background:${bg}"></div>
+        <div class="wei">
+          <div class="wet">${ev.time}</div>
+          <div class="wen">${ev.name}</div>
+        </div>
+      </div>`;
+    });
+    if (!events.length) col += `<div style="padding:12px;font-size:12px;color:var(--t3)">No events</div>`;
+    col += '</div>';
+    grid.innerHTML += col;
+  });
+}
+
+function shiftWeek(delta) {
+  weekOffset += delta;
+  buildSchedule();
+}
+
+function buildTodaySchedule() {
+  const today    = new Date();
+  const dayNames = ['sun','mon','tue','wed','thu','fri','sat'];
+  const key      = dayNames[today.getDay()];
+  const events   = CONFIG.schedule[key];
+  const mini     = document.getElementById('sched-mini');
+  const lbl      = document.getElementById('today-sched-label');
+  const MONTHS   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dayFull  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  lbl.textContent = `${dayFull[today.getDay()]}'s Schedule`;
+
+  if (!events || !events.length) {
+    mini.innerHTML = '<div style="color:var(--t3);font-size:13px;padding:8px 0;">No scheduled events today.</div>';
+    return;
+  }
+  mini.innerHTML = events.map(ev => {
+    const bg = STRIPE_COLORS[ev.stripe] || '#FFF';
+    return `<div class="si">
+      <div class="stripe" style="background:${bg}"></div>
+      <div class="stime">${ev.time}</div>
+      <div class="sinfo">
+        <div class="sname">${ev.name}</div>
+        ${ev.loc ? `<div class="sloc">${ev.loc}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── DATE LABEL ──
+function setDateLabel() {
+  const d = new Date();
+  const mns = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dns = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('dash-date-label').textContent =
+    `Overview — ${dns[d.getDay()]}, ${mns[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  document.getElementById('wc-loc').textContent = CONFIG.location.label;
+  document.getElementById('wf-loc').textContent = `${CONFIG.location.label} · Elev. ${CONFIG.location.elevation}`;
+}
+
+// ── INIT ──
+renderStudent();
+renderAnnouncements();
+buildMiniCal();
+buildFullCal();
+buildSchedule();
+buildTodaySchedule();
+setDateLabel();
+fetchWeather().then(applyWeather);
+</script>
+</body>
+</html>
