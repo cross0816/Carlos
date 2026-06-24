@@ -1,0 +1,18 @@
+{
+  "name": "CXA Parent Portal",
+  "short_name": "CXA Portal",
+  "description": "Colorado Extreme Academy Parent Portal",
+  "start_url": "/Carlos/",
+  "display": "standalone",
+  "background_color": "#1A2535",
+  "theme_color": "#1A2535",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "Capture352.JPG",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
