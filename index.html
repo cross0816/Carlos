@@ -142,9 +142,9 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
 /* SIDEBAR */
 .sidebar{width:var(--sw);background:#1A2535;border-right:none;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:100;}
-.brand{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);}
-.brand-cxa{font-family:'Arial Narrow',Arial,sans-serif;font-size:30px;font-weight:900;letter-spacing:.1em;color:#FFFFFF;line-height:1;text-transform:uppercase;}
-.brand-sub{font-size:9px;text-transform:uppercase;letter-spacing:.22em;color:rgba(255,255,255,.35);margin-top:3px;}
+.brand{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1);}
+.brand-logo{display:block;width:100%;height:auto;}
+.brand-sub{display:none;}
 .nav{flex:1;padding:10px 0;}
 .ni{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.4);font-family:'Arial Narrow',Arial,sans-serif;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;border-left:2px solid transparent;transition:color .12s,background .12s;user-select:none;}
 .ni:hover{color:rgba(255,255,255,.75);background:rgba(255,255,255,.06);}
@@ -366,8 +366,30 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
 <aside class="sidebar">
   <div class="brand">
-    <div class="brand-cxa">CXA</div>
-    <div class="brand-sub">Colorado Extreme Academy</div>
+    <!-- CXA logo — white version for dark sidebar -->
+    <svg class="brand-logo" viewBox="0 0 296 50" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Colorado Extreme Academy">
+      <!-- Badge: outer triangle -->
+      <polygon points="26,1 51,44 1,44" fill="none" stroke="white" stroke-width="2.2" stroke-linejoin="round"/>
+      <!-- Badge: inner border triangle -->
+      <polygon points="26,8 45,40 7,40" fill="none" stroke="white" stroke-width="1.4" stroke-linejoin="round"/>
+      <!-- Badge: bottom-left lightning accent -->
+      <polygon points="1,44 7,33 4,33 9,22" fill="none" stroke="white" stroke-width="1.2" opacity=".55"/>
+      <!-- Badge: bottom-right lightning accent -->
+      <polygon points="51,44 45,33 48,33 43,22" fill="none" stroke="white" stroke-width="1.2" opacity=".55"/>
+      <!-- Badge: top micro-text -->
+      <text x="26" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="3.8" letter-spacing="1.8" fill="white" opacity=".5">COLORADO EXTREME ACADEMY</text>
+      <!-- Badge: CXA -->
+      <text x="26" y="32" text-anchor="middle" font-family="'Arial Narrow',Arial,sans-serif" font-weight="900" font-size="14" letter-spacing="1.2" fill="white">CXA</text>
+      <!-- Badge: EXTREME ACADEMY -->
+      <text x="26" y="38.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="3.6" letter-spacing="2.2" fill="white" opacity=".65">EXTREME ACADEMY</text>
+
+      <!-- Divider gap: x 56–60 -->
+
+      <!-- COLORADO main text -->
+      <text x="60" y="35" font-family="'Arial Black','Arial',sans-serif" font-weight="900" font-size="34" letter-spacing="-0.4" fill="white">COLORADO</text>
+      <!-- EXTREME ACADEMY sub-text -->
+      <text x="62" y="46" font-family="'Arial Narrow',Arial,sans-serif" font-weight="700" font-size="9.2" letter-spacing="7.2" fill="white" opacity=".75">EXTREME ACADEMY</text>
+    </svg>
   </div>
   <nav class="nav">
     <div class="ni active" onclick="gotoPage('dashboard',this)">
@@ -406,7 +428,22 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
 <div class="main">
   <header class="topbar">
-    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <!-- CXA logo — dark version for white topbar -->
+      <svg style="height:28px;width:auto;flex-shrink:0;" viewBox="0 0 296 50" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Colorado Extreme Academy">
+        <polygon points="26,1 51,44 1,44" fill="none" stroke="#1A2535" stroke-width="2.2" stroke-linejoin="round"/>
+        <polygon points="26,8 45,40 7,40" fill="none" stroke="#1A2535" stroke-width="1.4" stroke-linejoin="round"/>
+        <polygon points="1,44 7,33 4,33 9,22" fill="none" stroke="#1A2535" stroke-width="1.2" opacity=".4"/>
+        <polygon points="51,44 45,33 48,33 43,22" fill="none" stroke="#1A2535" stroke-width="1.2" opacity=".4"/>
+        <text x="26" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="3.8" letter-spacing="1.8" fill="#1A2535" opacity=".4">COLORADO EXTREME ACADEMY</text>
+        <text x="26" y="32" text-anchor="middle" font-family="'Arial Narrow',Arial,sans-serif" font-weight="900" font-size="14" letter-spacing="1.2" fill="#1A2535">CXA</text>
+        <text x="26" y="38.5" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="3.6" letter-spacing="2.2" fill="#1A2535" opacity=".5">EXTREME ACADEMY</text>
+        <text x="60" y="35" font-family="'Arial Black','Arial',sans-serif" font-weight="900" font-size="34" letter-spacing="-0.4" fill="#1A2535">COLORADO</text>
+        <text x="62" y="46" font-family="'Arial Narrow',Arial,sans-serif" font-weight="700" font-size="9.2" letter-spacing="7.2" fill="#1A2535" opacity=".6">EXTREME ACADEMY</text>
+      </svg>
+      <div style="width:1px;height:22px;background:var(--border);flex-shrink:0;"></div>
+      <div class="topbar-title" id="page-title">Dashboard</div>
+    </div>
     <div class="topbar-r">
       <button class="notif" title="Notifications">
         <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
