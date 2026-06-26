@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ticket Price Aggregator</title>
+
+<!-- ============================================================
+  CONFIGURATION — Paste your API keys here and save the file.
+  See the setup guide at the bottom of the page for signup links.
+  ============================================================ -->
+<script>
+const CONFIG = {
+  ticketmaster: {
+    apiKey: ''
+    // FREE — instant approval
+    // 1. Go to https://developer.ticketmaster.com/
+    // 2. Sign Up → My Apps → Create New App
+    // 3. Copy "Consumer Key" and paste above
+  },
+  seatgeek: {
+    clientId: ''
+    // FREE — request access
+    // 1. Go to https://platform.seatgeek.com/
+    // 2. Sign up → Apply for API access
+    // 3. Copy "Client ID" and paste above
+  },
+  stubhub: {
+    apiKey: ''
+    // PARTNER APPROVAL REQUIRED
+    // 1. Go to https://developer.stubhub.com/
+    // 2. Register as a developer and request access
+    // 3. Requires backend proxy — see notes below
+  },
+  vividseats: {
+    affiliateId: ''
+    // AFFILIATE PROGRAM REQUIRED
+    // 1. Go to https://www.vividseats.com/affiliate-program
+    // 2. Apply and get approved
+    // 3. Requires backend proxy — see notes below
+  },
+  axs: {
+    apiKey: ''
+    // CONTACT REQUIRED — no public API
+    // Email: partnerships@axs.com
+    // Requires backend proxy
+  }
+};
+</script>
+<!-- ============================================================ -->
+
+<style>
+:root {
+  --bg: #F5F6F8;
+  --surface: #FFFFFF;
+  --border: #E4E7EC;
+  --t1: #1A2535;
+  --t2: #5A6A80;
+  --t3: #A0AABB;
+  --accent: #1A2535;
+  --gold: #C4880A;
+  --ok: #2E7D32;
+  --ok-bg: rgba(46,125,50,.08);
+  --warn: #E67C00;
+  --r: 6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background: var(--bg); color: var(--t1); min-height: 100vh; }
+
+/* ─── HEADER ─── */
+.hdr { background: #1A2535; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+.hdr-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.hdr-icon { font-size: 22px; line-height: 1; }
+.hdr-name { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 15px; font-weight: 900; text-transform: uppercase; letter-spacing: .18em; color: #fff; }
+.hdr-back { font-size: 12px; color: rgba(255,255,255,.5); text-decoration: none; font-family: 'Arial Narrow', Arial, sans-serif; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border: 1px solid rgba(255,255,255,.15); border-radius: 3px; padding: 5px 12px; transition: background .12s; }
+.hdr-back:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.85); }
+
+/* ─── RETAILER STATUS BAR ─── */
+.retailer-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.r-chip { display: flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 20px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; border: 1px solid; cursor: default; transition: all .12s; }
+.r-chip.live { border-color: rgba(46,125,50,.3); background: rgba(46,125,50,.07); color: var(--ok); }
+.r-chip.setup { border-color: var(--border); background: var(--surface); color: var(--t3); cursor: pointer; }
+.r-chip.setup:hover { border-color: var(--t3); color: var(--t2); }
+.r-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.r-chip.live .r-dot { background: var(--ok); }
+.r-chip.setup .r-dot { background: var(--border); }
+.r-chip.needs-proxy { border-color: rgba(230,124,0,.25); background: rgba(230,124,0,.06); color: var(--warn); cursor: pointer; }
+.r-chip.needs-proxy .r-dot { background: var(--warn); }
+
+/* ─── SEARCH ─── */
+.search-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px 24px; }
+.search-form { display: flex; gap: 10px; max-width: 820px; }
+.search-input { flex: 1; padding: 11px 16px; font-size: 14px; border: 1px solid var(--border); border-radius: var(--r); outline: none; color: var(--t1); transition: border-color .12s; }
+.search-input:focus { border-color: var(--accent); }
+.city-input { width: 180px; padding: 11px 14px; font-size: 14px; border: 1px solid var(--border); border-radius: var(--r); outline: none; color: var(--t1); transition: border-color .12s; flex-shrink: 0; }
+.city-input:focus { border-color: var(--accent); }
+.search-btn { padding: 11px 24px; background: var(--accent); color: #fff; border: none; border-radius: var(--r); font-family: 'Arial Narrow', Arial, sans-serif; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .14em; cursor: pointer; transition: opacity .12s; white-space: nowrap; }
+.search-btn:hover { opacity: .88; }
+.search-btn:disabled { opacity: .5; cursor: not-allowed; }
+.search-hint { margin-top: 9px; font-size: 12px; color: var(--t3); }
+
+/* ─── CONTENT ─── */
+.content { padding: 24px; max-width: 1080px; margin: 0 auto; }
+
+/* ─── EMPTY / INFO STATE ─── */
+.state-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 48px 32px; text-align: center; }
+.state-icon { font-size: 42px; line-height: 1; margin-bottom: 16px; }
+.state-title { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; color: var(--t1); margin-bottom: 8px; }
+.state-body { font-size: 14px; color: var(--t2); max-width: 460px; margin: 0 auto; line-height: 1.6; }
+
+/* ─── LOADING SKELETONS ─── */
+.skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 12px; }
+.skel { background: linear-gradient(90deg, var(--border) 25%, #f0f2f5 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 3px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skel-h1 { height: 22px; width: 55%; margin-bottom: 10px; }
+.skel-h2 { height: 14px; width: 35%; margin-bottom: 18px; }
+.skel-row { height: 44px; margin-bottom: 6px; border-radius: var(--r); }
+
+/* ─── RESULTS LAYOUT ─── */
+.results-section { }
+.section-label { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .22em; color: var(--t3); margin-bottom: 14px; }
+.results-grid { display: flex; flex-direction: column; gap: 12px; }
+
+/* ─── EVENT CARD ─── */
+.event-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.event-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.event-meta { flex: 1; min-width: 0; }
+.event-name { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; color: var(--t1); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-sub { font-size: 12.5px; color: var(--t2); margin-top: 4px; line-height: 1.4; }
+.event-date-badge { flex-shrink: 0; background: #1A2535; border-radius: 4px; padding: 8px 14px; text-align: center; }
+.edb-mo { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .18em; color: rgba(255,255,255,.5); }
+.edb-day { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
+.edb-yr { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 1px; }
+
+/* ─── PRICE TABLE ─── */
+.price-table { width: 100%; }
+.price-row { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); gap: 12px; transition: background .1s; }
+.price-row:last-child { border-bottom: none; }
+.price-row:hover { background: var(--bg); }
+.pr-retailer { display: flex; align-items: center; gap: 10px; width: 150px; flex-shrink: 0; }
+.pr-logo { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.pr-name { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--t2); }
+.pr-price-area { flex: 1; min-width: 0; }
+.pr-price-main { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 22px; font-weight: 900; color: var(--t1); font-variant-numeric: tabular-nums; line-height: 1; }
+.pr-price-range { font-size: 12px; color: var(--t3); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.pr-price-avg { font-size: 12px; color: var(--t2); margin-top: 2px; }
+.pr-badge-area { display: flex; align-items: center; gap: 8px; }
+.pr-best { background: var(--ok-bg); color: var(--ok); font-family: 'Arial Narrow', Arial, sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .14em; padding: 2px 8px; border-radius: 2px; }
+.pr-buy-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; background: var(--accent); color: #fff; text-decoration: none; border-radius: 4px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; transition: opacity .12s; white-space: nowrap; flex-shrink: 0; }
+.pr-buy-btn:hover { opacity: .85; }
+.pr-setup-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border: 1px solid var(--border); color: var(--t3); text-decoration: none; border-radius: 4px; font-family: 'Arial Narrow', Arial, sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; cursor: pointer; background: none; transition: all .12s; white-space: nowrap; flex-shrink: 0; }
+.pr-setup-btn:hover { border-color: var(--t3); color: var(--t2); }
+.pr-disabled { color: var(--t3); font-size: 12px; }
+.pr-needs-proxy { color: var(--warn); font-size: 11.5px; }
+
+/* ─── RETAILER COLORS ─── */
+.logo-tm  { background: #026CDF; color: #fff; }
+.logo-sg  { background: #E85300; color: #fff; }
+.logo-sh  { background: #1B1B4B; color: #fff; }
+.logo-vs  { background: #C41230; color: #fff; }
+.logo-axs { background: #00A8E0; color: #fff; }
+
+/* ─── SETUP GUIDE ─── */
+.setup-section { margin-top: 32px; }
+.setup-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; cursor: pointer; user-select: none; }
+.setup-toggle-icon { font-size: 11px; color: var(--t3); transition: transform .15s; }
+.setup-toggle-icon.open { transform: rotate(90deg); }
+.setup-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 12px; }
+.setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; }
+.sc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.sc-logo { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.sc-retailer { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: var(--t1); }
+.sc-type { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; padding: 2px 7px; border-radius: 2px; margin-left: auto; }
+.sc-type.free { background: rgba(46,125,50,.1); color: var(--ok); }
+.sc-type.partner { background: rgba(230,124,0,.1); color: var(--warn); }
+.sc-type.contact { background: rgba(90,106,128,.1); color: var(--t2); }
+.sc-steps { font-size: 13px; color: var(--t2); line-height: 1.65; }
+.sc-steps ol { padding-left: 18px; }
+.sc-steps li { margin-bottom: 4px; }
+.sc-steps a { color: var(--gold); font-weight: 600; }
+.sc-note { margin-top: 10px; font-size: 11.5px; color: var(--t3); background: var(--bg); border-radius: 4px; padding: 8px 10px; }
+.sc-connected { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ok); font-weight: 600; margin-top: 4px; }
+
+/* ─── ERROR TOAST ─── */
+.error-banner { background: #FFF3CD; border: 1px solid #FFC107; border-radius: var(--r); padding: 12px 16px; margin-bottom: 14px; font-size: 13px; color: #856404; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 700px) {
+  .hdr { padding: 0 16px; }
+  .retailer-bar { padding: 10px 16px; }
+  .search-wrap { padding: 16px; }
+  .search-form { flex-wrap: wrap; }
+  .city-input { width: 100%; }
+  .content { padding: 16px; }
+  .event-name { font-size: 16px; }
+  .pr-retailer { width: 120px; }
+  .pr-price-main { font-size: 18px; }
+  .edb-day { font-size: 22px; }
+  .setup-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <span class="hdr-icon">🎟️</span>
+    <span class="hdr-name">Ticket Price Aggregator</span>
+  </div>
+  <a href="index.html" class="hdr-back">← Back to Portal</a>
+</header>
+
+<div class="retailer-bar" id="retailer-bar"></div>
+
+<div class="search-wrap">
+  <form class="search-form" id="search-form">
+    <input type="text" id="keyword" class="search-input" placeholder="Artist, team, event name…" autocomplete="off" required>
+    <input type="text" id="city" class="city-input" placeholder="City (optional)" autocomplete="off">
+    <button type="submit" class="search-btn" id="search-btn">Search Tickets</button>
+  </form>
+  <div class="search-hint" id="search-hint"></div>
+</div>
+
+<div class="content">
+  <div id="results-area"></div>
+  <div class="setup-section" id="setup-section"></div>
+</div>
+
+<script>
+// ─── RETAILER DEFINITIONS ───────────────────────────────────────
+const RETAILERS = [
+  {
+    id: 'ticketmaster',
+    name: 'Ticketmaster',
+    short: 'TM',
+    logoClass: 'logo-tm',
+    color: '#026CDF',
+    type: 'free',
+    typeLabel: 'Free API',
+    apiType: 'direct',
+    configured: () => !!CONFIG.ticketmaster.apiKey,
+    signupUrl: 'https://developer.ticketmaster.com/',
+    steps: [
+      'Go to <a href="https://developer.ticketmaster.com/" target="_blank">developer.ticketmaster.com</a>',
+      'Click <strong>Sign Up</strong> and create a free account',
+      'Go to <strong>My Apps</strong> → <strong>Create New App</strong>',
+      'Copy your <strong>Consumer Key</strong> (this is your API key)',
+      'Paste it into <code>CONFIG.ticketmaster.apiKey</code> at the top of tickets.html'
+    ],
+    note: 'Free tier: 5,000 req/day. Instant approval. No backend needed.',
+    fetch: fetchTicketmaster
+  },
+  {
+    id: 'seatgeek',
+    name: 'SeatGeek',
+    short: 'SG',
+    logoClass: 'logo-sg',
+    color: '#E85300',
+    type: 'free',
+    typeLabel: 'Free API',
+    apiType: 'direct',
+    configured: () => !!CONFIG.seatgeek.clientId,
+    signupUrl: 'https://platform.seatgeek.com/',
+    steps: [
+      'Go to <a href="https://platform.seatgeek.com/" target="_blank">platform.seatgeek.com</a>',
+      'Click <strong>Request Access</strong> and fill out the form',
+      'Check email for approval (usually 1–3 business days)',
+      'Once approved, copy your <strong>Client ID</strong>',
+      'Paste it into <code>CONFIG.seatgeek.clientId</code> at the top of tickets.html'
+    ],
+    note: 'Free tier: generous rate limits. Browser-safe CORS. No backend needed.',
+    fetch: fetchSeatGeek
+  },
+  {
+    id: 'stubhub',
+    name: 'StubHub',
+    short: 'SH',
+    logoClass: 'logo-sh',
+    color: '#1B1B4B',
+    type: 'partner',
+    typeLabel: 'Partner API',
+    apiType: 'proxy',
+    configured: () => !!CONFIG.stubhub.apiKey,
+    signupUrl: 'https://developer.stubhub.com/',
+    steps: [
+      'Go to <a href="https://developer.stubhub.com/" target="_blank">developer.stubhub.com</a>',
+      'Register as a developer and submit your use-case',
+      'Wait for partner approval (can take 1–2 weeks)',
+      'Once approved, get your API key via OAuth2 flow',
+      'Requires a <strong>backend proxy</strong> — API does not allow browser CORS'
+    ],
+    note: 'Requires backend proxy server (e.g. Node.js Express). Cannot call directly from browser.',
+    fetch: fetchStub('stubhub', 'StubHub')
+  },
+  {
+    id: 'vividseats',
+    name: 'Vivid Seats',
+    short: 'VS',
+    logoClass: 'logo-vs',
+    color: '#C41230',
+    type: 'partner',
+    typeLabel: 'Affiliate API',
+    apiType: 'proxy',
+    configured: () => !!CONFIG.vividseats.affiliateId,
+    signupUrl: 'https://www.vividseats.com/affiliate-program',
+    steps: [
+      'Go to <a href="https://www.vividseats.com/affiliate-program" target="_blank">vividseats.com/affiliate-program</a>',
+      'Apply for the affiliate/partner program',
+      'Wait for approval and receive your affiliate ID',
+      'API access comes through their affiliate feed',
+      'Requires a <strong>backend proxy</strong> to avoid CORS issues'
+    ],
+    note: 'Requires affiliate approval + backend proxy server.',
+    fetch: fetchStub('vividseats', 'Vivid Seats')
+  },
+  {
+    id: 'axs',
+    name: 'AXS',
+    short: 'AX',
+    logoClass: 'logo-axs',
+    color: '#00A8E0',
+    type: 'contact',
+    typeLabel: 'Contact Required',
+    apiType: 'proxy',
+    configured: () => !!CONFIG.axs.apiKey,
+    signupUrl: 'mailto:partnerships@axs.com',
+    steps: [
+      'AXS does not have a public developer portal',
+      'Email <a href="mailto:partnerships@axs.com">partnerships@axs.com</a> with your use case',
+      'Must sign a partner agreement',
+      'API access is highly selective',
+      'Requires a <strong>backend proxy</strong> server'
+    ],
+    note: 'Limited public availability. Most events are exclusive to their own platform.',
+    fetch: fetchStub('axs', 'AXS')
+  }
+];
+
+// ─── RETAILER STATUS BAR ────────────────────────────────────────
+function renderRetailerBar() {
+  const bar = document.getElementById('retailer-bar');
+  bar.innerHTML = RETAILERS.map(r => {
+    const isLive = r.configured();
+    const cls = isLive ? 'live' : r.apiType === 'proxy' ? 'needs-proxy' : 'setup';
+    const label = isLive ? 'Connected' : r.apiType === 'proxy' ? 'Proxy Required' : 'Setup Required';
+    return `<div class="r-chip ${cls}" onclick="scrollToSetup('${r.id}')">
+      <span class="r-dot"></span>
+      ${r.name}
+      <span style="font-size:9px;opacity:.7;font-weight:400">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── SEARCH HINT ────────────────────────────────────────────────
+function updateSearchHint() {
+  const live = RETAILERS.filter(r => r.configured()).map(r => r.name);
+  const hint = document.getElementById('search-hint');
+  if (live.length === 0) {
+    hint.innerHTML = '⚠️ No APIs connected yet. Add API keys in the setup guide below to see live prices.';
+    hint.style.color = 'var(--warn)';
+  } else {
+    hint.textContent = `Searching live: ${live.join(', ')}. Scroll down for setup guide to connect more.`;
+    hint.style.color = '';
+  }
+}
+
+// ─── TICKETMASTER API ────────────────────────────────────────────
+async function fetchTicketmaster(keyword, city) {
+  const key = CONFIG.ticketmaster.apiKey;
+  if (!key) return { retailer: 'ticketmaster', events: [], error: 'not_configured' };
+  const params = new URLSearchParams({
+    keyword,
+    size: 8,
+    sort: 'date,asc',
+    apikey: key
+  });
+  if (city) params.set('city', city);
+  const url = `https://app.ticketmaster.com/discovery/v2/events.json?${params}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.fault?.faultstring || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const raw = data._embedded?.events || [];
+    const events = raw.map(e => {
+      const venue = e._embedded?.venues?.[0];
+      const pr = e.priceRanges?.find(p => p.type === 'standard') || e.priceRanges?.[0];
+      return {
+        id: e.id,
+        name: e.name,
+        url: e.url,
+        date: e.dates?.start?.localDate,
+        time: e.dates?.start?.localTime,
+        venue: venue ? `${venue.name}, ${venue.city?.name}` : 'Venue TBD',
+        priceMin: pr?.min ?? null,
+        priceMax: pr?.max ?? null,
+        currency: pr?.currency || 'USD',
+        image: e.images?.find(i => i.ratio === '16_9' && i.width >= 640)?.url || null
+      };
+    }).filter(e => e.priceMin !== null || e.priceMax !== null || true);
+    return { retailer: 'ticketmaster', events };
+  } catch (err) {
+    return { retailer: 'ticketmaster', events: [], error: err.message };
+  }
+}
+
+// ─── SEATGEEK API ────────────────────────────────────────────────
+async function fetchSeatGeek(keyword, city) {
+  const id = CONFIG.seatgeek.clientId;
+  if (!id) return { retailer: 'seatgeek', events: [], error: 'not_configured' };
+  const params = new URLSearchParams({
+    q: keyword,
+    per_page: 8,
+    sort: 'datetime_local.asc',
+    client_id: id
+  });
+  if (city) params.set('venue.city', city);
+  const url = `https://api.seatgeek.com/2/events?${params}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const events = (data.events || []).map(e => {
+      const dt = e.datetime_local ? e.datetime_local.split('T') : [null, null];
+      return {
+        id: String(e.id),
+        name: e.title,
+        url: e.url,
+        date: dt[0],
+        time: dt[1] ? dt[1].slice(0, 5) : null,
+        venue: e.venue ? `${e.venue.name}, ${e.venue.city}` : 'Venue TBD',
+        priceMin: e.stats?.lowest_price ?? null,
+        priceMax: e.stats?.highest_price ?? null,
+        priceAvg: e.stats?.average_price ?? null,
+        currency: 'USD',
+        image: e.performers?.[0]?.image || null
+      };
+    });
+    return { retailer: 'seatgeek', events };
+  } catch (err) {
+    return { retailer: 'seatgeek', events: [], error: err.message };
+  }
+}
+
+// ─── STUB FOR PARTNER APIS ───────────────────────────────────────
+function fetchStub(retailerId, name) {
+  return async function(keyword, city) {
+    return { retailer: retailerId, events: [], error: 'not_configured' };
+  };
+}
+
+// ─── SEARCH HANDLER ─────────────────────────────────────────────
+async function handleSearch(e) {
+  e.preventDefault();
+  const keyword = document.getElementById('keyword').value.trim();
+  const city    = document.getElementById('city').value.trim();
+  if (!keyword) return;
+
+  const btn = document.getElementById('search-btn');
+  btn.disabled = true;
+  btn.textContent = 'Searching…';
+  showLoading();
+
+  // Fan out to all retailers in parallel
+  const promises = RETAILERS.map(r => r.fetch(keyword, city));
+  const results  = await Promise.allSettled(promises);
+  const data     = results.map((r, i) => r.status === 'fulfilled' ? r.value : { retailer: RETAILERS[i].id, events: [], error: r.reason?.message || 'Unknown error' });
+
+  renderResults(data, keyword, city);
+  btn.disabled = false;
+  btn.textContent = 'Search Tickets';
+}
+
+// ─── LOADING STATE ───────────────────────────────────────────────
+function showLoading() {
+  const area = document.getElementById('results-area');
+  area.innerHTML = [1,2,3].map(() => `
+    <div class="skeleton-card">
+      <div class="skel skel-h1"></div>
+      <div class="skel skel-h2"></div>
+      <div class="skel skel-row"></div>
+      <div class="skel skel-row"></div>
+    </div>`).join('');
+}
+
+// ─── DATE HELPERS ────────────────────────────────────────────────
+const MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS_F = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function parseLocalDate(str) {
+  if (!str) return null;
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function fmtDate(str) {
+  const d = parseLocalDate(str);
+  if (!d) return '—';
+  return `${MONTHS_F[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+function fmtTime(str) {
+  if (!str) return '';
+  const [h, m] = str.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hr   = h % 12 || 12;
+  return ` · ${hr}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
+function dateBadgeParts(str) {
+  const d = parseLocalDate(str);
+  if (!d) return { mo: '—', day: '—', yr: '' };
+  return {
+    mo:  MONTHS_S[d.getMonth()].toUpperCase(),
+    day: d.getDate(),
+    yr:  d.getFullYear()
+  };
+}
+
+// ─── PRICE FORMATTER ────────────────────────────────────────────
+function fmtPrice(val) {
+  if (val === null || val === undefined) return null;
+  return '$' + val.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// ─── FIND BEST PRICE ACROSS RETAILERS ───────────────────────────
+function findBestRetailer(priceData) {
+  let bestId = null, bestMin = Infinity;
+  for (const [retailerId, pd] of Object.entries(priceData)) {
+    if (pd && pd.priceMin !== null && pd.priceMin < bestMin) {
+      bestMin = pd.priceMin;
+      bestId  = retailerId;
+    }
+  }
+  return bestId;
+}
+
+// ─── RENDER PRICE ROW ────────────────────────────────────────────
+function renderPriceRow(retailer, priceData, isBest) {
+  const r   = RETAILERS.find(x => x.id === retailer.id);
+  const pd  = priceData[retailer.id];
+  const cfg = retailer.configured();
+
+  let priceHtml = '';
+  let actionHtml = '';
+
+  if (!cfg) {
+    if (retailer.apiType === 'proxy') {
+      priceHtml  = `<div class="pr-needs-proxy">Requires backend proxy</div>`;
+    } else {
+      priceHtml  = `<div class="pr-disabled">API key not configured</div>`;
+    }
+    actionHtml = `<button class="pr-setup-btn" onclick="scrollToSetup('${retailer.id}')">Setup →</button>`;
+  } else if (pd?.error) {
+    priceHtml  = `<div class="pr-disabled" title="${pd.error}">Error loading</div>`;
+    actionHtml = `<span style="font-size:11px;color:var(--t3)">${pd.error.slice(0,30)}</span>`;
+  } else if (!pd || pd.events.length === 0) {
+    priceHtml  = `<div class="pr-disabled">No listings found</div>`;
+    actionHtml = `<a href="${retailer.signupUrl}" target="_blank" class="pr-buy-btn" style="background:var(--t3)">Search →</a>`;
+  } else {
+    // Use the price from the matched/first event for this retailer
+    const ev = pd._matchedEvent || pd.events[0];
+    const min = ev?.priceMin, max = ev?.priceMax, avg = ev?.priceAvg;
+    const minFmt = fmtPrice(min);
+    const maxFmt = fmtPrice(max);
+    const avgFmt = fmtPrice(avg);
+
+    if (minFmt) {
+      priceHtml = `<div class="pr-price-main">${minFmt}</div>`;
+      if (maxFmt && max !== min) {
+        priceHtml += `<div class="pr-price-range">up to ${maxFmt}</div>`;
+      }
+      if (avgFmt && avg) {
+        priceHtml += `<div class="pr-price-avg">avg ${avgFmt}</div>`;
+      }
+    } else {
+      priceHtml = `<div class="pr-disabled">Price not listed</div>`;
+    }
+    actionHtml = `<a href="${ev.url}" target="_blank" class="pr-buy-btn">Buy →</a>`;
+  }
+
+  const bestBadge = isBest && cfg && pd?.events?.length ? `<span class="pr-best">Best Price</span>` : '';
+
+  return `<div class="price-row">
+    <div class="pr-retailer">
+      <div class="pr-logo ${retailer.logoClass}">${retailer.short}</div>
+      <div class="pr-name">${retailer.name}</div>
+    </div>
+    <div class="pr-price-area">${priceHtml}</div>
+    <div class="pr-badge-area">
+      ${bestBadge}
+      ${actionHtml}
+    </div>
+  </div>`;
+}
+
+// ─── RENDER RESULTS ──────────────────────────────────────────────
+function renderResults(allData, keyword, city) {
+  const area = document.getElementById('results-area');
+
+  // Build a map of retailer id -> result
+  const dataMap = {};
+  allData.forEach(d => { dataMap[d.retailer] = d; });
+
+  const liveRetailers = RETAILERS.filter(r => r.configured());
+  const hasAnyResults = liveRetailers.some(r => (dataMap[r.id]?.events?.length || 0) > 0);
+
+  if (liveRetailers.length === 0) {
+    area.innerHTML = `
+      <div class="state-box">
+        <div class="state-icon">🔑</div>
+        <div class="state-title">Connect Your First API</div>
+        <div class="state-body">No APIs are configured yet. See the setup guide below to get free API keys from Ticketmaster and SeatGeek — both take just a few minutes.</div>
+      </div>`;
+    renderSetupGuide();
+    return;
+  }
+
+  if (!hasAnyResults) {
+    const errors = liveRetailers.filter(r => dataMap[r.id]?.error && dataMap[r.id].error !== 'not_configured');
+    let html = '';
+    if (errors.length) {
+      html += errors.map(r => `<div class="error-banner">⚠️ <strong>${r.name}</strong>: ${dataMap[r.id].error}</div>`).join('');
+    }
+    html += `<div class="state-box">
+      <div class="state-icon">🔍</div>
+      <div class="state-title">No Events Found</div>
+      <div class="state-body">No results for "<strong>${escHtml(keyword)}</strong>"${city ? ` in ${escHtml(city)}` : ''}. Try a different search term or remove the city filter.</div>
+    </div>`;
+    area.innerHTML = html;
+    renderSetupGuide();
+    return;
+  }
+
+  // Use Ticketmaster events as primary list; fall back to SeatGeek
+  const primaryRetailer = liveRetailers.find(r => r.id === 'ticketmaster' && dataMap[r.id]?.events?.length)
+                       || liveRetailers.find(r => r.id === 'seatgeek' && dataMap[r.id]?.events?.length)
+                       || liveRetailers.find(r => dataMap[r.id]?.events?.length);
+
+  if (!primaryRetailer) {
+    area.innerHTML = `<div class="state-box"><div class="state-icon">🔍</div><div class="state-title">No Events Found</div></div>`;
+    renderSetupGuide();
+    return;
+  }
+
+  const primaryEvents = dataMap[primaryRetailer.id].events;
+
+  // Build per-event price data from secondary retailers
+  // Simple matching: same date + similar venue city
+  function tryMatch(targetEvent, retailerId) {
+    const d = dataMap[retailerId];
+    if (!d || d.error || !d.events.length) return null;
+    const targetDate = targetEvent.date;
+    const targetCity = targetEvent.venue?.split(',').pop()?.trim().toLowerCase() || '';
+    // Exact date match preferred
+    let match = d.events.find(e => e.date === targetDate && e.venue?.toLowerCase().includes(targetCity));
+    if (!match && targetDate) match = d.events.find(e => e.date === targetDate);
+    return match || null;
+  }
+
+  const errors = liveRetailers.filter(r => dataMap[r.id]?.error && dataMap[r.id].error !== 'not_configured');
+  let html = '';
+  if (errors.length) {
+    html += errors.map(r => `<div class="error-banner">⚠️ <strong>${r.name}</strong>: ${dataMap[r.id].error}</div>`).join('');
+  }
+
+  const locationStr = city ? ` in ${escHtml(city)}` : '';
+  html += `<div class="section-label">Results for "${escHtml(keyword)}"${locationStr} — ${primaryEvents.length} events from ${primaryRetailer.name}</div>`;
+  html += `<div class="results-grid">`;
+
+  primaryEvents.forEach(ev => {
+    const bd = dateBadgeParts(ev.date);
+
+    // Build per-retailer price data for this event
+    const eventPriceData = {};
+    RETAILERS.forEach(r => {
+      if (r.id === primaryRetailer.id) {
+        eventPriceData[r.id] = { ...dataMap[r.id], _matchedEvent: ev };
+      } else if (r.configured() && dataMap[r.id]) {
+        const matched = tryMatch(ev, r.id);
+        eventPriceData[r.id] = { ...dataMap[r.id], _matchedEvent: matched };
+      } else {
+        eventPriceData[r.id] = dataMap[r.id] || { retailer: r.id, events: [], error: 'not_configured' };
+      }
+    });
+
+    // Find best price
+    const bestRetailerId = findBestRetailer(
+      Object.fromEntries(RETAILERS.map(r => [r.id, eventPriceData[r.id]?._matchedEvent || (eventPriceData[r.id]?.events?.[0] ?? null)]))
+    );
+
+    const priceRows = RETAILERS.map(r => renderPriceRow(r, eventPriceData, r.id === bestRetailerId)).join('');
+
+    html += `<div class="event-card">
+      <div class="event-header">
+        <div class="event-meta">
+          <div class="event-name">${escHtml(ev.name)}</div>
+          <div class="event-sub">${escHtml(ev.venue)}${fmtTime(ev.time)}</div>
+          <div class="event-sub" style="margin-top:3px">${fmtDate(ev.date)}</div>
+        </div>
+        <div class="event-date-badge">
+          <div class="edb-mo">${bd.mo}</div>
+          <div class="edb-day">${bd.day}</div>
+          <div class="edb-yr">${bd.yr}</div>
+        </div>
+      </div>
+      <table class="price-table">${priceRows}</table>
+    </div>`;
+  });
+
+  html += `</div>`;
+  area.innerHTML = html;
+  renderSetupGuide();
+}
+
+// ─── SETUP GUIDE ─────────────────────────────────────────────────
+let setupOpen = true;
+
+function renderSetupGuide() {
+  const section = document.getElementById('setup-section');
+  const chevron = setupOpen ? '▶' : '▶';
+  section.innerHTML = `
+    <div class="setup-title-row" onclick="toggleSetup()">
+      <div class="section-label" style="margin-bottom:0">API Setup Guide</div>
+      <span class="setup-toggle-icon ${setupOpen ? 'open' : ''}" id="setup-chevron">▶</span>
+    </div>
+    <div id="setup-cards-container" style="display:${setupOpen ? 'block' : 'none'}">
+      <div class="setup-cards">
+        ${RETAILERS.map(r => renderSetupCard(r)).join('')}
+      </div>
+    </div>`;
+}
+
+function renderSetupCard(r) {
+  const cfg = r.configured();
+  return `<div class="setup-card" id="setup-${r.id}">
+    <div class="sc-head">
+      <div class="sc-logo ${r.logoClass}">${r.short}</div>
+      <div class="sc-retailer">${r.name}</div>
+      <span class="sc-type ${r.type}">${r.typeLabel}</span>
+    </div>
+    ${cfg
+      ? `<div class="sc-connected">✓ Connected — API key configured</div>`
+      : `<div class="sc-steps"><ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol></div>`
+    }
+    ${r.note ? `<div class="sc-note">${r.note}</div>` : ''}
+  </div>`;
+}
+
+function toggleSetup() {
+  setupOpen = !setupOpen;
+  const c = document.getElementById('setup-cards-container');
+  const i = document.getElementById('setup-chevron');
+  if (c) c.style.display = setupOpen ? 'block' : 'none';
+  if (i) i.classList.toggle('open', setupOpen);
+}
+
+function scrollToSetup(retailerId) {
+  setupOpen = true;
+  renderSetupGuide();
+  const el = document.getElementById(`setup-${retailerId}`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.boxShadow = '0 0 0 2px var(--gold)';
+    setTimeout(() => { el.style.boxShadow = ''; }, 2000);
+  }
+}
+
+// ─── HTML ESCAPE ─────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+document.getElementById('search-form').addEventListener('submit', handleSearch);
+renderRetailerBar();
+updateSearchHint();
+
+// Default state
+document.getElementById('results-area').innerHTML = `
+  <div class="state-box">
+    <div class="state-icon">🎟️</div>
+    <div class="state-title">Find Ticket Prices</div>
+    <div class="state-body">Search for any artist, sports team, or event to compare prices across Ticketmaster, SeatGeek, StubHub, Vivid Seats, and AXS — all in one place.</div>
+  </div>`;
+
+renderSetupGuide();
+</script>
+
+</body>
+</html>
