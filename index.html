@@ -652,11 +652,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     </div>
     <div class="ni" onclick="gotoPage('calendar',this)">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-      <span class="nav-label">Calendar</span>
-    </div>
-    <div class="ni" onclick="gotoPage('schedule',this)">
-      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
-      <span class="nav-label">Schedule</span>
+      <span class="nav-label">Calendar & Schedule</span>
     </div>
     <div class="ni" onclick="gotoPage('weather',this)">
       <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
@@ -718,7 +714,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         <div class="sc-stats" id="sc-stats"></div>
       </div>
 
-      <div class="card" onclick="gotoPage('schedule')" style="cursor:pointer;">
+      <div class="card" onclick="gotoPage('calendar')" style="cursor:pointer;">
         <div class="clabel" id="today-sched-label">Today's Schedule</div>
         <div class="sl" id="sched-mini"></div>
       </div>
@@ -791,7 +787,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div id="ann-full"></div>
   </div>
 
-  <!-- CALENDAR -->
+  <!-- CALENDAR & SCHEDULE -->
   <div id="p-calendar" class="page">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);" id="fullcal-title"></div>
@@ -802,10 +798,8 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       </div>
     </div>
     <div id="calendar-content"></div>
-  </div>
 
-  <!-- SCHEDULE -->
-  <div id="p-schedule" class="page">
+    <div class="slabel" style="margin-top:28px;margin-bottom:12px;">Weekly Schedule</div>
     <div class="wh">
       <div class="wlbl" id="week-label"></div>
       <div style="display:flex;gap:6px;">
@@ -899,8 +893,8 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 // ── PAGE NAV ──
 const PAGE_TITLES = {
   dashboard:'Dashboard',student:'Student Profile',
-  announcements:'Announcements',calendar:'Calendar',
-  schedule:'Schedule',weather:'Weather',
+  announcements:'Announcements',calendar:'Calendar & Schedule',
+  schedule:'Calendar & Schedule',weather:'Weather',
   gallery:'Photo Gallery',documents:'Documents & Forms',
   messages:'Messages'
 };
@@ -1632,10 +1626,6 @@ auth.onAuthStateChanged(async user => {
   <button class="tab-item" data-page="calendar" onclick="gotoPage('calendar',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
     Calendar
-  </button>
-  <button class="tab-item" data-page="schedule" onclick="gotoPage('schedule',this)" style="min-width:60px;">
-    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
-    Schedule
   </button>
   <button class="tab-item" data-page="weather" onclick="gotoPage('weather',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
