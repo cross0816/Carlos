@@ -963,6 +963,40 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       </div>
       <div id="admin-families-list"></div>
     </div>
+
+    <!-- Manage Announcements -->
+    <div class="card" style="margin-top:20px;">
+      <div class="clabel">Post New Announcement</div>
+      <label class="msg-label">Title</label>
+      <input class="msg-input" id="ann-new-title" placeholder="e.g. Practice Cancelled This Friday">
+      <label class="msg-label">Message</label>
+      <textarea class="msg-input" id="ann-new-body" rows="3" placeholder="Details…" style="resize:vertical;"></textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="msg-label">Tag</label>
+          <select class="msg-input" id="ann-new-tag">
+            <option value="general">General</option>
+            <option value="event">Event</option>
+            <option value="important">Important</option>
+          </select>
+        </div>
+        <div>
+          <label class="msg-label">Author / From</label>
+          <input class="msg-input" id="ann-new-author" placeholder="e.g. Coaching Staff">
+        </div>
+      </div>
+      <button class="msg-btn" id="ann-new-btn" onclick="addAnnouncement()" style="margin-top:14px;max-width:220px;">Post Announcement</button>
+      <div id="ann-new-err" style="margin-top:8px;font-size:13px;font-family:'Arial Narrow',Arial,sans-serif;"></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="clabel" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Current Announcements</span>
+        <button onclick="loadAnnouncements()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--t2);">↻ Refresh</button>
+      </div>
+      <div id="admin-ann-list"></div>
+    </div>
+
   </div>
 
 </div>
@@ -1365,10 +1399,29 @@ async function saveScoreEdit() {
 // ── RENDER ANNOUNCEMENTS ──
 function tagClass(t) { return t==='important'?'ti':t==='event'?'te':'tg'; }
 
+async function loadAnnouncements() {
+  try {
+    const snap = await db.collection('announcements').orderBy('createdAt', 'desc').get();
+    if (!snap.empty) {
+      CONFIG.announcements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+  } catch(e) {
+    console.warn('Could not load announcements from Firestore:', e);
+  }
+  renderAnnouncements();
+  if (isAdmin) renderAdminAnnouncements();
+}
+
 function renderAnnouncements() {
   const mini = document.getElementById('ann-mini');
   const full = document.getElementById('ann-full');
   const ann  = CONFIG.announcements;
+
+  if (!ann || !ann.length) {
+    mini.innerHTML = '<div style="color:var(--t3);font-size:13px;padding:8px 0;">No announcements yet.</div>';
+    full.innerHTML = '<div style="color:var(--t3);font-size:13px;padding:16px 0;">No announcements yet.</div>';
+    return;
+  }
 
   // mini (first 3)
   mini.innerHTML = ann.slice(0, 3).map((a, i) => `
@@ -1393,6 +1446,69 @@ function renderAnnouncements() {
         ${a.extra  ? `<span>${a.extra}</span>` : ''}
       </div>
     </div>`).join('');
+}
+
+// ── ADMIN: MANAGE ANNOUNCEMENTS ──
+function renderAdminAnnouncements() {
+  const el = document.getElementById('admin-ann-list');
+  if (!el) return;
+  const ann = CONFIG.announcements;
+  if (!ann || !ann.length) {
+    el.innerHTML = '<div style="color:var(--t3);font-size:13px;padding:10px 0;">No announcements yet.</div>';
+    return;
+  }
+  el.innerHTML = ann.map(a => `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${a.title}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px;">${a.date} · <span class="atag ${tagClass(a.tag)}" style="font-size:10px;padding:1px 6px;">${a.tag}</span></div>
+      </div>
+      <button class="admin-btn danger" onclick="deleteAnnouncement('${a.id}')" style="flex-shrink:0;">Delete</button>
+    </div>`).join('');
+}
+
+async function addAnnouncement() {
+  const title  = document.getElementById('ann-new-title').value.trim();
+  const body   = document.getElementById('ann-new-body').value.trim();
+  const tag    = document.getElementById('ann-new-tag').value;
+  const author = document.getElementById('ann-new-author').value.trim() || 'Admin Office';
+  const err    = document.getElementById('ann-new-err');
+  const btn    = document.getElementById('ann-new-btn');
+  err.textContent = '';
+  if (!title || !body) { err.textContent = 'Title and message are required.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Posting…';
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  try {
+    await db.collection('announcements').add({
+      title, body, tag, author,
+      date: dateStr,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('ann-new-title').value  = '';
+    document.getElementById('ann-new-body').value   = '';
+    document.getElementById('ann-new-author').value = '';
+    document.getElementById('ann-new-tag').value    = 'general';
+    err.style.color = '#16a34a';
+    err.textContent = '✓ Announcement posted.';
+    setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 3000);
+    await loadAnnouncements();
+  } catch(e) {
+    err.style.color = '';
+    err.textContent = 'Failed: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Post Announcement';
+}
+
+async function deleteAnnouncement(id) {
+  if (!confirm('Delete this announcement?')) return;
+  try {
+    await db.collection('announcements').doc(id).delete();
+    await loadAnnouncements();
+  } catch(e) {
+    alert('Failed to delete: ' + e.message);
+  }
 }
 
 // ── CALENDAR ──
@@ -2156,7 +2272,7 @@ auth.onAuthStateChanged(async user => {
   }
 
   renderStudent();
-  renderAnnouncements();
+  loadAnnouncements();
   loadDriveGallery();
   renderDocuments();
   loadMessageHistory();
