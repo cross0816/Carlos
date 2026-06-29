@@ -1189,7 +1189,7 @@ function thumbUrl(id) {
   return `https://drive.google.com/thumbnail?id=${id}&sz=w600`;
 }
 function fullUrl(id) {
-  return `https://drive.google.com/uc?export=view&id=${id}`;
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w1600`;
 }
 function formatDriveDate(iso) {
   const d = new Date(iso);
