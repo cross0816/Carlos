@@ -12,6 +12,11 @@
 <meta name="theme-color" content="#1A2535">
 <link rel="apple-touch-icon" href="Capture352.JPG">
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <!-- ============================================================
   CONFIGURATION — edit this block to update student info,
   location, and Google Calendar embed URL.
@@ -197,6 +202,21 @@ const CONFIG = {
     }
   ]
 };
+</script>
+
+<script>
+// ── FIREBASE INIT ──
+const firebaseConfig = {
+  apiKey:            "AIzaSyDtB3WRTlmUcDPRg4m-MeBy8jMwxcakbQY",
+  authDomain:        "cxa-parent-portal.firebaseapp.com",
+  projectId:         "cxa-parent-portal",
+  storageBucket:     "cxa-parent-portal.firebasestorage.app",
+  messagingSenderId: "488155596502",
+  appId:             "1:488155596502:web:6a37a1ba930db9b6f56b77"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
 </script>
 <!-- ============================================================ -->
 
@@ -465,6 +485,24 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .cal-setup ol{margin:12px 0 0 18px;}
 .cal-setup li{margin-bottom:6px;}
 
+/* LOGIN SCREEN */
+.login-screen{position:fixed;inset:0;background:#1A2535;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-screen.hidden{display:none;}
+.login-box{background:#fff;border-radius:12px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.login-logo{display:block;width:80px;height:auto;margin:0 auto 20px;}
+.login-title{font-family:'Arial Narrow',Arial,sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#1A2535;text-align:center;margin-bottom:4px;}
+.login-sub{font-size:12px;color:#5A6A80;text-align:center;margin-bottom:28px;}
+.login-label{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#5A6A80;display:block;margin-bottom:5px;}
+.login-input{width:100%;padding:11px 14px;border:1px solid #E4E7EC;border-radius:5px;font-size:14px;color:#1A2535;outline:none;transition:border-color .15s;margin-bottom:14px;}
+.login-input:focus{border-color:#1A2535;}
+.login-btn{width:100%;padding:13px;background:#1A2535;color:#fff;border:none;border-radius:5px;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;cursor:pointer;transition:background .15s;margin-top:4px;}
+.login-btn:hover{background:#2d3f59;}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+.login-err{font-size:12px;color:#DC2626;text-align:center;margin-top:10px;min-height:18px;}
+.login-forgot{display:block;text-align:center;font-size:12px;color:#5A6A80;margin-top:14px;cursor:pointer;background:none;border:none;text-decoration:underline;}
+.login-forgot:hover{color:#1A2535;}
+.login-reset-msg{font-size:12px;color:#2E7D32;text-align:center;margin-top:10px;}
+
 /* BOTTOM TAB BAR (mobile only) */
 .tab-bar{display:none;}
 
@@ -556,6 +594,23 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <img src="Capture352.JPG" class="login-logo" alt="CXA">
+    <div class="login-title">CXA Parent Portal</div>
+    <div class="login-sub">Colorado Extreme Academy — Sign in to continue</div>
+    <label class="login-label" for="login-email">Email</label>
+    <input class="login-input" id="login-email" type="email" placeholder="parent@email.com" autocomplete="email">
+    <label class="login-label" for="login-pass">Password</label>
+    <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err"></div>
+    <button class="login-forgot" onclick="doReset()">Forgot password?</button>
+    <div class="login-reset-msg" id="login-reset-msg"></div>
+  </div>
+</div>
+
 <aside class="sidebar">
   <div class="brand">
     <img src="Capture352.JPG" class="brand-logo" alt="Colorado Extreme Academy">
@@ -620,6 +675,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         <div class="avatar" id="parent-avatar"></div>
         <span id="parent-name"></span>
       </div>
+      <button onclick="doSignOut()" title="Sign out" style="background:none;border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;cursor:pointer;color:var(--t2);font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Sign Out</button>
     </div>
   </header>
 
@@ -1304,17 +1360,99 @@ function renderDocuments(filter) {
     </a>`).join('');
 }
 
+// ── AUTH ──
+function showLogin()  { document.getElementById('login-screen').classList.remove('hidden'); }
+function hideLogin()  { document.getElementById('login-screen').classList.add('hidden'); }
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-err');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    err.textContent = friendlyAuthError(e.code);
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+async function doReset() {
+  const email = document.getElementById('login-email').value.trim();
+  const msg   = document.getElementById('login-reset-msg');
+  const err   = document.getElementById('login-err');
+  if (!email) { err.textContent = 'Enter your email above first.'; return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    msg.textContent = 'Password reset email sent — check your inbox.';
+    err.textContent = '';
+  } catch(e) {
+    err.textContent = friendlyAuthError(e.code);
+  }
+}
+
+function doSignOut() {
+  auth.signOut();
+}
+
+function friendlyAuthError(code) {
+  const map = {
+    'auth/user-not-found':    'No account found with that email.',
+    'auth/wrong-password':    'Incorrect password. Try again.',
+    'auth/invalid-email':     'Please enter a valid email address.',
+    'auth/too-many-requests': 'Too many attempts. Try again later.',
+    'auth/invalid-credential':'Email or password is incorrect.'
+  };
+  return map[code] || 'Sign-in failed. Please try again.';
+}
+
+// Allow Enter key to submit login
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('login-email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-pass').focus();
+});
+
 // ── INIT ──
-renderStudent();
-renderAnnouncements();
-loadDriveGallery();
-renderDocuments();
-buildDashCal();
-buildFullCal();
-buildSchedule();
-buildTodaySchedule();
-setDateLabel();
-fetchWeather().then(applyWeather);
+// Watch auth state — app only initializes after login
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    showLogin();
+    return;
+  }
+  hideLogin();
+
+  // Load this parent's data from Firestore
+  try {
+    const doc = await db.collection('users').doc(user.uid).get();
+    if (doc.exists) {
+      const data = doc.data();
+      // Override CONFIG with Firestore data
+      if (data.parent)  Object.assign(CONFIG.parent, data.parent);
+      if (data.student) Object.assign(CONFIG.student, data.student);
+      if (data.progress) CONFIG.progress = data.progress;
+      if (data.schedule) CONFIG.schedule = data.schedule;
+    }
+  } catch(e) {
+    console.warn('Could not load Firestore profile:', e);
+  }
+
+  renderStudent();
+  renderAnnouncements();
+  loadDriveGallery();
+  renderDocuments();
+  buildDashCal();
+  buildFullCal();
+  buildSchedule();
+  buildTodaySchedule();
+  setDateLabel();
+  fetchWeather().then(applyWeather);
+});
 
 // Sync tab bar active state with page navigation
 (function(){
