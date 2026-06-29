@@ -718,6 +718,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         <div class="avatar" id="parent-avatar"></div>
         <span id="parent-name"></span>
       </div>
+      <button onclick="openAccountSettings()" title="Account settings" style="background:none;border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;cursor:pointer;color:var(--t2);font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">⚙ Account</button>
       <button onclick="doSignOut()" title="Sign out" style="background:none;border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;cursor:pointer;color:var(--t2);font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Sign Out</button>
     </div>
   </header>
@@ -906,17 +907,6 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   <div id="p-admin" class="page">
     <div class="slabel">Admin Panel — Manage Families</div>
 
-    <!-- Change Admin Email -->
-    <div class="card" style="margin-bottom:20px;">
-      <div class="clabel">Change Admin Email</div>
-      <label class="msg-label">New Email Address</label>
-      <input class="msg-input" id="chg-email" type="email" placeholder="e.g. carlos@cxa.life">
-      <label class="msg-label">Current Password (required to confirm)</label>
-      <input class="msg-input" id="chg-password" type="password" placeholder="Your current password">
-      <button class="msg-btn" onclick="changeAdminEmail()" style="margin-top:12px;max-width:220px;">Update Email</button>
-      <div class="msg-err" id="chg-err" style="margin-top:8px;"></div>
-    </div>
-
     <!-- Send Push Notification -->
     <div class="card" style="margin-bottom:20px;">
       <div class="clabel">Send Push Notification</div>
@@ -1006,6 +996,23 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       <button onclick="closeEditModal()" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:5px;background:none;cursor:pointer;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Cancel</button>
     </div>
     <div class="msg-err" id="ef-err"></div>
+  </div>
+</div>
+
+<!-- ACCOUNT SETTINGS MODAL -->
+<div id="account-settings-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:28px;width:100%;max-width:420px;margin:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);">Account Settings</div>
+      <button onclick="closeAccountSettings()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--t2);">✕</button>
+    </div>
+    <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:14px;">Change Login Email</div>
+    <label class="msg-label">New Email Address</label>
+    <input class="msg-input" id="acc-email" type="email" placeholder="e.g. carlos@cxa.life">
+    <label class="msg-label">Current Password (to confirm)</label>
+    <input class="msg-input" id="acc-password" type="password" placeholder="Your current password">
+    <button class="msg-btn" onclick="saveAccountEmail()" style="margin-top:14px;width:100%;">Update Email</button>
+    <div id="acc-err" style="margin-top:10px;font-size:13px;font-family:'Arial Narrow',Arial,sans-serif;"></div>
   </div>
 </div>
 
@@ -1751,6 +1758,40 @@ async function sendPushNotification() {
     err.textContent = 'Failed: ' + e.message;
   }
   btn.disabled = false; btn.textContent = 'Send Notification';
+}
+
+// ── ACCOUNT SETTINGS (any logged-in user) ──
+function openAccountSettings() {
+  document.getElementById('acc-email').value    = '';
+  document.getElementById('acc-password').value = '';
+  document.getElementById('acc-err').textContent = '';
+  document.getElementById('acc-err').style.color = '';
+  document.getElementById('account-settings-modal').style.display = 'flex';
+}
+function closeAccountSettings() {
+  document.getElementById('account-settings-modal').style.display = 'none';
+}
+async function saveAccountEmail() {
+  const newEmail = document.getElementById('acc-email').value.trim();
+  const password = document.getElementById('acc-password').value;
+  const err      = document.getElementById('acc-err');
+  err.style.color = ''; err.textContent = '';
+  if (!newEmail || !password) { err.textContent = 'Both fields are required.'; return; }
+  try {
+    const user = auth.currentUser;
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+    await user.reauthenticateWithCredential(credential);
+    await user.updateEmail(newEmail);
+    err.style.color = '#16a34a';
+    err.textContent = '✓ Email updated. Use ' + newEmail + ' to log in next time.';
+    document.getElementById('acc-email').value    = '';
+    document.getElementById('acc-password').value = '';
+  } catch(e) {
+    err.textContent =
+      e.code === 'auth/wrong-password'       ? 'Incorrect password.' :
+      e.code === 'auth/email-already-in-use' ? 'That email is already in use.' :
+      e.code === 'auth/invalid-email'        ? 'Invalid email address.' : e.message;
+  }
 }
 
 // ── CHANGE ADMIN EMAIL ──
