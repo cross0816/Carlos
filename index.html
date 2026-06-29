@@ -1056,13 +1056,24 @@ const PAGE_TITLES = {
   messages:'Messages',admin:'Admin Panel'
 };
 function gotoPage(id, el) {
+  if (!document.getElementById('p-' + id)) return;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
   document.getElementById('p-' + id).classList.add('active');
   const nav = el || document.querySelector(`[onclick*="'${id}'"]`);
   if (nav) nav.classList.add('active');
   document.getElementById('page-title').textContent = PAGE_TITLES[id] || '';
+  // Update URL hash without triggering hashchange listener
+  if (location.hash !== '#' + id) {
+    history.pushState(null, '', '#' + id);
+  }
 }
+
+// Navigate to hash on back/forward
+window.addEventListener('hashchange', () => {
+  const id = location.hash.replace('#', '') || 'dashboard';
+  if (PAGE_TITLES[id]) gotoPage(id);
+});
 
 // ── WEATHER CODES ──
 function wmoDesc(code) {
@@ -2155,6 +2166,10 @@ auth.onAuthStateChanged(async user => {
   buildTodaySchedule();
   setDateLabel();
   fetchWeather().then(applyWeather);
+
+  // Navigate to hash if present, otherwise default to dashboard
+  const initialPage = location.hash.replace('#', '');
+  gotoPage(PAGE_TITLES[initialPage] ? initialPage : 'dashboard');
 });
 
 // Sync tab bar active state with page navigation
