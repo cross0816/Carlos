@@ -906,6 +906,17 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   <div id="p-admin" class="page">
     <div class="slabel">Admin Panel — Manage Families</div>
 
+    <!-- Change Admin Email -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="clabel">Change Admin Email</div>
+      <label class="msg-label">New Email Address</label>
+      <input class="msg-input" id="chg-email" type="email" placeholder="e.g. carlos@cxa.life">
+      <label class="msg-label">Current Password (required to confirm)</label>
+      <input class="msg-input" id="chg-password" type="password" placeholder="Your current password">
+      <button class="msg-btn" onclick="changeAdminEmail()" style="margin-top:12px;max-width:220px;">Update Email</button>
+      <div class="msg-err" id="chg-err" style="margin-top:8px;"></div>
+    </div>
+
     <!-- Send Push Notification -->
     <div class="card" style="margin-bottom:20px;">
       <div class="clabel">Send Push Notification</div>
@@ -1740,6 +1751,33 @@ async function sendPushNotification() {
     err.textContent = 'Failed: ' + e.message;
   }
   btn.disabled = false; btn.textContent = 'Send Notification';
+}
+
+// ── CHANGE ADMIN EMAIL ──
+async function changeAdminEmail() {
+  const newEmail = document.getElementById('chg-email').value.trim();
+  const password = document.getElementById('chg-password').value;
+  const err      = document.getElementById('chg-err');
+  err.style.color = ''; err.textContent = '';
+
+  if (!newEmail || !password) { err.textContent = 'Both fields are required.'; return; }
+
+  try {
+    const user = auth.currentUser;
+    // Re-authenticate first
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+    await user.reauthenticateWithCredential(credential);
+    await user.updateEmail(newEmail);
+    err.style.color = '#16a34a';
+    err.textContent = '✓ Email updated to ' + newEmail + '. Use this to log in next time.';
+    document.getElementById('chg-email').value    = '';
+    document.getElementById('chg-password').value = '';
+  } catch(e) {
+    const msg = e.code === 'auth/wrong-password' ? 'Incorrect password.' :
+                e.code === 'auth/email-already-in-use' ? 'That email is already in use.' :
+                e.code === 'auth/invalid-email' ? 'Invalid email address.' : e.message;
+    err.textContent = msg;
+  }
 }
 
 // ── EMAILJS INIT ──
