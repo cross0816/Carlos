@@ -12,6 +12,9 @@
 <meta name="theme-color" content="#1A2535">
 <link rel="apple-touch-icon" href="Capture352.JPG">
 
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -503,6 +506,25 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .login-forgot:hover{color:#1A2535;}
 .login-reset-msg{font-size:12px;color:#2E7D32;text-align:center;margin-top:10px;}
 
+/* MESSAGING */
+.msg-label{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--t2);display:block;margin-bottom:5px;margin-top:12px;}
+.msg-input{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:5px;font-size:13px;color:var(--t1);background:var(--bg);outline:none;transition:border-color .15s;font-family:inherit;}
+.msg-input:focus{border-color:var(--accent);background:#fff;}
+.msg-textarea{min-height:140px;resize:vertical;}
+.msg-btn{margin-top:16px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:5px;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;cursor:pointer;transition:opacity .15s;}
+.msg-btn:hover{opacity:.85;}
+.msg-btn:disabled{opacity:.5;cursor:not-allowed;}
+.msg-err{font-size:12px;color:#DC2626;margin-top:8px;min-height:16px;}
+.msg-history-item{padding:12px 0;border-bottom:1px solid var(--border);}
+.msg-history-item:last-child{border-bottom:none;}
+.msg-hi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.msg-hi-subj{font-size:13px;font-weight:700;color:var(--t1);}
+.msg-hi-date{font-size:11px;color:var(--t3);}
+.msg-hi-to{font-size:11px;color:var(--t2);margin-bottom:4px;}
+.msg-hi-body{font-size:12px;color:var(--t2);line-height:1.5;white-space:pre-wrap;}
+.msg-empty{font-size:13px;color:var(--t3);text-align:center;padding:30px 0;}
+@media(max-width:700px){.msg-layout{grid-template-columns:1fr;}}
+
 /* BOTTOM TAB BAR (mobile only) */
 .tab-bar{display:none;}
 
@@ -647,6 +669,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div class="ni" onclick="gotoPage('documents',this)">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
       <span class="nav-label">Documents</span>
+    </div>
+    <div class="ni" onclick="gotoPage('messages',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+      <span class="nav-label">Messages</span>
     </div>
   </nav>
   <div class="sidebar-mtn">
@@ -822,6 +848,41 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div class="doc-grid" id="doc-grid"></div>
   </div>
 
+  <!-- MESSAGING -->
+  <div id="p-messages" class="page">
+    <div class="slabel">Contact CXA Staff</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="msg-layout">
+
+      <!-- Send Message Form -->
+      <div class="card">
+        <div class="clabel">New Message</div>
+        <div id="msg-success" style="display:none;background:#D1FAE5;border:1px solid #6EE7B7;border-radius:5px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#065F46;">
+          ✓ Message sent successfully! CXA staff will respond to your email.
+        </div>
+        <label class="msg-label">To</label>
+        <select class="msg-input" id="msg-to">
+          <option value="Admin Office">Admin Office</option>
+          <option value="Athletic Director">Athletic Director</option>
+          <option value="Head Coach">Head Coach</option>
+          <option value="Academic Coordinator">Academic Coordinator</option>
+        </select>
+        <label class="msg-label">Subject</label>
+        <input class="msg-input" id="msg-subject" type="text" placeholder="e.g. Question about schedule">
+        <label class="msg-label">Message</label>
+        <textarea class="msg-input msg-textarea" id="msg-body" placeholder="Write your message here…"></textarea>
+        <button class="msg-btn" id="msg-send-btn" onclick="sendMessage()">Send Message</button>
+        <div class="msg-err" id="msg-err"></div>
+      </div>
+
+      <!-- Sent Messages History -->
+      <div class="card">
+        <div class="clabel">Sent Messages</div>
+        <div id="msg-history"></div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <!-- LIGHTBOX -->
@@ -840,7 +901,8 @@ const PAGE_TITLES = {
   dashboard:'Dashboard',student:'Student Profile',
   announcements:'Announcements',calendar:'Calendar',
   schedule:'Schedule',weather:'Weather',
-  gallery:'Photo Gallery',documents:'Documents & Forms'
+  gallery:'Photo Gallery',documents:'Documents & Forms',
+  messages:'Messages'
 };
 function gotoPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1360,6 +1422,96 @@ function renderDocuments(filter) {
     </a>`).join('');
 }
 
+// ── EMAILJS INIT ──
+emailjs.init('MGVyrbVShVxiNLTB4');
+
+// ── MESSAGING ──
+const EMAILJS_SERVICE  = 'service_tnxwk3e';
+const EMAILJS_TEMPLATE = 'template_459gnj7';
+
+async function sendMessage() {
+  const to      = document.getElementById('msg-to').value;
+  const subject = document.getElementById('msg-subject').value.trim();
+  const body    = document.getElementById('msg-body').value.trim();
+  const btn     = document.getElementById('msg-send-btn');
+  const err     = document.getElementById('msg-err');
+  const success = document.getElementById('msg-success');
+
+  err.textContent = '';
+  success.style.display = 'none';
+
+  if (!subject) { err.textContent = 'Please enter a subject.'; return; }
+  if (!body)    { err.textContent = 'Please write a message.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const user = auth.currentUser;
+  const params = {
+    to_name:      'CXA Staff',
+    from_name:    CONFIG.parent.name,
+    from_email:   user ? user.email : '',
+    student_name: CONFIG.student.name,
+    to:           to,
+    subject:      subject,
+    message:      body
+  };
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, params);
+
+    // Save to Firestore message history
+    if (user) {
+      await db.collection('users').doc(user.uid).collection('messages').add({
+        to, subject, body,
+        sentAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    success.style.display = 'block';
+    document.getElementById('msg-subject').value = '';
+    document.getElementById('msg-body').value = '';
+    loadMessageHistory();
+  } catch(e) {
+    err.textContent = 'Failed to send. Please try again.';
+    console.error(e);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Send Message';
+}
+
+async function loadMessageHistory() {
+  const user = auth.currentUser;
+  const el   = document.getElementById('msg-history');
+  if (!user || !el) return;
+
+  try {
+    const snap = await db.collection('users').doc(user.uid)
+      .collection('messages').orderBy('sentAt','desc').limit(20).get();
+
+    if (snap.empty) {
+      el.innerHTML = '<div class="msg-empty">No messages sent yet.</div>';
+      return;
+    }
+
+    el.innerHTML = snap.docs.map(d => {
+      const m = d.data();
+      const date = m.sentAt ? m.sentAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Sending…';
+      return `<div class="msg-history-item">
+        <div class="msg-hi-head">
+          <div class="msg-hi-subj">${m.subject}</div>
+          <div class="msg-hi-date">${date}</div>
+        </div>
+        <div class="msg-hi-to">To: ${m.to}</div>
+        <div class="msg-hi-body">${m.body}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="msg-empty">Could not load message history.</div>';
+  }
+}
+
 // ── AUTH ──
 function showLogin()  { document.getElementById('login-screen').classList.remove('hidden'); }
 function hideLogin()  { document.getElementById('login-screen').classList.add('hidden'); }
@@ -1446,6 +1598,7 @@ auth.onAuthStateChanged(async user => {
   renderAnnouncements();
   loadDriveGallery();
   renderDocuments();
+  loadMessageHistory();
   buildDashCal();
   buildFullCal();
   buildSchedule();
@@ -1495,6 +1648,10 @@ auth.onAuthStateChanged(async user => {
   <button class="tab-item" data-page="documents" onclick="gotoPage('documents',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
     Docs
+  </button>
+  <button class="tab-item" data-page="messages" onclick="gotoPage('messages',this)" style="min-width:60px;">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+    Messages
   </button>
 </nav>
 
