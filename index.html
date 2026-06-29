@@ -797,6 +797,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     </div>
     <div class="dg" id="detail-grid"></div>
     <div class="pg" id="progress-grid"></div>
+    <div id="coach-comments-card" style="display:none;margin-top:16px;" class="card">
+      <div class="clabel">Coach Comments</div>
+      <p id="coach-comments-text" style="font-size:14px;color:var(--t1);line-height:1.6;margin:0;white-space:pre-wrap;"></p>
+    </div>
   </div>
 
   <!-- ANNOUNCEMENTS -->
@@ -1207,6 +1211,18 @@ function renderStudent() {
     }).join('');
     pGrid.innerHTML += `<div class="pc"><div class="clabel">${label}</div>${rows}</div>`;
   });
+
+  // Coach comments (read-only for parents)
+  const comments = (CONFIG.progress || {}).comments || '';
+  const commentEl = document.getElementById('coach-comments-card');
+  if (commentEl) {
+    if (comments) {
+      commentEl.style.display = '';
+      document.getElementById('coach-comments-text').textContent = comments;
+    } else {
+      commentEl.style.display = 'none';
+    }
+  }
 }
 
 // ── ADMIN: EDIT SCORES MODAL ──
@@ -1248,14 +1264,19 @@ async function openScoreEditModal(uid) {
       </div>`).join('');
   }
 
+  const existingComments = (_scoreEditData.progress || {}).comments || '';
   document.getElementById('ase-body').innerHTML = `
     <div style="margin-bottom:18px;">
       <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:12px;">Academic Performance</div>
       ${buildSliders('academic', academic)}
     </div>
-    <div>
+    <div style="margin-bottom:18px;">
       <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:12px;">Athletic Development</div>
       ${buildSliders('athletic', athletic)}
+    </div>
+    <div>
+      <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;">Coach Comments</div>
+      <textarea id="ase-comments" placeholder="Add notes or feedback visible to this family…" style="width:100%;min-height:100px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--t1);background:var(--bg);font-family:inherit;resize:vertical;box-sizing:border-box;">${existingComments}</textarea>
     </div>`;
 
   // Store counts for save
@@ -1286,8 +1307,10 @@ async function saveScoreEdit() {
     name, score: parseInt(document.getElementById(`ase-slider-athletic-${i}`).value)
   }));
 
+  const comments = document.getElementById('ase-comments').value.trim();
+
   try {
-    await db.collection('users').doc(_scoreEditUid).update({ progress: { academic, athletic } });
+    await db.collection('users').doc(_scoreEditUid).update({ progress: { academic, athletic, comments } });
     closeScoreEditModal();
     loadFamilies();
   } catch(e) {
