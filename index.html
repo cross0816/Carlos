@@ -525,6 +525,19 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .msg-empty{font-size:13px;color:var(--t3);text-align:center;padding:30px 0;}
 @media(max-width:700px){.msg-layout{grid-template-columns:1fr;}}
 
+/* ADMIN */
+.admin-family-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+.admin-family-row:last-child{border-bottom:none;}
+.admin-family-info{flex:1;min-width:0;}
+.admin-family-name{font-size:14px;font-weight:700;color:var(--t1);}
+.admin-family-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+.admin-actions{display:flex;gap:8px;flex-shrink:0;}
+.admin-btn{padding:6px 12px;border-radius:4px;font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--t2);}
+.admin-btn:hover{background:var(--surface);}
+.admin-btn.danger{color:#DC2626;border-color:#FECACA;}
+.admin-btn.danger:hover{background:#FEF2F2;}
+@media(max-width:600px){.admin-form-grid{grid-template-columns:1fr;}}
+
 /* BOTTOM TAB BAR (mobile only) */
 .tab-bar{display:none;}
 
@@ -669,6 +682,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div class="ni" onclick="gotoPage('messages',this)">
       <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
       <span class="nav-label">Messages</span>
+    </div>
+    <div class="ni" id="admin-nav-item" onclick="gotoPage('admin',this)" style="display:none;">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+      <span class="nav-label">Admin</span>
     </div>
   </nav>
   <div class="sidebar-mtn">
@@ -877,6 +894,89 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     </div>
   </div>
 
+  <!-- ADMIN PANEL -->
+  <div id="p-admin" class="page">
+    <div class="slabel">Admin Panel — Manage Families</div>
+
+    <!-- Add Family Form -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="clabel">Add New Family</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="admin-form-grid">
+        <div>
+          <label class="msg-label">Parent Name</label>
+          <input class="msg-input" id="af-parent-name" placeholder="e.g. Jane Smith">
+          <label class="msg-label">Parent Initials</label>
+          <input class="msg-input" id="af-parent-initials" placeholder="e.g. JS">
+          <label class="msg-label">Parent Email</label>
+          <input class="msg-input" id="af-email" type="email" placeholder="parent@email.com">
+          <label class="msg-label">Temporary Password</label>
+          <input class="msg-input" id="af-password" type="password" placeholder="Min 6 characters">
+        </div>
+        <div>
+          <label class="msg-label">Student Name</label>
+          <input class="msg-input" id="af-student-name" placeholder="e.g. Alex Smith">
+          <label class="msg-label">Grade</label>
+          <input class="msg-input" id="af-grade" placeholder="e.g. 7th">
+          <label class="msg-label">Age</label>
+          <input class="msg-input" id="af-age" type="number" placeholder="e.g. 12">
+          <label class="msg-label">Gender</label>
+          <select class="msg-input" id="af-gender">
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+          <label class="msg-label">Date of Birth</label>
+          <input class="msg-input" id="af-dob" placeholder="e.g. March 5, 2012">
+          <label class="msg-label">Athlete ID</label>
+          <input class="msg-input" id="af-id" placeholder="e.g. #0413">
+        </div>
+      </div>
+      <button class="msg-btn" id="af-btn" onclick="addFamily()" style="margin-top:16px;max-width:220px;">Add Family</button>
+      <div class="msg-err" id="af-err"></div>
+      <div id="af-success" style="display:none;margin-top:10px;color:#065F46;font-size:13px;background:#D1FAE5;padding:10px 14px;border-radius:5px;"></div>
+    </div>
+
+    <!-- Families List -->
+    <div class="card">
+      <div class="clabel" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>All Families</span>
+        <button onclick="loadFamilies()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--t2);">↻ Refresh</button>
+      </div>
+      <div id="admin-families-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- EDIT FAMILY MODAL -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;margin:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);">Edit Family</div>
+      <button onclick="closeEditModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--t2);">✕</button>
+    </div>
+    <input type="hidden" id="ef-uid">
+    <label class="msg-label">Parent Name</label>
+    <input class="msg-input" id="ef-parent-name">
+    <label class="msg-label">Parent Initials</label>
+    <input class="msg-input" id="ef-parent-initials">
+    <label class="msg-label">Student Name</label>
+    <input class="msg-input" id="ef-student-name">
+    <label class="msg-label">Grade</label>
+    <input class="msg-input" id="ef-grade">
+    <label class="msg-label">Age</label>
+    <input class="msg-input" id="ef-age" type="number">
+    <label class="msg-label">Gender</label>
+    <select class="msg-input" id="ef-gender"><option>Male</option><option>Female</option></select>
+    <label class="msg-label">Date of Birth</label>
+    <input class="msg-input" id="ef-dob">
+    <label class="msg-label">Athlete ID</label>
+    <input class="msg-input" id="ef-id">
+    <div style="display:flex;gap:10px;margin-top:18px;">
+      <button class="msg-btn" onclick="saveEditFamily()" style="flex:1;">Save Changes</button>
+      <button onclick="closeEditModal()" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:5px;background:none;cursor:pointer;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Cancel</button>
+    </div>
+    <div class="msg-err" id="ef-err"></div>
+  </div>
 </div>
 
 <!-- LIGHTBOX -->
@@ -896,7 +996,7 @@ const PAGE_TITLES = {
   announcements:'Announcements',calendar:'Calendar & Schedule',
   schedule:'Calendar & Schedule',weather:'Weather',
   gallery:'Photo Gallery',documents:'Documents & Forms',
-  messages:'Messages'
+  messages:'Messages',admin:'Admin Panel'
 };
 function gotoPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1506,6 +1606,142 @@ async function loadMessageHistory() {
   }
 }
 
+// ── ADMIN ──
+const FIREBASE_API_KEY = 'AIzaSyDtB3WRTlmUcDPRg4m-MeBy8jMwxcakbQY';
+
+async function addFamily() {
+  const btn  = document.getElementById('af-btn');
+  const err  = document.getElementById('af-err');
+  const succ = document.getElementById('af-success');
+  err.textContent = ''; succ.style.display = 'none';
+
+  const email    = document.getElementById('af-email').value.trim();
+  const password = document.getElementById('af-password').value;
+  const pName    = document.getElementById('af-parent-name').value.trim();
+  const pInit    = document.getElementById('af-parent-initials').value.trim();
+  const sName    = document.getElementById('af-student-name').value.trim();
+  const grade    = document.getElementById('af-grade').value.trim();
+  const age      = parseInt(document.getElementById('af-age').value);
+  const gender   = document.getElementById('af-gender').value;
+  const dob      = document.getElementById('af-dob').value.trim();
+  const sid      = document.getElementById('af-id').value.trim();
+
+  if (!email||!password||!pName||!sName||!grade) {
+    err.textContent = 'Please fill in all required fields.'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  try {
+    // Create Auth user via REST API (doesn't sign out admin)
+    const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password, returnSecureToken: true})
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const uid = data.localId;
+
+    // Create Firestore profile
+    await db.collection('users').doc(uid).set({
+      parentName: pName,
+      parentInitials: pInit,
+      student: { name:sName, grade, age, gender, dob, id:sid, year:'2026–2027' }
+    });
+
+    succ.style.display = 'block';
+    succ.textContent = `✓ Family added! ${pName} can log in with ${email}.`;
+    ['af-parent-name','af-parent-initials','af-email','af-password','af-student-name','af-grade','af-age','af-dob','af-id']
+      .forEach(id => document.getElementById(id).value = '');
+    loadFamilies();
+  } catch(e) {
+    err.textContent = e.message || 'Failed to create family.';
+  }
+  btn.disabled = false; btn.textContent = 'Add Family';
+}
+
+async function loadFamilies() {
+  const el = document.getElementById('admin-families-list');
+  el.innerHTML = '<div style="padding:16px;color:var(--t3);font-size:13px;">Loading…</div>';
+  try {
+    const snap = await db.collection('users').get();
+    if (snap.empty) { el.innerHTML = '<div style="padding:16px;color:var(--t3);font-size:13px;">No families yet.</div>'; return; }
+    el.innerHTML = snap.docs.map(d => {
+      const data = d.data();
+      if (data.role === 'admin') return ''; // skip admin accounts
+      const s = data.student || {};
+      return `<div class="admin-family-row">
+        <div class="admin-family-info">
+          <div class="admin-family-name">${data.parentName || '—'} <span style="font-weight:400;color:var(--t3);font-size:12px;">(${data.parentInitials||''})</span></div>
+          <div class="admin-family-sub">Athlete: ${s.name||'—'} · Grade ${s.grade||'—'} · Age ${s.age||'—'}</div>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-btn" onclick="openEditModal('${d.id}')">Edit</button>
+          <button class="admin-btn danger" onclick="deleteFamily('${d.id}','${data.parentName||'this family'}')">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div style="padding:16px;color:#DC2626;font-size:13px;">Could not load families: ${e.message}</div>`;
+  }
+}
+
+async function openEditModal(uid) {
+  const doc = await db.collection('users').doc(uid).get();
+  const d = doc.data(); const s = d.student || {};
+  document.getElementById('ef-uid').value            = uid;
+  document.getElementById('ef-parent-name').value    = d.parentName || '';
+  document.getElementById('ef-parent-initials').value= d.parentInitials || '';
+  document.getElementById('ef-student-name').value   = s.name  || '';
+  document.getElementById('ef-grade').value          = s.grade || '';
+  document.getElementById('ef-age').value            = s.age   || '';
+  document.getElementById('ef-gender').value         = s.gender|| 'Male';
+  document.getElementById('ef-dob').value            = s.dob   || '';
+  document.getElementById('ef-id').value             = s.id    || '';
+  document.getElementById('ef-err').textContent      = '';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+
+async function saveEditFamily() {
+  const uid  = document.getElementById('ef-uid').value;
+  const err  = document.getElementById('ef-err');
+  err.textContent = '';
+  try {
+    await db.collection('users').doc(uid).update({
+      parentName:     document.getElementById('ef-parent-name').value.trim(),
+      parentInitials: document.getElementById('ef-parent-initials').value.trim(),
+      student: {
+        name:   document.getElementById('ef-student-name').value.trim(),
+        grade:  document.getElementById('ef-grade').value.trim(),
+        age:    parseInt(document.getElementById('ef-age').value),
+        gender: document.getElementById('ef-gender').value,
+        dob:    document.getElementById('ef-dob').value.trim(),
+        id:     document.getElementById('ef-id').value.trim(),
+        year:   '2026–2027'
+      }
+    });
+    closeEditModal();
+    loadFamilies();
+  } catch(e) {
+    err.textContent = 'Failed to save: ' + e.message;
+  }
+}
+
+async function deleteFamily(uid, name) {
+  if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
+  try {
+    await db.collection('users').doc(uid).delete();
+    loadFamilies();
+  } catch(e) {
+    alert('Failed to delete: ' + e.message);
+  }
+}
+
 // ── AUTH ──
 function showLogin()  { document.getElementById('login-screen').classList.remove('hidden'); }
 function hideLogin()  { document.getElementById('login-screen').classList.add('hidden'); }
@@ -1578,11 +1814,17 @@ auth.onAuthStateChanged(async user => {
     const doc = await db.collection('users').doc(user.uid).get();
     if (doc.exists) {
       const data = doc.data();
-      // Override CONFIG with Firestore data
-      if (data.parent)  Object.assign(CONFIG.parent, data.parent);
-      if (data.student) Object.assign(CONFIG.student, data.student);
+      if (data.parentName)     CONFIG.parent.name     = data.parentName;
+      if (data.parentInitials) CONFIG.parent.initials = data.parentInitials;
+      if (data.student)  Object.assign(CONFIG.student, data.student);
       if (data.progress) CONFIG.progress = data.progress;
       if (data.schedule) CONFIG.schedule = data.schedule;
+
+      // Show admin nav if admin
+      if (data.role === 'admin') {
+        document.getElementById('admin-nav-item').style.display = 'flex';
+        loadFamilies();
+      }
     }
   } catch(e) {
     console.warn('Could not load Firestore profile:', e);
