@@ -130,7 +130,108 @@ const CONFIG = {
       { name: 'Leadership',               score: 90 },
       { name: 'Mental Toughness',         score: 85 }
     ]
-  }
+  },
+
+  // Photo Gallery — add photos here
+  // Each entry: { src, caption, date, category }
+  // src can be a URL (Google Drive, Dropbox, etc.) or a relative path to a file in the repo
+  // To get a Google Drive direct link: share the file → "Anyone with link" → replace
+  //   "drive.google.com/file/d/FILE_ID/view" with "drive.google.com/uc?id=FILE_ID"
+  photos: [
+    {
+      src: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80',
+      caption: 'Team Practice — Field House',
+      date: 'June 20, 2026',
+      category: 'Practice'
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?w=600&q=80',
+      caption: 'Strength & Conditioning',
+      date: 'June 18, 2026',
+      category: 'Training'
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80',
+      caption: 'Awards Night 2026',
+      date: 'June 14, 2026',
+      category: 'Events'
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1526676037777-05a232554f77?w=600&q=80',
+      caption: 'Speed Training on the Track',
+      date: 'June 10, 2026',
+      category: 'Training'
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1560272564-c83b66b1ad12?w=600&q=80',
+      caption: 'Team Huddle — Game Day',
+      date: 'June 6, 2026',
+      category: 'Games'
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&q=80',
+      caption: 'Parent & Coach Meet-and-Greet',
+      date: 'June 1, 2026',
+      category: 'Events'
+    }
+  ],
+
+  // Documents — add files/links here
+  // Each entry: { title, description, url, type, date }
+  // type options: 'pdf', 'form', 'link', 'video'
+  // url can be a Google Drive share link, direct PDF link, or any URL
+  documents: [
+    {
+      title: 'CXA Parent & Athlete Handbook 2026–2027',
+      description: 'Complete guide to CXA policies, expectations, code of conduct, and procedures.',
+      url: '#',
+      type: 'pdf',
+      date: 'June 1, 2026',
+      category: 'Handbook'
+    },
+    {
+      title: 'Athlete Medical & Emergency Release Form',
+      description: 'Required for all athletes. Must be completed and returned before first practice.',
+      url: '#',
+      type: 'form',
+      date: 'June 1, 2026',
+      category: 'Required Forms',
+      required: true
+    },
+    {
+      title: 'Liability Waiver & Assumption of Risk',
+      description: 'Annual liability waiver for the 2026–2027 season. Digital signature accepted.',
+      url: '#',
+      type: 'form',
+      date: 'June 1, 2026',
+      category: 'Required Forms',
+      required: true
+    },
+    {
+      title: 'Summer Training Camp Registration',
+      description: 'Register for the July 7–25 Summer Intensive Camp. Early-bird pricing through June 30.',
+      url: '#',
+      type: 'link',
+      date: 'June 23, 2026',
+      category: 'Registration'
+    },
+    {
+      title: '2026–2027 Season Schedule',
+      description: 'Full competition calendar including game dates, locations, and travel information.',
+      url: '#',
+      type: 'pdf',
+      date: 'June 5, 2026',
+      category: 'Schedules'
+    },
+    {
+      title: 'Nutrition & Meal Plan Guidelines',
+      description: 'CXA recommended nutrition program for peak athletic performance.',
+      url: '#',
+      type: 'pdf',
+      date: 'May 20, 2026',
+      category: 'Resources'
+    }
+  ]
 };
 </script>
 <!-- ============================================================ -->
@@ -347,6 +448,51 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .fcdev.eg{background:var(--gold);color:#0A0A0A;}
 .fcdev.em{background:#444;color:var(--t1);}
 
+/* PHOTO GALLERY */
+.gallery-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.gf-btn{font-family:'Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--t2);cursor:pointer;transition:all .15s;}
+.gf-btn:hover{border-color:var(--accent);color:var(--accent);}
+.gf-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.gallery-item{position:relative;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--border);aspect-ratio:4/3;}
+.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.gallery-item:hover img{transform:scale(1.04);}
+.gallery-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 50%);opacity:0;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;}
+.gallery-item:hover .gallery-overlay{opacity:1;}
+.gallery-cap{color:#fff;font-size:12px;font-weight:600;line-height:1.3;}
+.gallery-date{color:rgba(255,255,255,.7);font-size:10px;margin-top:2px;}
+.gallery-cat{position:absolute;top:8px;left:8px;background:var(--gold);color:#0A0A0A;font-family:'Arial Narrow',Arial,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 7px;border-radius:10px;}
+/* Lightbox */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:92vw;max-height:78vh;border-radius:6px;object-fit:contain;}
+.lightbox-cap{color:#fff;font-size:14px;font-weight:600;}
+.lightbox-date{color:rgba(255,255,255,.5);font-size:12px;}
+.lightbox-close{position:absolute;top:18px;right:22px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;line-height:1;}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:24px;cursor:pointer;padding:10px 16px;border-radius:4px;}
+.lightbox-nav:hover{background:rgba(255,255,255,.25);}
+.lb-prev{left:12px;}
+.lb-next{right:12px;}
+
+/* DOCUMENTS */
+.doc-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.doc-grid{display:flex;flex-direction:column;gap:10px;}
+.doc-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s;cursor:pointer;}
+.doc-item:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.doc-icon{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;}
+.doc-icon.pdf{background:#FEE2E2;color:#DC2626;}
+.doc-icon.form{background:#DBEAFE;color:#2563EB;}
+.doc-icon.link{background:#D1FAE5;color:#059669;}
+.doc-icon.video{background:#EDE9FE;color:#7C3AED;}
+.doc-info{flex:1;min-width:0;}
+.doc-title{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:3px;}
+.doc-desc{font-size:12px;color:var(--t2);line-height:1.4;}
+.doc-meta{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap;}
+.doc-tag{font-family:'Arial Narrow',Arial,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:2px 7px;border-radius:10px;background:var(--bg);color:var(--t3);border:1px solid var(--border);}
+.doc-tag.required{background:#FEF3C7;color:#92400E;border-color:#FCD34D;}
+.doc-date{font-size:11px;color:var(--t3);}
+.doc-arrow{color:var(--t3);font-size:18px;flex-shrink:0;}
+
 /* Calendar embed */
 .cal-embed{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
 .cal-embed iframe{width:100%;border:none;display:block;}
@@ -426,6 +572,12 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   .dash-cond-item{padding:14px 0;}
   .dash-cond-val{font-size:22px;}
 
+  /* Gallery */
+  .gallery-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+
+  /* Docs */
+  .doc-item{flex-wrap:wrap;}
+
   /* Weather */
   .wg{grid-template-columns:1fr;}
   .wc-temp{font-size:52px;}
@@ -468,6 +620,14 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div class="ni" onclick="gotoPage('weather',this)">
       <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
       <span class="nav-label">Weather</span>
+    </div>
+    <div class="ni" onclick="gotoPage('gallery',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>
+      <span class="nav-label">Gallery</span>
+    </div>
+    <div class="ni" onclick="gotoPage('documents',this)">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+      <span class="nav-label">Documents</span>
     </div>
   </nav>
   <div class="sidebar-mtn">
@@ -628,6 +788,30 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div class="conds" id="conditions"></div>
   </div>
 
+  <!-- PHOTO GALLERY -->
+  <div id="p-gallery" class="page">
+    <div class="slabel">CXA Photo Gallery</div>
+    <div class="gallery-filters" id="gallery-filters"></div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+
+  <!-- DOCUMENTS -->
+  <div id="p-documents" class="page">
+    <div class="slabel">Documents & Forms</div>
+    <div class="doc-filters" id="doc-filters"></div>
+    <div class="doc-grid" id="doc-grid"></div>
+  </div>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav lb-prev" onclick="lightboxNav(-1)">&#8249;</button>
+  <img id="lb-img" src="" alt="">
+  <div class="lightbox-cap" id="lb-cap"></div>
+  <div class="lightbox-date" id="lb-date"></div>
+  <button class="lightbox-nav lb-next" onclick="lightboxNav(1)">&#8250;</button>
 </div>
 
 <script>
@@ -635,7 +819,8 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 const PAGE_TITLES = {
   dashboard:'Dashboard',student:'Student Profile',
   announcements:'Announcements',calendar:'Calendar',
-  schedule:'Schedule',weather:'Weather'
+  schedule:'Schedule',weather:'Weather',
+  gallery:'Photo Gallery',documents:'Documents & Forms'
 };
 function gotoPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1032,9 +1217,94 @@ function setDateLabel() {
   document.getElementById('wf-loc').textContent = `${CONFIG.location.label} · Elev. ${CONFIG.location.elevation}`;
 }
 
+// ── PHOTO GALLERY ──
+const DOC_ICONS = { pdf:'📄', form:'📋', link:'🔗', video:'🎬' };
+let lbIndex = 0, lbFiltered = [];
+
+function renderGallery(filter) {
+  const photos = filter && filter !== 'All'
+    ? CONFIG.photos.filter(p => p.category === filter)
+    : CONFIG.photos;
+  lbFiltered = photos;
+
+  // Filters
+  const cats = ['All', ...new Set(CONFIG.photos.map(p => p.category))];
+  const fEl = document.getElementById('gallery-filters');
+  fEl.innerHTML = cats.map(c =>
+    `<button class="gf-btn${(!filter||filter==='All'?c==='All':c===filter)?' active':''}" onclick="renderGallery('${c}')">${c}</button>`
+  ).join('');
+
+  // Grid
+  document.getElementById('gallery-grid').innerHTML = photos.map((p, i) => `
+    <div class="gallery-item" onclick="openLightbox(${i})">
+      <img src="${p.src}" alt="${p.caption}" loading="lazy">
+      <div class="gallery-cat">${p.category}</div>
+      <div class="gallery-overlay">
+        <div class="gallery-cap">${p.caption}</div>
+        <div class="gallery-date">${p.date}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openLightbox(i) {
+  lbIndex = i;
+  const p = lbFiltered[i];
+  document.getElementById('lb-img').src = p.src;
+  document.getElementById('lb-cap').textContent = p.caption;
+  document.getElementById('lb-date').textContent = p.date;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function lightboxNav(dir) {
+  lbIndex = (lbIndex + dir + lbFiltered.length) % lbFiltered.length;
+  openLightbox(lbIndex);
+}
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') lightboxNav(-1);
+  if (e.key === 'ArrowRight') lightboxNav(1);
+});
+
+// ── DOCUMENTS ──
+function renderDocuments(filter) {
+  const docs = filter && filter !== 'All'
+    ? CONFIG.documents.filter(d => d.category === filter)
+    : CONFIG.documents;
+
+  const cats = ['All', ...new Set(CONFIG.documents.map(d => d.category))];
+  document.getElementById('doc-filters').innerHTML = cats.map(c =>
+    `<button class="gf-btn${(!filter||filter==='All'?c==='All':c===filter)?' active':''}" onclick="renderDocuments('${c}')">${c}</button>`
+  ).join('');
+
+  document.getElementById('doc-grid').innerHTML = docs.map(d => `
+    <a class="doc-item" href="${d.url}" target="_blank" rel="noopener">
+      <div class="doc-icon ${d.type}">${DOC_ICONS[d.type]||'📄'}</div>
+      <div class="doc-info">
+        <div class="doc-title">${d.title}</div>
+        <div class="doc-desc">${d.description}</div>
+        <div class="doc-meta">
+          <span class="doc-tag${d.required?' required':''}">${d.category}</span>
+          ${d.required ? '<span class="doc-tag required">Required</span>' : ''}
+          <span class="doc-date">${d.date}</span>
+        </div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>`).join('');
+}
+
 // ── INIT ──
 renderStudent();
 renderAnnouncements();
+renderGallery();
+renderDocuments();
 buildDashCal();
 buildFullCal();
 buildSchedule();
@@ -1055,26 +1325,34 @@ fetchWeather().then(applyWeather);
 </script>
 
 <!-- BOTTOM TAB BAR (phones only) -->
-<nav class="tab-bar">
-  <button class="tab-item active" data-page="dashboard" onclick="gotoPage('dashboard',this)">
+<nav class="tab-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+  <button class="tab-item active" data-page="dashboard" onclick="gotoPage('dashboard',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7A1 1 0 003 11h1v6a1 1 0 001 1h4v-4h2v4h4a1 1 0 001-1v-6h1a1 1 0 00.707-1.707l-7-7z"/></svg>
     Home
   </button>
-  <button class="tab-item" data-page="student" onclick="gotoPage('student',this)">
+  <button class="tab-item" data-page="student" onclick="gotoPage('student',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
     Student
   </button>
-  <button class="tab-item" data-page="calendar" onclick="gotoPage('calendar',this)">
+  <button class="tab-item" data-page="calendar" onclick="gotoPage('calendar',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
     Calendar
   </button>
-  <button class="tab-item" data-page="schedule" onclick="gotoPage('schedule',this)">
+  <button class="tab-item" data-page="schedule" onclick="gotoPage('schedule',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
     Schedule
   </button>
-  <button class="tab-item" data-page="weather" onclick="gotoPage('weather',this)">
+  <button class="tab-item" data-page="weather" onclick="gotoPage('weather',this)" style="min-width:60px;">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
     Weather
+  </button>
+  <button class="tab-item" data-page="gallery" onclick="gotoPage('gallery',this)" style="min-width:60px;">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>
+    Gallery
+  </button>
+  <button class="tab-item" data-page="documents" onclick="gotoPage('documents',this)" style="min-width:60px;">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+    Docs
   </button>
 </nav>
 
