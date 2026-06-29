@@ -15,6 +15,9 @@
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
+<!-- OneSignal -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -903,6 +906,17 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   <div id="p-admin" class="page">
     <div class="slabel">Admin Panel — Manage Families</div>
 
+    <!-- Send Push Notification -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="clabel">Send Push Notification</div>
+      <label class="msg-label">Title</label>
+      <input class="msg-input" id="notif-title" placeholder="e.g. Practice Cancelled Today">
+      <label class="msg-label">Message</label>
+      <textarea class="msg-input" id="notif-body" rows="3" placeholder="e.g. Due to weather, tonight's practice is cancelled. See you Thursday." style="resize:vertical;"></textarea>
+      <button class="msg-btn" id="notif-send-btn" onclick="sendPushNotification()" style="margin-top:12px;max-width:220px;">Send Notification</button>
+      <div class="msg-err" id="notif-err" style="margin-top:8px;"></div>
+    </div>
+
     <!-- Add Family Form -->
     <div class="card" style="margin-bottom:20px;">
       <div class="clabel">Add New Family</div>
@@ -1661,6 +1675,73 @@ function renderDocuments(filter) {
     </div>`).join('');
 }
 
+// ── ONESIGNAL INIT ──
+const ONESIGNAL_APP_ID  = '9cfc1714-52c6-45cf-af4d-dac6365ee233';
+const ONESIGNAL_REST_KEY = 'os_v2_app_tt6bofcsyzc47l2n3lddmxxcgpkmoxcyuwcu2hm4wahkfutko7mzniuwvplr3alqj7qnd3nyinz4k2rvdkscdbtuknpiekndf2veszq';
+
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: ONESIGNAL_APP_ID,
+    serviceWorkerPath: 'OneSignalSDKWorker.js',
+    notifyButton: { enable: false },
+    promptOptions: {
+      slidedown: {
+        enabled: true,
+        autoPrompt: false,
+        timeDelay: 3,
+        pageViews: 1,
+        actionMessage: 'CXA Parent Portal would like to send you updates and announcements.',
+        acceptButtonText: 'Allow',
+        cancelButtonText: 'No Thanks'
+      }
+    }
+  });
+});
+
+function promptPushSubscription() {
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.Slidedown.promptPush();
+  });
+}
+
+async function sendPushNotification() {
+  const title   = document.getElementById('notif-title').value.trim();
+  const message = document.getElementById('notif-body').value.trim();
+  const err     = document.getElementById('notif-err');
+  const btn     = document.getElementById('notif-send-btn');
+  err.textContent = '';
+  if (!title || !message) { err.textContent = 'Title and message are required.'; return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    const res = await fetch('https://onesignal.com/api/v1/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + ONESIGNAL_REST_KEY
+      },
+      body: JSON.stringify({
+        app_id: ONESIGNAL_APP_ID,
+        included_segments: ['All'],
+        headings: { en: title },
+        contents: { en: message }
+      })
+    });
+    const data = await res.json();
+    if (data.errors) throw new Error(data.errors.join(', '));
+    document.getElementById('notif-title').value = '';
+    document.getElementById('notif-body').value  = '';
+    err.style.color = '#16a34a';
+    err.textContent = '✓ Notification sent to all families.';
+    setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 4000);
+  } catch(e) {
+    err.style.color = '';
+    err.textContent = 'Failed: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Send Notification';
+}
+
 // ── EMAILJS INIT ──
 emailjs.init('MGVyrbVShVxiNLTB4');
 
@@ -1948,7 +2029,9 @@ document.getElementById('login-email').addEventListener('keydown', e => {
 
 // ── INIT ──
 // Watch auth state — app only initializes after login
+let isAdmin = false;
 auth.onAuthStateChanged(async user => {
+  isAdmin = false;
   if (!user) {
     showLogin();
     return;
@@ -1968,12 +2051,18 @@ auth.onAuthStateChanged(async user => {
 
       // Show admin nav if admin
       if (data.role === 'admin') {
+        isAdmin = true;
         document.getElementById('admin-nav-item').style.display = 'flex';
         loadFamilies();
       }
     }
   } catch(e) {
     console.warn('Could not load Firestore profile:', e);
+  }
+
+  // Prompt for push notifications after login (non-admin families only)
+  if (!isAdmin) {
+    setTimeout(promptPushSubscription, 4000);
   }
 
   renderStudent();
