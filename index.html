@@ -545,6 +545,27 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 /* BOTTOM TAB BAR (mobile only) */
 .tab-bar{display:none;}
 
+/* More sheet (mobile) */
+.more-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;}
+.more-sheet-overlay.open{display:block;}
+.more-sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:301;
+  background:#1A2535;
+  border-radius:18px 18px 0 0;
+  padding:0 0 env(safe-area-inset-bottom);
+  transform:translateY(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.more-sheet.open{transform:translateY(0);}
+.more-sheet-handle{width:36px;height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin:12px auto 4px;}
+.more-sheet-title{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:rgba(255,255,255,.4);padding:8px 20px 4px;}
+.more-sheet-item{display:flex;align-items:center;gap:14px;padding:14px 20px;color:rgba(255,255,255,.85);font-size:15px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;border:none;background:none;width:100%;text-align:left;}
+.more-sheet-item svg{width:22px;height:22px;color:rgba(255,255,255,.5);flex-shrink:0;}
+.more-sheet-item:active{background:rgba(255,255,255,.07);}
+.more-sheet-divider{height:1px;background:rgba(255,255,255,.08);margin:4px 0;}
+.more-sheet-item.danger{color:#FC8181;}
+.more-sheet-item.danger svg{color:#FC8181;}
+
 /* RESPONSIVE — tablet */
 @media(max-width:960px){
   .sidebar{width:54px;}
@@ -563,11 +584,14 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
 /* RESPONSIVE — phone */
 @media(max-width:600px){
+  /* Prevent iOS input zoom */
+  input,select,textarea{font-size:16px !important;}
+
   /* Hide desktop sidebar entirely; show bottom tab bar */
   .sidebar{display:none;}
-  .main{margin-left:0;}
+  .main{margin-left:0;padding-top:env(safe-area-inset-top);}
 
-  /* Bottom tab bar */
+  /* Bottom tab bar — 5 fixed items */
   .tab-bar{
     display:flex;
     position:fixed;
@@ -576,32 +600,42 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     border-top:1px solid rgba(255,255,255,.1);
     z-index:200;
     padding-bottom:env(safe-area-inset-bottom);
+    box-shadow:0 -4px 20px rgba(0,0,0,.25);
   }
   .tab-item{
     flex:1;display:flex;flex-direction:column;align-items:center;
-    padding:10px 4px 8px;gap:4px;
+    padding:10px 2px 6px;gap:3px;
     cursor:pointer;color:rgba(255,255,255,.4);
     font-family:'Arial Narrow',Arial,sans-serif;font-size:9px;
-    font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+    font-weight:700;text-transform:uppercase;letter-spacing:.06em;
     border:none;background:none;transition:color .12s;
     -webkit-tap-highlight-color:transparent;
+    min-height:54px;
   }
-  .tab-item svg{width:20px;height:20px;flex-shrink:0;}
+  .tab-item svg{width:22px;height:22px;flex-shrink:0;}
   .tab-item.active{color:#FFFFFF;}
   .tab-item.active svg{color:var(--gold);}
 
-  /* Topbar — hide logo, just show page title */
-  .topbar{padding:12px 16px;}
-  .topbar img,.topbar svg[role="img"]{display:none;}
+  /* Topbar — clean mobile header */
+  .topbar{
+    padding:10px 16px;
+    padding-top:calc(10px + env(safe-area-inset-top));
+    position:sticky;top:0;z-index:100;
+  }
+  .topbar img{display:none;}
   .topbar > div:first-child > div[style*="width:1px"]{display:none;}
-  #page-title{font-size:15px;letter-spacing:.12em;}
+  #page-title{font-size:16px;letter-spacing:.1em;}
+  /* Hide Account + Sign Out from topbar on mobile */
+  .topbar-r > button:not(.notif){display:none;}
+  .topbar-r .parent-chip span{display:none;}
+  .parent-chip{cursor:pointer;}
 
-  /* Page content — account for tab bar */
-  .page{padding:14px 14px 90px;}
+  /* Page content — account for tab bar + topbar */
+  .page{padding:16px 14px 100px;}
 
-  /* Cards — bigger tap targets & text */
-  .card{padding:18px 16px;border-radius:8px;}
-  .clabel{font-size:10px;margin-bottom:10px;}
+  /* Cards */
+  .card{padding:16px 14px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .clabel{font-size:10px;margin-bottom:12px;}
 
   /* Dashboard */
   .dash-grid{grid-template-columns:1fr;gap:12px;}
@@ -611,7 +645,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   .dash-conds{flex-direction:column;gap:0;}
   .dash-cond-divider{width:100%;height:1px;background:var(--border);margin:0;}
   .dash-cond-item{padding:14px 0;}
-  .dash-cond-val{font-size:22px;}
+  .dash-cond-val{font-size:24px;}
 
   /* Gallery */
   .gallery-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
@@ -621,13 +655,17 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
   /* Weather */
   .wg{grid-template-columns:1fr;}
-  .wc-temp{font-size:52px;}
+  .wc-temp{font-size:56px;}
 
   /* Schedule / other grids */
   .fcg{grid-template-columns:1fr 1fr;}
   .conds{grid-template-columns:1fr;}
   .wfh{flex-direction:column;gap:14px;}
   .dg{grid-template-columns:1fr;}
+
+  /* Bigger tap targets for buttons */
+  .admin-btn{padding:8px 14px;font-size:12px;}
+  .msg-btn{padding:14px;}
 }
 </style>
 </head>
@@ -2288,49 +2326,114 @@ auth.onAuthStateChanged(async user => {
   gotoPage(PAGE_TITLES[initialPage] ? initialPage : 'dashboard');
 });
 
+// Pages that live inside the More sheet
+const MORE_PAGES = new Set(['weather','gallery','documents','messages','admin']);
+
 // Sync tab bar active state with page navigation
 (function(){
   const orig = window.gotoPage;
   window.gotoPage = function(id, el) {
     orig(id, el);
+    const inMore = MORE_PAGES.has(id);
     document.querySelectorAll('.tab-item').forEach(t => {
-      t.classList.toggle('active', t.dataset.page === id);
+      if (t.id === 'tab-more') {
+        t.classList.toggle('active', inMore);
+      } else {
+        t.classList.toggle('active', t.dataset.page === id);
+      }
     });
   };
 })();
+
+// More sheet
+function openMoreSheet() {
+  document.getElementById('more-overlay').classList.add('open');
+  document.getElementById('more-sheet').classList.add('open');
+}
+function closeMoreSheet() {
+  document.getElementById('more-overlay').classList.remove('open');
+  document.getElementById('more-sheet').classList.remove('open');
+}
+function moreNav(page) {
+  closeMoreSheet();
+  gotoPage(page);
+}
+
+// Show Admin in More sheet if admin
+(function(){
+  const orig = window.loadFamilies || function(){};
+  // Watch for admin role being set and show More sheet admin item
+  const observer = new MutationObserver(() => {
+    const adminNav = document.getElementById('admin-nav-item');
+    const moreAdmin = document.getElementById('more-admin-item');
+    if (adminNav && moreAdmin) {
+      moreAdmin.style.display = adminNav.style.display === 'none' ? 'none' : 'flex';
+    }
+  });
+  const adminNav = document.getElementById('admin-nav-item');
+  if (adminNav) observer.observe(adminNav, { attributes: true, attributeFilter: ['style'] });
+})();
 </script>
 
-<!-- BOTTOM TAB BAR (phones only) -->
-<nav class="tab-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-  <button class="tab-item active" data-page="dashboard" onclick="gotoPage('dashboard',this)" style="min-width:60px;">
+<!-- BOTTOM TAB BAR — 5 fixed items (phones only) -->
+<nav class="tab-bar">
+  <button class="tab-item active" data-page="dashboard" onclick="gotoPage('dashboard',this)">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7A1 1 0 003 11h1v6a1 1 0 001 1h4v-4h2v4h4a1 1 0 001-1v-6h1a1 1 0 00.707-1.707l-7-7z"/></svg>
     Home
   </button>
-  <button class="tab-item" data-page="student" onclick="gotoPage('student',this)" style="min-width:60px;">
+  <button class="tab-item" data-page="student" onclick="gotoPage('student',this)">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
-    Student
+    Athlete
   </button>
-  <button class="tab-item" data-page="calendar" onclick="gotoPage('calendar',this)" style="min-width:60px;">
+  <button class="tab-item" data-page="announcements" onclick="gotoPage('announcements',this)">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
+    Alerts
+  </button>
+  <button class="tab-item" data-page="calendar" onclick="gotoPage('calendar',this)">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
     Calendar
   </button>
-  <button class="tab-item" data-page="weather" onclick="gotoPage('weather',this)" style="min-width:60px;">
+  <button class="tab-item" id="tab-more" onclick="openMoreSheet()">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
+    More
+  </button>
+</nav>
+
+<!-- MORE SLIDE-UP SHEET -->
+<div class="more-sheet-overlay" id="more-overlay" onclick="closeMoreSheet()"></div>
+<div class="more-sheet" id="more-sheet">
+  <div class="more-sheet-handle"></div>
+  <div class="more-sheet-title">More</div>
+  <button class="more-sheet-item" onclick="moreNav('weather')">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
     Weather
   </button>
-  <button class="tab-item" data-page="gallery" onclick="gotoPage('gallery',this)" style="min-width:60px;">
+  <button class="more-sheet-item" onclick="moreNav('gallery')">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>
-    Gallery
+    Photo Gallery
   </button>
-  <button class="tab-item" data-page="documents" onclick="gotoPage('documents',this)" style="min-width:60px;">
+  <button class="more-sheet-item" onclick="moreNav('documents')">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
-    Docs
+    Documents & Forms
   </button>
-  <button class="tab-item" data-page="messages" onclick="gotoPage('messages',this)" style="min-width:60px;">
+  <button class="more-sheet-item" onclick="moreNav('messages')">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
     Messages
   </button>
-</nav>
+  <button class="more-sheet-item" id="more-admin-item" onclick="moreNav('admin')" style="display:none;">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+    Admin Panel
+  </button>
+  <div class="more-sheet-divider"></div>
+  <button class="more-sheet-item" onclick="openAccountSettings();closeMoreSheet()">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+    Account Settings
+  </button>
+  <button class="more-sheet-item danger" onclick="doSignOut();closeMoreSheet()">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+    Sign Out
+  </button>
+</div>
 
 </body>
 </html>
