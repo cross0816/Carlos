@@ -165,7 +165,7 @@ const CONFIG = {
       title: 'Athlete Medical & Emergency Release Form',
       description: 'Required for all athletes. Includes emergency contacts, medical info, physician & insurance details, and photo release.',
       url: 'https://forms.gle/ET3sizBvxc45W3rv9',
-      embedUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSd_ET3sizBvxc45W3rv9/viewform?embedded=true',
+      embedUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScV5TVvpD7VL1wS6epE1Qikje1nAySEm0M8fpxC6nYA42SV0Q/viewform?embedded=true',
       type: 'form',
       date: 'June 1, 2026',
       category: 'Required Forms',
@@ -1491,6 +1491,14 @@ document.addEventListener('keydown', e => {
 });
 
 // ── DOCUMENTS ──
+function toggleFormEmbed(i) {
+  const el  = document.getElementById(`form-embed-${i}`);
+  const arr = document.querySelectorAll(`[onclick="toggleFormEmbed(${i})"] .doc-arrow`);
+  const open = el.style.display === 'none';
+  el.style.display = open ? 'block' : 'none';
+  arr.forEach(a => a.textContent = open ? '▴' : '▾');
+}
+
 function renderDocuments(filter) {
   const docs = filter && filter !== 'All'
     ? CONFIG.documents.filter(d => d.category === filter)
@@ -1501,20 +1509,25 @@ function renderDocuments(filter) {
     `<button class="gf-btn${(!filter||filter==='All'?c==='All':c===filter)?' active':''}" onclick="renderDocuments('${c}')">${c}</button>`
   ).join('');
 
-  document.getElementById('doc-grid').innerHTML = docs.map(d => `
-    <a class="doc-item" href="${d.url}" target="_blank" rel="noopener">
-      <div class="doc-icon ${d.type}">${DOC_ICONS[d.type]||'📄'}</div>
-      <div class="doc-info">
-        <div class="doc-title">${d.title}</div>
-        <div class="doc-desc">${d.description}</div>
-        <div class="doc-meta">
-          <span class="doc-tag${d.required?' required':''}">${d.category}</span>
-          ${d.required ? '<span class="doc-tag required">Required</span>' : ''}
-          <span class="doc-date">${d.date}</span>
+  document.getElementById('doc-grid').innerHTML = docs.map((d, i) => `
+    <div>
+      <a class="doc-item" href="${d.url === '#' ? 'javascript:void(0)' : d.url}" ${d.embedUrl ? `onclick="toggleFormEmbed(${i})"` : d.url !== '#' ? 'target="_blank" rel="noopener"' : ''}>
+        <div class="doc-icon ${d.type}">${DOC_ICONS[d.type]||'📄'}</div>
+        <div class="doc-info">
+          <div class="doc-title">${d.title}</div>
+          <div class="doc-desc">${d.description}</div>
+          <div class="doc-meta">
+            <span class="doc-tag${d.required?' required':''}">${d.category}</span>
+            ${d.required ? '<span class="doc-tag required">Required</span>' : ''}
+            <span class="doc-date">${d.date}</span>
+          </div>
         </div>
-      </div>
-      <div class="doc-arrow">›</div>
-    </a>`).join('');
+        <div class="doc-arrow">${d.embedUrl ? '▾' : '›'}</div>
+      </a>
+      ${d.embedUrl ? `<div id="form-embed-${i}" style="display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden;">
+        <iframe src="${d.embedUrl}" width="100%" height="700" frameborder="0" marginheight="0" marginwidth="0" style="display:block;">Loading…</iframe>
+      </div>` : ''}
+    </div>`).join('');
 }
 
 // ── EMAILJS INIT ──
