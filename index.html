@@ -980,6 +980,26 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   </div>
 </div>
 
+<!-- ADMIN: EDIT SCORES MODAL -->
+<div id="admin-score-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;margin:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div id="ase-title" style="font-family:'Arial Narrow',Arial,sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);">Edit Scores</div>
+      <button onclick="closeScoreEditModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--t2);">✕</button>
+    </div>
+    <input type="hidden" id="ase-acad-count">
+    <input type="hidden" id="ase-ath-count">
+    <input type="hidden" id="ase-academic-names">
+    <input type="hidden" id="ase-athletic-names">
+    <div id="ase-body"></div>
+    <div class="msg-err" id="ase-err"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button id="ase-save-btn" class="msg-btn" onclick="saveScoreEdit()" style="flex:1;">Save Scores</button>
+      <button onclick="closeScoreEditModal()" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:5px;background:none;cursor:pointer;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
@@ -1174,10 +1194,11 @@ function renderStudent() {
   `;
 
   const pGrid = document.getElementById('progress-grid');
+  pGrid.innerHTML = '';
   ['academic','athletic'].forEach(cat => {
-    const label  = cat === 'academic' ? 'Academic Performance' : 'Athletic Development';
-    const items  = CONFIG.progress[cat];
-    const rows   = items.map(i => {
+    const label = cat === 'academic' ? 'Academic Performance' : 'Athletic Development';
+    const items = CONFIG.progress[cat];
+    const rows = items.map(i => {
       const cls = i.score >= 90 ? '' : ' gold';
       return `<div class="pi">
         <div class="ph"><span class="pn">${i.name}</span><span class="ps">${i.score}%</span></div>
@@ -1186,6 +1207,93 @@ function renderStudent() {
     }).join('');
     pGrid.innerHTML += `<div class="pc"><div class="clabel">${label}</div>${rows}</div>`;
   });
+}
+
+// ── ADMIN: EDIT SCORES MODAL ──
+let _scoreEditUid = null;
+let _scoreEditData = null;
+
+async function openScoreEditModal(uid) {
+  _scoreEditUid = uid;
+  const doc = await db.collection('users').doc(uid).get();
+  _scoreEditData = doc.data() || {};
+  const prog = _scoreEditData.progress || { academic: [], athletic: [] };
+
+  // Default score sets if missing
+  const defaultAcademic = [
+    {name:'Mathematics',score:0},{name:'Language Arts',score:0},{name:'Science',score:0},
+    {name:'Social Studies',score:0},{name:'Physical Ed.',score:0}
+  ];
+  const defaultAthletic = [
+    {name:'Speed & Agility',score:0},{name:'Strength & Conditioning',score:0},
+    {name:'Team Skills',score:0},{name:'Leadership',score:0},{name:'Mental Toughness',score:0}
+  ];
+  const academic = prog.academic && prog.academic.length ? prog.academic : defaultAcademic;
+  const athletic = prog.athletic && prog.athletic.length ? prog.athletic : defaultAthletic;
+
+  const athleteName = (_scoreEditData.student || {}).name || 'Athlete';
+  document.getElementById('ase-title').textContent = 'Edit Scores — ' + athleteName;
+
+  function buildSliders(cat, items) {
+    return items.map((item, i) => `
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+          <label style="font-size:13px;font-weight:600;color:var(--t1);">${item.name}</label>
+          <span id="ase-val-${cat}-${i}" style="font-family:'Arial Narrow',Arial,sans-serif;font-size:14px;font-weight:700;color:var(--accent);">${item.score}%</span>
+        </div>
+        <input type="range" min="0" max="100" value="${item.score}"
+          style="width:100%;accent-color:var(--accent);"
+          oninput="document.getElementById('ase-val-${cat}-${i}').textContent=this.value+'%'"
+          id="ase-slider-${cat}-${i}">
+      </div>`).join('');
+  }
+
+  document.getElementById('ase-body').innerHTML = `
+    <div style="margin-bottom:18px;">
+      <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:12px;">Academic Performance</div>
+      ${buildSliders('academic', academic)}
+    </div>
+    <div>
+      <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:12px;">Athletic Development</div>
+      ${buildSliders('athletic', athletic)}
+    </div>`;
+
+  // Store counts for save
+  document.getElementById('ase-acad-count').value = academic.length;
+  document.getElementById('ase-ath-count').value  = athletic.length;
+  document.getElementById('ase-academic-names').value = JSON.stringify(academic.map(x=>x.name));
+  document.getElementById('ase-athletic-names').value = JSON.stringify(athletic.map(x=>x.name));
+  document.getElementById('ase-err').textContent = '';
+  document.getElementById('admin-score-edit-modal').style.display = 'flex';
+}
+
+function closeScoreEditModal() {
+  document.getElementById('admin-score-edit-modal').style.display = 'none';
+}
+
+async function saveScoreEdit() {
+  const err = document.getElementById('ase-err');
+  const btn = document.getElementById('ase-save-btn');
+  err.textContent = ''; btn.disabled = true; btn.textContent = 'Saving…';
+
+  const acadNames = JSON.parse(document.getElementById('ase-academic-names').value);
+  const athNames  = JSON.parse(document.getElementById('ase-athletic-names').value);
+
+  const academic = acadNames.map((name, i) => ({
+    name, score: parseInt(document.getElementById(`ase-slider-academic-${i}`).value)
+  }));
+  const athletic = athNames.map((name, i) => ({
+    name, score: parseInt(document.getElementById(`ase-slider-athletic-${i}`).value)
+  }));
+
+  try {
+    await db.collection('users').doc(_scoreEditUid).update({ progress: { academic, athletic } });
+    closeScoreEditModal();
+    loadFamilies();
+  } catch(e) {
+    err.textContent = 'Failed to save: ' + e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Save Scores';
 }
 
 // ── RENDER ANNOUNCEMENTS ──
@@ -1692,6 +1800,7 @@ async function loadFamilies() {
         </div>
         <div class="admin-actions">
           <button class="admin-btn" onclick="openEditModal('${d.id}')">Edit</button>
+          <button class="admin-btn" onclick="openScoreEditModal('${d.id}')" style="color:#2563EB;border-color:#2563EB;">Scores</button>
           <button class="admin-btn danger" onclick="deleteFamily('${d.id}','${data.parentName||'this family'}')">Delete</button>
         </div>
       </div>`;
