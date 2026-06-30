@@ -2217,7 +2217,14 @@ async function deleteFamily(uid, name) {
 
 // ── AUTH ──
 function showLogin()  { document.getElementById('login-screen').classList.remove('hidden'); }
-function hideLogin()  { document.getElementById('login-screen').classList.add('hidden'); }
+function hideLogin()  {
+  document.getElementById('login-screen').classList.add('hidden');
+  // Reset iOS Safari viewport zoom that snaps to top-left on DOM change
+  const mv = document.querySelector('meta[name=viewport]');
+  mv.content = 'width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover';
+  setTimeout(() => { mv.content = 'width=device-width,initial-scale=1,viewport-fit=cover'; }, 300);
+  window.scrollTo(0, 0);
+}
 
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
