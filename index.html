@@ -244,7 +244,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .brand{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1);}
 .brand-logo{display:block;width:100%;height:auto;}
 .brand-sub{display:none;}
-.nav{flex:1;padding:10px 0;}
+.nav{flex:1;padding:10px 0;display:flex;flex-direction:column;}
 .ni{display:flex;align-items:center;gap:11px;padding:11px 20px;cursor:pointer;color:rgba(255,255,255,.4);font-family:'Arial Narrow',Arial,sans-serif;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;border-left:2px solid transparent;transition:color .12s,background .12s;user-select:none;}
 .ni:hover{color:rgba(255,255,255,.75);background:rgba(255,255,255,.06);}
 .ni.active{color:#FFFFFF;border-left-color:var(--gold);background:rgba(255,255,255,.08);}
@@ -709,10 +709,6 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
       <span class="nav-label">Calendar & Schedule</span>
     </div>
-    <div class="ni" onclick="gotoPage('weather',this)">
-      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
-      <span class="nav-label">Weather</span>
-    </div>
     <div class="ni" onclick="gotoPage('gallery',this)">
       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>
       <span class="nav-label">Gallery</span>
@@ -730,6 +726,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       <span class="nav-label">Admin</span>
     </div>
   </nav>
+  <div class="ni" onclick="gotoPage('weather',this)" style="margin-top:auto;">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
+    <span class="nav-label">Weather</span>
+  </div>
   <div class="sidebar-mtn">
     <svg viewBox="0 0 210 64" fill="white"><path d="M0,64 L28,36 L50,52 L84,8 L110,38 L136,22 L162,44 L188,14 L210,32 L210,64 Z"/></svg>
   </div>
