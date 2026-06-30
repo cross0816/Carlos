@@ -779,6 +779,30 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         <div class="sl" id="sched-mini"></div>
       </div>
 
+      <!-- Outdoor Activity Conditions — full width -->
+      <div class="card" style="grid-column:span 2;cursor:pointer;" onclick="gotoPage('weather')">
+        <div class="clabel">Outdoor Activity Conditions — Today</div>
+        <div class="dash-conds" id="dash-conditions">
+          <div class="dash-cond-item">
+            <div class="dash-cond-val c-ok" id="dc-morning">—</div>
+            <div class="dash-cond-label">Morning Practice</div>
+            <div class="dash-cond-sub" id="dc-morning-sub"></div>
+          </div>
+          <div class="dash-cond-divider"></div>
+          <div class="dash-cond-item">
+            <div class="dash-cond-val c-ok" id="dc-afternoon">—</div>
+            <div class="dash-cond-label">Afternoon Sessions</div>
+            <div class="dash-cond-sub" id="dc-afternoon-sub"></div>
+          </div>
+          <div class="dash-cond-divider"></div>
+          <div class="dash-cond-item">
+            <div class="dash-cond-val c-ok" id="dc-evening">—</div>
+            <div class="dash-cond-label">Evening Events</div>
+            <div class="dash-cond-sub" id="dc-evening-sub"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="card" onclick="gotoPage('announcements')" style="cursor:pointer;">
         <div class="clabel">Recent Announcements</div>
         <div class="ann-list" id="ann-mini"></div>
@@ -802,30 +826,6 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
             src=""
             style="width:100%;height:480px;border:none;display:block;"
             frameborder="0" scrolling="no"></iframe>
-        </div>
-      </div>
-
-      <!-- Outdoor Activity Conditions — full width, bottom -->
-      <div class="card" style="grid-column:span 2;cursor:pointer;" onclick="gotoPage('weather')">
-        <div class="clabel">Outdoor Activity Conditions — Today</div>
-        <div class="dash-conds" id="dash-conditions">
-          <div class="dash-cond-item">
-            <div class="dash-cond-val c-ok" id="dc-morning">—</div>
-            <div class="dash-cond-label">Morning Practice</div>
-            <div class="dash-cond-sub" id="dc-morning-sub"></div>
-          </div>
-          <div class="dash-cond-divider"></div>
-          <div class="dash-cond-item">
-            <div class="dash-cond-val c-ok" id="dc-afternoon">—</div>
-            <div class="dash-cond-label">Afternoon Sessions</div>
-            <div class="dash-cond-sub" id="dc-afternoon-sub"></div>
-          </div>
-          <div class="dash-cond-divider"></div>
-          <div class="dash-cond-item">
-            <div class="dash-cond-val c-ok" id="dc-evening">—</div>
-            <div class="dash-cond-label">Evening Events</div>
-            <div class="dash-cond-sub" id="dc-evening-sub"></div>
-          </div>
         </div>
       </div>
 
