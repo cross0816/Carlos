@@ -237,7 +237,7 @@ const db   = firebase.firestore();
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
-body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;overflow-x:hidden;}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;}
 
 /* SIDEBAR */
 .sidebar{width:var(--sw);background:#1A2535;border-right:none;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:100;}
@@ -589,7 +589,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
   /* Hide desktop sidebar entirely; show bottom tab bar */
   .sidebar{display:none;}
-  .main{margin-left:0;overflow-x:hidden;}
+  .main{margin-left:0;}
 
   /* Bottom tab bar — 5 fixed items */
   .tab-bar{
