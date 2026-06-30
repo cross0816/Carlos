@@ -631,15 +631,16 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   .parent-chip{cursor:pointer;}
 
   /* Page content — account for tab bar + topbar */
-  .page{padding:16px 14px 100px;}
+  .page{padding:16px 14px 100px;max-width:100vw;box-sizing:border-box;}
 
   /* Cards */
-  .card{padding:16px 14px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .card{padding:16px 14px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);max-width:100%;box-sizing:border-box;}
   .clabel{font-size:10px;margin-bottom:12px;}
 
-  /* Dashboard */
+  /* Dashboard — force all spans to 1 on mobile */
   .dash-grid{grid-template-columns:1fr;gap:12px;}
   .cal-card{grid-column:span 1;}
+  .dash-grid > *{grid-column:span 1 !important;}
 
   /* Outdoor conditions — stack vertically */
   .dash-conds{flex-direction:column;gap:0;}
@@ -2225,11 +2226,15 @@ async function deleteFamily(uid, name) {
 function showLogin()  { document.getElementById('login-screen').classList.remove('hidden'); }
 function hideLogin()  {
   document.getElementById('login-screen').classList.add('hidden');
-  // Reset iOS Safari viewport zoom that snaps to top-left on DOM change
-  const mv = document.querySelector('meta[name=viewport]');
-  mv.content = 'width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover';
-  setTimeout(() => { mv.content = 'width=device-width,initial-scale=1,viewport-fit=cover'; }, 300);
   window.scrollTo(0, 0);
+  // Reset iOS Safari viewport zoom — brief maximum-scale lock forces correct scale
+  const mv = document.querySelector('meta[name=viewport]');
+  setTimeout(() => {
+    mv.content = 'width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover';
+    setTimeout(() => {
+      mv.content = 'width=device-width,initial-scale=1,viewport-fit=cover';
+    }, 100);
+  }, 50);
 }
 
 async function doLogin() {
