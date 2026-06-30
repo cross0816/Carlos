@@ -527,7 +527,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .msg-hi-to{font-size:11px;color:var(--t2);margin-bottom:4px;}
 .msg-hi-body{font-size:12px;color:var(--t2);line-height:1.5;white-space:pre-wrap;}
 .msg-empty{font-size:13px;color:var(--t3);text-align:center;padding:30px 0;}
-@media(max-width:700px){.msg-layout{grid-template-columns:1fr;}}
+.msg-layout{display:grid;grid-template-columns:1fr;gap:20px;}
 
 /* ADMIN */
 .admin-family-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
@@ -911,7 +911,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   <!-- MESSAGING -->
   <div id="p-messages" class="page">
     <div class="slabel">Contact CXA Staff</div>
-    <div style="display:grid;grid-template-columns:1fr;gap:20px;" class="msg-layout">
+    <div class="msg-layout">
 
       <!-- Send Message Form -->
       <div class="card">
