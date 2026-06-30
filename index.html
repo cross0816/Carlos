@@ -810,8 +810,13 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
       <div class="card wc" onclick="gotoPage('weather')" style="cursor:pointer;">
         <div class="clabel">Today's Weather</div>
-        <div class="wc-temp" id="wc-temp">—</div>
-        <div class="wc-cond" id="wc-cond">Loading…</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="font-size:42px;line-height:1;" id="wc-icon"></div>
+          <div>
+            <div class="wc-temp" id="wc-temp">—</div>
+            <div class="wc-cond" id="wc-cond">Loading…</div>
+          </div>
+        </div>
         <div class="wc-loc" id="wc-loc"></div>
         <div class="wc-rows" id="wc-rows"></div>
       </div>
@@ -1211,6 +1216,7 @@ function applyWeather(data) {
   // Dashboard weather card
   document.getElementById('wc-temp').textContent = temp + '°';
   document.getElementById('wc-cond').textContent = desc;
+  document.getElementById('wc-icon').textContent = icon;
   document.getElementById('wc-rows').innerHTML = `
     <div class="wc-row"><span class="wk">Feels like</span><span class="wv">${feels}°F</span></div>
     <div class="wc-row"><span class="wk">Wind</span><span class="wv">${wind} mph</span></div>
