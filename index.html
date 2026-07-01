@@ -1907,7 +1907,7 @@ async function sendPushNotification() {
   if (!title || !message) { err.textContent = 'Title and message are required.'; return; }
   btn.disabled = true; btn.textContent = 'Sending…';
   try {
-    const res = await fetch('https://corsproxy.io/?url=https://onesignal.com/api/v1/notifications', {
+    const res = await fetch('https://billowing-silence-d5c4.workers.dev', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
