@@ -749,9 +749,9 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       <div class="topbar-title" id="page-title">Dashboard</div>
     </div>
     <div class="topbar-r">
-      <button class="notif" title="Notifications">
+      <button class="notif" id="bell-btn" title="Messages" onclick="gotoPage('messages')">
         <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
-        <span class="ndot"></span>
+        <span class="ndot" id="bell-badge" style="display:none;"></span>
       </button>
       <div class="parent-chip">
         <div class="avatar" id="parent-avatar"></div>
@@ -2077,6 +2077,17 @@ async function loadMessageHistory() {
   }
 }
 
+async function checkUnreadMessages() {
+  const user = auth.currentUser;
+  const badge = document.getElementById('bell-badge');
+  if (!user || !badge) return;
+  try {
+    const snap = await db.collection('users').doc(user.uid)
+      .collection('messages').where('read','==',false).limit(1).get();
+    badge.style.display = snap.empty ? 'none' : 'block';
+  } catch(e) { badge.style.display = 'none'; }
+}
+
 // ── ADMIN ──
 const FIREBASE_API_KEY = 'AIzaSyDtB3WRTlmUcDPRg4m-MeBy8jMwxcakbQY';
 
@@ -2326,6 +2337,7 @@ auth.onAuthStateChanged(async user => {
   loadDriveGallery();
   renderDocuments();
   loadMessageHistory();
+  checkUnreadMessages();
   buildDashCal();
   buildFullCal();
   buildSchedule();
