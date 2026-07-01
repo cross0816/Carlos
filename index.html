@@ -1911,25 +1911,31 @@ async function sendPushNotification() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + ONESIGNAL_REST_KEY
+        'Authorization': 'Key ' + ONESIGNAL_REST_KEY
       },
       body: JSON.stringify({
         app_id: ONESIGNAL_APP_ID,
-        included_segments: ['All'],
+        included_segments: ['Subscribed Users'],
         headings: { en: title },
         contents: { en: message }
       })
     });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error('HTTP ' + res.status + ': ' + txt);
+    }
     const data = await res.json();
-    if (data.errors) throw new Error(data.errors.join(', '));
+    console.log('OneSignal response:', JSON.stringify(data));
+    if (data.errors) throw new Error(JSON.stringify(data.errors));
     document.getElementById('notif-title').value = '';
     document.getElementById('notif-body').value  = '';
     err.style.color = '#16a34a';
-    err.textContent = '✓ Notification sent to all families.';
+    err.textContent = '✓ Notification sent (' + (data.recipients || 0) + ' recipients).';
     setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 4000);
   } catch(e) {
     err.style.color = '';
     err.textContent = 'Failed: ' + e.message;
+    console.error('Push error:', e);
   }
   btn.disabled = false; btn.textContent = 'Send Notification';
 }
