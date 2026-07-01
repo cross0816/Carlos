@@ -1907,15 +1907,15 @@ async function sendPushNotification() {
   if (!title || !message) { err.textContent = 'Title and message are required.'; return; }
   btn.disabled = true; btn.textContent = 'Sending…';
   try {
-    const res = await fetch('https://billowing-silence-d5c4.workers.dev', {
+    const res = await fetch('https://corsproxy.io/?url=https://onesignal.com/api/v1/notifications', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Key ' + ONESIGNAL_REST_KEY
+        'Authorization': 'Basic ' + ONESIGNAL_REST_KEY
       },
       body: JSON.stringify({
         app_id: ONESIGNAL_APP_ID,
-        included_segments: ['Subscribed Users'],
+        included_segments: ['All'],
         headings: { en: title },
         contents: { en: message }
       })
