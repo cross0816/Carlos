@@ -1907,18 +1907,10 @@ async function sendPushNotification() {
   if (!title || !message) { err.textContent = 'Title and message are required.'; return; }
   btn.disabled = true; btn.textContent = 'Sending…';
   try {
-    const res = await fetch('https://corsproxy.io/?url=https://onesignal.com/api/v1/notifications', {
+    const res = await fetch('https://eoxmcl6k9tv4ada.m.pipedream.net', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + ONESIGNAL_REST_KEY
-      },
-      body: JSON.stringify({
-        app_id: ONESIGNAL_APP_ID,
-        included_segments: ['All'],
-        headings: { en: title },
-        contents: { en: message }
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, message })
     });
     if (!res.ok) {
       const txt = await res.text();
