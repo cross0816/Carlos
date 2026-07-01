@@ -2079,15 +2079,34 @@ async function loadMessageHistory() {
   }
 }
 
-async function checkUnreadMessages() {
+let _notifUnsub = null;
+function checkUnreadMessages() {
   const badge = document.getElementById('bell-badge');
   if (!badge) return;
-  try {
-    const seen = JSON.parse(localStorage.getItem('seen_notifs') || '[]');
-    const snap = await db.collection('notifications').orderBy('sentAt','desc').limit(10).get();
-    const hasNew = snap.docs.some(d => !seen.includes(d.id));
-    badge.style.display = hasNew ? 'block' : 'none';
-  } catch(e) { badge.style.display = 'none'; }
+  if (_notifUnsub) _notifUnsub();
+  let first = true;
+  _notifUnsub = db.collection('notifications').orderBy('sentAt','desc').limit(20)
+    .onSnapshot(snap => {
+      const seen = JSON.parse(localStorage.getItem('seen_notifs') || '[]');
+      const hasNew = snap.docs.some(d => !seen.includes(d.id));
+      badge.style.display = hasNew ? 'block' : 'none';
+      if (!first && hasNew) {
+        // Play a soft chime when a new notification arrives
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = 880;
+          o.type = 'sine';
+          g.gain.setValueAtTime(0.3, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+          o.start(ctx.currentTime);
+          o.stop(ctx.currentTime + 0.6);
+        } catch(e) {}
+      }
+      first = false;
+    }, () => { badge.style.display = 'none'; });
 }
 
 async function openNotifPanel() {
