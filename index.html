@@ -1916,7 +1916,7 @@ async function sendPushNotification() {
     document.getElementById('notif-title').value = '';
     document.getElementById('notif-body').value  = '';
     err.style.color = '#16a34a';
-    err.textContent = '✓ Notification sent (' + (data.recipients || 0) + ' recipients).';
+    err.textContent = '✓ Notification sent to all families!';
     setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 4000);
   } catch(e) {
     err.style.color = '';
