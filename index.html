@@ -749,7 +749,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       <div class="topbar-title" id="page-title">Dashboard</div>
     </div>
     <div class="topbar-r">
-      <button class="notif" id="bell-btn" title="Messages" onclick="gotoPage('messages')">
+      <button class="notif" id="bell-btn" title="Notifications" onclick="openNotifPanel()">
         <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
         <span class="ndot" id="bell-badge" style="display:none;"></span>
       </button>
@@ -1913,6 +1913,8 @@ async function sendPushNotification() {
       body: JSON.stringify({ title, message })
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
+    // Save to Firestore so families can read it in the bell panel
+    await db.collection('notifications').add({ title, message, sentAt: firebase.firestore.FieldValue.serverTimestamp() });
     document.getElementById('notif-title').value = '';
     document.getElementById('notif-body').value  = '';
     err.style.color = '#16a34a';
@@ -2078,14 +2080,50 @@ async function loadMessageHistory() {
 }
 
 async function checkUnreadMessages() {
-  const user = auth.currentUser;
   const badge = document.getElementById('bell-badge');
-  if (!user || !badge) return;
+  if (!badge) return;
   try {
-    const snap = await db.collection('users').doc(user.uid)
-      .collection('messages').where('read','==',false).limit(1).get();
-    badge.style.display = snap.empty ? 'none' : 'block';
+    const seen = JSON.parse(localStorage.getItem('seen_notifs') || '[]');
+    const snap = await db.collection('notifications').orderBy('sentAt','desc').limit(10).get();
+    const hasNew = snap.docs.some(d => !seen.includes(d.id));
+    badge.style.display = hasNew ? 'block' : 'none';
   } catch(e) { badge.style.display = 'none'; }
+}
+
+async function openNotifPanel() {
+  document.getElementById('notif-overlay').classList.add('open');
+  document.getElementById('notif-panel').classList.add('open');
+  const inbox = document.getElementById('notif-inbox');
+  inbox.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;padding:20px 0;">Loading…</div>';
+  try {
+    const snap = await db.collection('notifications').orderBy('sentAt','desc').limit(20).get();
+    const seen = JSON.parse(localStorage.getItem('seen_notifs') || '[]');
+    const ids = snap.docs.map(d => d.id);
+    localStorage.setItem('seen_notifs', JSON.stringify([...new Set([...seen, ...ids])]));
+    document.getElementById('bell-badge').style.display = 'none';
+    if (snap.empty) {
+      inbox.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;padding:20px 0;">No notifications yet.</div>';
+      return;
+    }
+    inbox.innerHTML = snap.docs.map(d => {
+      const n = d.data();
+      const date = n.sentAt ? n.sentAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      return `<div style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div style="font-size:14px;font-weight:700;color:#fff;">${n.title}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.35);white-space:nowrap;margin-left:10px;">${date}</div>
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,.65);">${n.message}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    inbox.innerHTML = '<div style="color:#FC8181;font-size:13px;">Could not load notifications.</div>';
+  }
+}
+
+function closeNotifPanel() {
+  document.getElementById('notif-overlay').classList.remove('open');
+  document.getElementById('notif-panel').classList.remove('open');
 }
 
 // ── ADMIN ──
@@ -2422,6 +2460,17 @@ function moreNav(page) {
     More
   </button>
 </nav>
+
+<!-- NOTIFICATION PANEL -->
+<div class="more-sheet-overlay" id="notif-overlay" onclick="closeNotifPanel()"></div>
+<div class="more-sheet" id="notif-panel" style="max-height:70vh;overflow-y:auto;">
+  <div class="more-sheet-handle"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 20px 4px;">
+    <div class="more-sheet-title" style="padding:0;">Notifications</div>
+    <button onclick="closeNotifPanel()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:20px;cursor:pointer;">✕</button>
+  </div>
+  <div id="notif-inbox" style="padding:0 20px 20px;"></div>
+</div>
 
 <!-- MORE SLIDE-UP SHEET -->
 <div class="more-sheet-overlay" id="more-overlay" onclick="closeMoreSheet()"></div>
