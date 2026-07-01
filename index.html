@@ -2079,6 +2079,35 @@ async function loadMessageHistory() {
   }
 }
 
+// Unlock AudioContext on first user interaction (required by iOS)
+let _audioCtx = null;
+function _unlockAudio() {
+  if (_audioCtx) return;
+  try {
+    _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  } catch(e) {}
+}
+document.addEventListener('touchstart', _unlockAudio, { once: true });
+document.addEventListener('click', _unlockAudio, { once: true });
+
+function playNotifSound() {
+  try {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    const now = _audioCtx.currentTime;
+    [[0, 660], [0.15, 880]].forEach(([t, freq]) => {
+      const o = _audioCtx.createOscillator();
+      const g = _audioCtx.createGain();
+      o.connect(g); g.connect(_audioCtx.destination);
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.25, now + t);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.4);
+      o.start(now + t); o.stop(now + t + 0.4);
+    });
+  } catch(e) {}
+}
+
 let _notifUnsub = null;
 function checkUnreadMessages() {
   const badge = document.getElementById('bell-badge');
@@ -2090,21 +2119,7 @@ function checkUnreadMessages() {
       const seen = JSON.parse(localStorage.getItem('seen_notifs') || '[]');
       const hasNew = snap.docs.some(d => !seen.includes(d.id));
       badge.style.display = hasNew ? 'block' : 'none';
-      if (!first && hasNew) {
-        // Play a soft chime when a new notification arrives
-        try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const o = ctx.createOscillator();
-          const g = ctx.createGain();
-          o.connect(g); g.connect(ctx.destination);
-          o.frequency.value = 880;
-          o.type = 'sine';
-          g.gain.setValueAtTime(0.3, ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-          o.start(ctx.currentTime);
-          o.stop(ctx.currentTime + 0.6);
-        } catch(e) {}
-      }
+      if (!first && hasNew) playNotifSound();
       first = false;
     }, () => { badge.style.display = 'none'; });
 }
