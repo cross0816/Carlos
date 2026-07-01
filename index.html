@@ -2119,12 +2119,15 @@ function checkUnreadMessages() {
       const seen = JSON.parse(localStorage.getItem('seen_notifs') || '[]');
       const hasNew = snap.docs.some(d => !seen.includes(d.id));
       badge.style.display = hasNew ? 'block' : 'none';
-      if (!first && hasNew) playNotifSound();
       first = false;
     }, () => { badge.style.display = 'none'; });
 }
 
 async function openNotifPanel() {
+  // Play sound now — we're inside a user tap so iOS allows it
+  if (document.getElementById('bell-badge').style.display !== 'none') {
+    playNotifSound();
+  }
   document.getElementById('notif-overlay').classList.add('open');
   document.getElementById('notif-panel').classList.add('open');
   const inbox = document.getElementById('notif-inbox');
