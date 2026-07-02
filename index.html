@@ -2922,8 +2922,11 @@ auth.onAuthStateChanged(async user => {
   fetchWeather().then(applyWeather);
 
   // Navigate to hash if present, otherwise default to dashboard
+  // Family users never start on admin page
   const initialPage = location.hash.replace('#', '');
-  gotoPage(PAGE_TITLES[initialPage] ? initialPage : 'dashboard');
+  const startPage = (PAGE_TITLES[initialPage] && (initialPage !== 'admin' || isAdmin))
+    ? initialPage : 'dashboard';
+  gotoPage(startPage);
 });
 
 // Pages that live inside the More sheet
