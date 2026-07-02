@@ -1548,21 +1548,9 @@ function renderStudent() {
     pGrid.innerHTML += `<div class="pc"><div class="clabel">${label}</div>${rows}</div>`;
   });
 
-  // Uniform sizes
-  const sz = CONFIG.sizes || {};
+  // Uniform sizes — internal use only, hidden from family view
   const sizeEl = document.getElementById('sizes-card');
-  if (sizeEl) {
-    const hasSizes = sz.tshirt || sz.jacket || sz.shorts || sz.pants;
-    sizeEl.style.display = hasSizes ? '' : 'none';
-    if (hasSizes) {
-      document.getElementById('sizes-grid').innerHTML = [
-        sz.tshirt ? `<div class="dc"><div class="dl">T-Shirt</div><div class="dv">${sz.tshirt}</div></div>` : '',
-        sz.jacket ? `<div class="dc"><div class="dl">Jacket</div><div class="dv">${sz.jacket}</div></div>` : '',
-        sz.shorts ? `<div class="dc"><div class="dl">Shorts</div><div class="dv">${sz.shorts}</div></div>` : '',
-        sz.pants  ? `<div class="dc"><div class="dl">Pants</div><div class="dv">${sz.pants}</div></div>`  : '',
-      ].join('');
-    }
-  }
+  if (sizeEl) sizeEl.style.display = 'none';
 
   // Coach comments (read-only for parents)
   const comments = (CONFIG.progress || {}).comments || '';
