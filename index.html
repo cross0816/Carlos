@@ -2535,6 +2535,13 @@ async function sendChatMessage() {
       role: isAdmin ? 'admin' : 'family',
       sentAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    // Send push notification to all subscribers
+    const preview = text.length > 80 ? text.slice(0, 80) + '…' : text;
+    fetch('https://eoxmcl6k9tv4ada.m.pipedream.net', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: '💬 ' + _chatSenderName, message: preview })
+    }).catch(() => {});
   } catch(e) {
     input.value = text;
     console.error('Chat send failed:', e);
