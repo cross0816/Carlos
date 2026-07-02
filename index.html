@@ -2497,7 +2497,25 @@ function initChat(displayName, role) {
         </div>`;
       }).join('');
       el.scrollTop = el.scrollHeight;
+
+      // Show badge if chat page is not currently open
+      const lastId = snap.docs[snap.docs.length - 1].id;
+      const seenId = localStorage.getItem('seen_chat_last');
+      const chatOpen = document.getElementById('p-chat') && document.getElementById('p-chat').classList.contains('active');
+      const badge = document.getElementById('chat-badge');
+      if (badge) badge.style.display = (!chatOpen && lastId !== seenId) ? 'block' : 'none';
     });
+}
+
+function clearChatBadge() {
+  const badge = document.getElementById('chat-badge');
+  if (badge) badge.style.display = 'none';
+  // Mark latest message as seen
+  const el = document.getElementById('chat-messages');
+  if (!el) return;
+  db.collection('chat').orderBy('sentAt','desc').limit(1).get().then(snap => {
+    if (!snap.empty) localStorage.setItem('seen_chat_last', snap.docs[0].id);
+  }).catch(() => {});
 }
 
 async function sendChatMessage() {
@@ -2980,8 +2998,11 @@ function moreNav(page) {
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
     Alerts
   </button>
-  <button class="tab-item" data-page="chat" onclick="gotoPage('chat',this)">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+  <button class="tab-item" data-page="chat" onclick="gotoPage('chat',this);clearChatBadge()">
+    <span style="position:relative;display:inline-block;">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+      <span id="chat-badge" style="display:none;position:absolute;top:-4px;right:-6px;width:9px;height:9px;background:#ef4444;border-radius:50%;border:2px solid var(--bg,#fff);"></span>
+    </span>
     Chat
   </button>
   <button class="tab-item" id="tab-more" onclick="openMoreSheet()">
