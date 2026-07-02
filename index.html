@@ -1035,6 +1035,25 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
           <input class="msg-input" id="af-id" placeholder="e.g. #0413">
         </div>
       </div>
+      <div style="margin-top:16px;font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--t3);">Uniform Sizes</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+        <div>
+          <label class="msg-label">T-Shirt Size</label>
+          <select class="msg-input" id="af-tshirt"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+        </div>
+        <div>
+          <label class="msg-label">Jacket Size</label>
+          <select class="msg-input" id="af-jacket"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+        </div>
+        <div>
+          <label class="msg-label">Shorts Size</label>
+          <select class="msg-input" id="af-shorts"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+        </div>
+        <div>
+          <label class="msg-label">Pant Size</label>
+          <input class="msg-input" id="af-pants" placeholder="e.g. 28x30">
+        </div>
+      </div>
       <button class="msg-btn" id="af-btn" onclick="addFamily()" style="margin-top:16px;max-width:220px;">Add Family</button>
       <div class="msg-err" id="af-err"></div>
       <div id="af-success" style="display:none;margin-top:10px;color:#065F46;font-size:13px;background:#D1FAE5;padding:10px 14px;border-radius:5px;"></div>
@@ -2335,13 +2354,20 @@ async function addFamily() {
     await db.collection('users').doc(uid).set({
       parentName: pName,
       parentInitials: pInit,
-      student: { name:sName, grade, age, gender, dob, id:sid, year:'2026–2027' }
+      student: { name:sName, grade, age, gender, dob, id:sid, year:'2026–2027' },
+      sizes: {
+        tshirt: document.getElementById('af-tshirt').value,
+        jacket: document.getElementById('af-jacket').value,
+        shorts: document.getElementById('af-shorts').value,
+        pants:  document.getElementById('af-pants').value.trim()
+      }
     });
 
     succ.style.display = 'block';
     succ.textContent = `✓ Family added! ${pName} can log in with ${email}.`;
-    ['af-parent-name','af-parent-initials','af-email','af-password','af-student-name','af-grade','af-age','af-dob','af-id']
+    ['af-parent-name','af-parent-initials','af-email','af-password','af-student-name','af-grade','af-age','af-dob','af-id','af-pants']
       .forEach(id => document.getElementById(id).value = '');
+    ['af-tshirt','af-jacket','af-shorts'].forEach(id => document.getElementById(id).value = '');
     loadFamilies();
   } catch(e) {
     err.textContent = e.message || 'Failed to create family.';
