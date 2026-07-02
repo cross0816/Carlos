@@ -42,6 +42,9 @@ const CONFIG = {
     initials: 'CP',
     name:     'Carlos P.'
   },
+  sizes: {
+    tshirt: '', jacket: '', shorts: '', pants: ''
+  },
   // CXA location — used for weather
   location: {
     label:     'Carbondale, CO',
@@ -867,6 +870,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       <div class="clabel">Coach Comments</div>
       <p id="coach-comments-text" style="font-size:14px;color:var(--t1);line-height:1.6;margin:0;white-space:pre-wrap;"></p>
     </div>
+    <div id="sizes-card" style="display:none;margin-top:16px;" class="card">
+      <div class="clabel">Uniform Sizes</div>
+      <div class="dg" id="sizes-grid"></div>
+    </div>
   </div>
 
   <!-- ANNOUNCEMENTS -->
@@ -1103,6 +1110,25 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <input class="msg-input" id="ef-dob">
     <label class="msg-label">Athlete ID</label>
     <input class="msg-input" id="ef-id">
+    <div style="margin-top:16px;font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--t3);">Uniform Sizes</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+      <div>
+        <label class="msg-label">T-Shirt Size</label>
+        <select class="msg-input" id="ef-tshirt"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+      </div>
+      <div>
+        <label class="msg-label">Jacket Size</label>
+        <select class="msg-input" id="ef-jacket"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+      </div>
+      <div>
+        <label class="msg-label">Shorts Size</label>
+        <select class="msg-input" id="ef-shorts"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+      </div>
+      <div>
+        <label class="msg-label">Pant Size</label>
+        <input class="msg-input" id="ef-pants" placeholder="e.g. 28x30">
+      </div>
+    </div>
     <div style="display:flex;gap:10px;margin-top:18px;">
       <button class="msg-btn" onclick="saveEditFamily()" style="flex:1;">Save Changes</button>
       <button onclick="closeEditModal()" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:5px;background:none;cursor:pointer;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Cancel</button>
@@ -1367,6 +1393,22 @@ function renderStudent() {
     }).join('');
     pGrid.innerHTML += `<div class="pc"><div class="clabel">${label}</div>${rows}</div>`;
   });
+
+  // Uniform sizes
+  const sz = CONFIG.sizes || {};
+  const sizeEl = document.getElementById('sizes-card');
+  if (sizeEl) {
+    const hasSizes = sz.tshirt || sz.jacket || sz.shorts || sz.pants;
+    sizeEl.style.display = hasSizes ? '' : 'none';
+    if (hasSizes) {
+      document.getElementById('sizes-grid').innerHTML = [
+        sz.tshirt ? `<div class="dc"><div class="dl">T-Shirt</div><div class="dv">${sz.tshirt}</div></div>` : '',
+        sz.jacket ? `<div class="dc"><div class="dl">Jacket</div><div class="dv">${sz.jacket}</div></div>` : '',
+        sz.shorts ? `<div class="dc"><div class="dl">Shorts</div><div class="dv">${sz.shorts}</div></div>` : '',
+        sz.pants  ? `<div class="dc"><div class="dl">Pants</div><div class="dv">${sz.pants}</div></div>`  : '',
+      ].join('');
+    }
+  }
 
   // Coach comments (read-only for parents)
   const comments = (CONFIG.progress || {}).comments || '';
@@ -2346,6 +2388,11 @@ async function openEditModal(uid) {
   document.getElementById('ef-gender').value         = s.gender|| 'Male';
   document.getElementById('ef-dob').value            = s.dob   || '';
   document.getElementById('ef-id').value             = s.id    || '';
+  const sz = d.sizes || {};
+  document.getElementById('ef-tshirt').value = sz.tshirt || '';
+  document.getElementById('ef-jacket').value = sz.jacket || '';
+  document.getElementById('ef-shorts').value = sz.shorts || '';
+  document.getElementById('ef-pants').value  = sz.pants  || '';
   document.getElementById('ef-err').textContent      = '';
   document.getElementById('edit-modal').style.display = 'flex';
 }
@@ -2370,6 +2417,12 @@ async function saveEditFamily() {
         dob:    document.getElementById('ef-dob').value.trim(),
         id:     document.getElementById('ef-id').value.trim(),
         year:   '2026–2027'
+      },
+      sizes: {
+        tshirt: document.getElementById('ef-tshirt').value,
+        jacket: document.getElementById('ef-jacket').value,
+        shorts: document.getElementById('ef-shorts').value,
+        pants:  document.getElementById('ef-pants').value.trim()
       }
     });
     closeEditModal();
@@ -2478,6 +2531,7 @@ auth.onAuthStateChanged(async user => {
       if (data.parentInitials) CONFIG.parent.initials = data.parentInitials;
       if (data.student)  Object.assign(CONFIG.student, data.student);
       if (data.progress) CONFIG.progress = data.progress;
+      if (data.sizes)    CONFIG.sizes = data.sizes;
       if (data.schedule) CONFIG.schedule = data.schedule;
 
       // Show admin nav if admin
