@@ -532,6 +532,12 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .msg-empty{font-size:13px;color:var(--t3);text-align:center;padding:30px 0;}
 .msg-layout{display:grid;grid-template-columns:1fr;gap:20px;}
 
+/* FOOD MENU */
+.menu-day{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.menu-day-label{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:4px;}
+.menu-day-text{font-size:13px;color:var(--t1);font-weight:600;}
+.menu-day-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+
 /* CHAT */
 .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 120px);max-height:700px;}
 .chat-messages{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:10px;}
@@ -903,6 +909,16 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       </div>
     </div>
     <div class="wg" id="week-grid"></div>
+
+    <!-- Monthly Food Menu -->
+    <div class="slabel" style="margin-top:28px;margin-bottom:12px;">Monthly Food Menu</div>
+    <div class="card" id="food-menu-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div id="food-menu-month" style="font-family:'Arial Narrow',Arial,sans-serif;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);"></div>
+      </div>
+      <div id="food-menu-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;"></div>
+      <div id="food-menu-empty" style="display:none;color:var(--t3);font-size:13px;text-align:center;padding:20px 0;">No menu posted yet.</div>
+    </div>
   </div>
 
   <!-- WEATHER -->
@@ -1066,6 +1082,31 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
         <button onclick="loadFamilies()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--t2);">↻ Refresh</button>
       </div>
       <div id="admin-families-list"></div>
+    </div>
+
+    <!-- Food Menu Manager -->
+    <div class="card" style="margin-top:20px;">
+      <div class="clabel">Monthly Food Menu</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label class="msg-label">Month</label>
+          <select class="msg-input" id="fm-month">
+            <option>January</option><option>February</option><option>March</option><option>April</option>
+            <option>May</option><option>June</option><option>July</option><option>August</option>
+            <option>September</option><option>October</option><option>November</option><option>December</option>
+          </select>
+        </div>
+        <div>
+          <label class="msg-label">Year</label>
+          <input class="msg-input" id="fm-year" type="number" placeholder="e.g. 2026">
+        </div>
+      </div>
+      <div id="fm-days-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px;"></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="msg-btn" onclick="saveFoodMenu()" style="margin-top:0;max-width:180px;">Save Menu</button>
+        <button onclick="generateFoodDays()" style="background:none;border:1px solid var(--border);border-radius:5px;padding:10px 16px;cursor:pointer;font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);">Generate Days</button>
+      </div>
+      <div class="msg-err" id="fm-err" style="margin-top:8px;"></div>
     </div>
 
     <!-- Manage Announcements -->
@@ -2256,6 +2297,95 @@ function closeNotifPanel() {
   document.getElementById('notif-panel').classList.remove('open');
 }
 
+// ── FOOD MENU ──
+async function loadFoodMenu() {
+  const now = new Date();
+  const monthName = ['January','February','March','April','May','June','July','August','September','October','November','December'][now.getMonth()];
+  const year = now.getFullYear();
+  const grid = document.getElementById('food-menu-grid');
+  const empty = document.getElementById('food-menu-empty');
+  const title = document.getElementById('food-menu-month');
+  if (!grid) return;
+  try {
+    const snap = await db.collection('foodmenu')
+      .where('month', '==', monthName).where('year', '==', year).get();
+    if (snap.empty || !snap.docs[0].data().days || snap.docs[0].data().days.length === 0) {
+      grid.style.display = 'none';
+      empty.style.display = 'block';
+      title.textContent = monthName + ' ' + year;
+      return;
+    }
+    const data = snap.docs[0].data();
+    title.textContent = data.month + ' ' + data.year;
+    grid.style.display = 'grid';
+    empty.style.display = 'none';
+    grid.innerHTML = data.days.map(d => `
+      <div class="menu-day">
+        <div class="menu-day-label">${d.date}</div>
+        <div class="menu-day-text">${d.meal || '—'}</div>
+        ${d.side ? `<div class="menu-day-sub">${d.side}</div>` : ''}
+      </div>`).join('');
+  } catch(e) {
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    empty.textContent = 'Could not load menu.';
+  }
+}
+
+function generateFoodDays() {
+  const month = document.getElementById('fm-month').value;
+  const year  = parseInt(document.getElementById('fm-year').value);
+  if (!year) { document.getElementById('fm-err').textContent = 'Enter a year first.'; return; }
+  document.getElementById('fm-err').textContent = '';
+  const monthIdx = ['January','February','March','April','May','June','July','August','September','October','November','December'].indexOf(month);
+  const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const grid = document.getElementById('fm-days-grid');
+  // Only weekdays (Mon–Fri)
+  const days = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dow = new Date(year, monthIdx, d).getDay();
+    if (dow >= 1 && dow <= 5) days.push({ date: dayNames[dow] + ' ' + month.slice(0,3) + ' ' + d, meal: '', side: '' });
+  }
+  grid.innerHTML = days.map((d, i) => `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
+      <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;">${d.date}</div>
+      <input class="msg-input" data-day="${i}" data-field="meal" placeholder="Main dish" style="margin-bottom:6px;font-size:12px;padding:6px 8px;" value="">
+      <input class="msg-input" data-day="${i}" data-field="side" placeholder="Side / drink" style="font-size:12px;padding:6px 8px;" value="">
+    </div>`).join('');
+  grid._days = days;
+}
+
+async function saveFoodMenu() {
+  const month = document.getElementById('fm-month').value;
+  const year  = parseInt(document.getElementById('fm-year').value);
+  const err   = document.getElementById('fm-err');
+  const grid  = document.getElementById('fm-days-grid');
+  if (!year) { err.textContent = 'Enter a year.'; return; }
+  if (!grid.children.length) { err.textContent = 'Click "Generate Days" first.'; return; }
+  err.textContent = '';
+  const days = Array.from(grid.querySelectorAll('[data-field="meal"]')).map((el, i) => {
+    const sideEl = grid.querySelector(`[data-day="${i}"][data-field="side"]`);
+    return { date: el.closest('div').querySelector('div').textContent, meal: el.value.trim(), side: sideEl ? sideEl.value.trim() : '' };
+  });
+  try {
+    const snap = await db.collection('foodmenu')
+      .where('month','==',month).where('year','==',year).get();
+    if (!snap.empty) {
+      await snap.docs[0].ref.update({ days });
+    } else {
+      await db.collection('foodmenu').add({ month, year, days });
+    }
+    err.style.color = '#16a34a';
+    err.textContent = '✓ Menu saved!';
+    setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 3000);
+    loadFoodMenu();
+  } catch(e) {
+    err.style.color = '';
+    err.textContent = 'Failed: ' + e.message;
+  }
+}
+
 // ── CHAT ──
 let _chatUnsub = null;
 let _chatSenderName = '';
@@ -2583,6 +2713,14 @@ auth.onAuthStateChanged(async user => {
   renderDocuments();
   loadMessageHistory();
   checkUnreadMessages();
+  loadFoodMenu();
+  // Pre-fill admin food menu month/year
+  const _now = new Date();
+  const _months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const fmMonth = document.getElementById('fm-month');
+  const fmYear  = document.getElementById('fm-year');
+  if (fmMonth) fmMonth.value = _months[_now.getMonth()];
+  if (fmYear)  fmYear.value  = _now.getFullYear();
   buildDashCal();
   buildFullCal();
   buildSchedule();
