@@ -2516,7 +2516,7 @@ auth.onAuthStateChanged(async user => {
 });
 
 // Pages that live inside the More sheet
-const MORE_PAGES = new Set(['weather','gallery','documents','messages','admin']);
+const MORE_PAGES = new Set(['weather','gallery','documents','messages','admin','calendar']);
 
 // Sync tab bar active state with page navigation
 (function(){
@@ -2578,9 +2578,9 @@ function moreNav(page) {
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z"/></svg>
     Alerts
   </button>
-  <button class="tab-item" data-page="calendar" onclick="gotoPage('calendar',this)">
-    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-    Calendar
+  <button class="tab-item" data-page="chat" onclick="gotoPage('chat',this)">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+    Chat
   </button>
   <button class="tab-item" id="tab-more" onclick="openMoreSheet()">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
@@ -2604,6 +2604,10 @@ function moreNav(page) {
 <div class="more-sheet" id="more-sheet">
   <div class="more-sheet-handle"></div>
   <div class="more-sheet-title">More</div>
+  <button class="more-sheet-item" onclick="moreNav('calendar')">
+    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+    Calendar
+  </button>
   <button class="more-sheet-item" onclick="moreNav('weather')">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/></svg>
     Weather
