@@ -711,6 +711,85 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     <div class="login-err" id="login-err"></div>
     <button class="login-forgot" onclick="doReset()">Forgot password?</button>
     <div class="login-reset-msg" id="login-reset-msg"></div>
+    <div style="text-align:center;margin-top:18px;padding-top:16px;border-top:1px solid #e5e7eb;">
+      <span style="font-size:12px;color:#6B7280;">New family? </span>
+      <button onclick="openRegister()" style="background:none;border:none;color:#1A2535;font-size:12px;font-weight:700;font-family:'Arial Narrow',Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;text-decoration:underline;">Register with Invite Code</button>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTRATION MODAL -->
+<div id="register-modal" style="display:none;position:fixed;inset:0;background:#1A2535;z-index:1100;overflow-y:auto;padding:24px;">
+  <div style="background:#fff;border-radius:12px;padding:28px 24px;width:100%;max-width:480px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#1A2535;">Family Registration</div>
+      <button onclick="closeRegister()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#6B7280;">✕</button>
+    </div>
+
+    <!-- Step 1: Invite Code -->
+    <div id="reg-step1">
+      <div style="font-size:13px;color:#6B7280;margin-bottom:16px;">Enter the invite code provided by CXA staff to get started.</div>
+      <label class="login-label">Invite Code</label>
+      <input class="login-input" id="reg-code" type="text" placeholder="Enter invite code" style="text-transform:uppercase;letter-spacing:.1em;">
+      <button class="login-btn" onclick="verifyInviteCode()" style="margin-top:12px;">Continue</button>
+      <div class="login-err" id="reg-code-err"></div>
+    </div>
+
+    <!-- Step 2: Registration Form -->
+    <div id="reg-step2" style="display:none;">
+      <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9CA3AF;margin-bottom:12px;">Parent / Guardian Info</div>
+      <label class="login-label">Parent Name</label>
+      <input class="login-input" id="reg-parent-name" placeholder="e.g. Jane Smith">
+      <label class="login-label">Parent Initials</label>
+      <input class="login-input" id="reg-parent-initials" placeholder="e.g. JS" style="max-width:100px;">
+      <label class="login-label">Email Address</label>
+      <input class="login-input" id="reg-email" type="email" placeholder="parent@email.com">
+      <label class="login-label">Create Password</label>
+      <input class="login-input" id="reg-password" type="password" placeholder="Min 6 characters">
+
+      <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9CA3AF;margin:16px 0 12px;">Student-Athlete Info</div>
+      <label class="login-label">Student Full Name</label>
+      <input class="login-input" id="reg-student-name" placeholder="e.g. Alex Smith">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="login-label">Grade</label>
+          <input class="login-input" id="reg-grade" placeholder="e.g. 7th">
+        </div>
+        <div>
+          <label class="login-label">Age</label>
+          <input class="login-input" id="reg-age" type="number" placeholder="e.g. 12">
+        </div>
+        <div>
+          <label class="login-label">Gender</label>
+          <select class="login-input" id="reg-gender" style="background:#fff;"><option>Male</option><option>Female</option></select>
+        </div>
+        <div>
+          <label class="login-label">Date of Birth</label>
+          <input class="login-input" id="reg-dob" placeholder="e.g. March 5, 2012">
+        </div>
+      </div>
+      <div style="font-size:11px;font-family:'Arial Narrow',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#9CA3AF;margin:16px 0 12px;">Uniform Sizes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(optional)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label class="login-label">T-Shirt</label>
+          <select class="login-input" id="reg-tshirt" style="background:#fff;"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+        </div>
+        <div>
+          <label class="login-label">Jacket</label>
+          <select class="login-input" id="reg-jacket" style="background:#fff;"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+        </div>
+        <div>
+          <label class="login-label">Shorts</label>
+          <select class="login-input" id="reg-shorts" style="background:#fff;"><option value="">—</option><option>YS</option><option>YM</option><option>YL</option><option>YXL</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
+        </div>
+        <div>
+          <label class="login-label">Pants</label>
+          <input class="login-input" id="reg-pants" placeholder="e.g. 28x30">
+        </div>
+      </div>
+      <button class="login-btn" onclick="submitRegistration()" id="reg-submit-btn" style="margin-top:20px;">Create Account</button>
+      <div class="login-err" id="reg-err"></div>
+    </div>
   </div>
 </div>
 
@@ -1007,6 +1086,20 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
   <!-- ADMIN PANEL -->
   <div id="p-admin" class="page">
     <div class="slabel">Admin Panel — Manage Families</div>
+
+    <!-- Invite Code -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="clabel">Family Invite Code</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:12px;">Families enter this code to unlock the registration form. Share it only with approved families.</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;">
+          <label class="msg-label">Current Invite Code</label>
+          <input class="msg-input" id="invite-code-input" placeholder="e.g. CXA2026" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700;">
+        </div>
+        <button class="msg-btn" onclick="saveInviteCode()" style="margin-top:0;max-width:140px;padding:10px;">Save Code</button>
+      </div>
+      <div id="invite-code-err" style="margin-top:8px;font-size:12px;"></div>
+    </div>
 
     <!-- Send Push Notification -->
     <div class="card" style="margin-bottom:20px;">
@@ -2598,6 +2691,101 @@ async function deleteFamily(uid, name) {
   }
 }
 
+// ── INVITE CODE & REGISTRATION ──
+async function saveInviteCode() {
+  const code = document.getElementById('invite-code-input').value.trim().toUpperCase();
+  const err  = document.getElementById('invite-code-err');
+  if (!code) { err.textContent = 'Enter a code first.'; err.style.color = ''; return; }
+  try {
+    await db.collection('settings').doc('inviteCode').set({ code });
+    err.style.color = '#16a34a';
+    err.textContent = '✓ Invite code saved: ' + code;
+    setTimeout(() => { err.textContent = ''; err.style.color = ''; }, 3000);
+  } catch(e) { err.style.color = ''; err.textContent = 'Failed: ' + e.message; }
+}
+
+async function loadInviteCodeAdmin() {
+  try {
+    const doc = await db.collection('settings').doc('inviteCode').get();
+    if (doc.exists) document.getElementById('invite-code-input').value = doc.data().code || '';
+  } catch(e) {}
+}
+
+function openRegister() {
+  document.getElementById('reg-step1').style.display = 'block';
+  document.getElementById('reg-step2').style.display = 'none';
+  document.getElementById('reg-code').value = '';
+  document.getElementById('reg-code-err').textContent = '';
+  document.getElementById('reg-err').textContent = '';
+  document.getElementById('register-modal').style.display = 'block';
+}
+
+function closeRegister() {
+  document.getElementById('register-modal').style.display = 'none';
+}
+
+async function verifyInviteCode() {
+  const entered = document.getElementById('reg-code').value.trim().toUpperCase();
+  const err = document.getElementById('reg-code-err');
+  err.textContent = '';
+  if (!entered) { err.textContent = 'Please enter the invite code.'; return; }
+  try {
+    const doc = await db.collection('settings').doc('inviteCode').get();
+    if (!doc.exists || doc.data().code !== entered) {
+      err.textContent = 'Invalid invite code. Please contact CXA staff.';
+      return;
+    }
+    document.getElementById('reg-step1').style.display = 'none';
+    document.getElementById('reg-step2').style.display = 'block';
+  } catch(e) { err.textContent = 'Could not verify code. Try again.'; }
+}
+
+async function submitRegistration() {
+  const btn     = document.getElementById('reg-submit-btn');
+  const err     = document.getElementById('reg-err');
+  const pName   = document.getElementById('reg-parent-name').value.trim();
+  const pInit   = document.getElementById('reg-parent-initials').value.trim().toUpperCase();
+  const email   = document.getElementById('reg-email').value.trim();
+  const password= document.getElementById('reg-password').value;
+  const sName   = document.getElementById('reg-student-name').value.trim();
+  const grade   = document.getElementById('reg-grade').value.trim();
+  const age     = parseInt(document.getElementById('reg-age').value) || 0;
+  const gender  = document.getElementById('reg-gender').value;
+  const dob     = document.getElementById('reg-dob').value.trim();
+  err.textContent = '';
+  if (!pName || !email || !password || !sName || !grade) {
+    err.textContent = 'Please fill in all required fields.'; return;
+  }
+  if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password, returnSecureToken: true })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    await db.collection('users').doc(data.localId).set({
+      parentName: pName, parentInitials: pInit,
+      student: { name: sName, grade, age, gender, dob, id: '', year: '2026–2027' },
+      sizes: {
+        tshirt: document.getElementById('reg-tshirt').value,
+        jacket: document.getElementById('reg-jacket').value,
+        shorts: document.getElementById('reg-shorts').value,
+        pants:  document.getElementById('reg-pants').value.trim()
+      }
+    });
+    closeRegister();
+    document.getElementById('login-email').value = email;
+    document.getElementById('login-err').style.color = '#16a34a';
+    document.getElementById('login-err').textContent = '✓ Account created! Sign in below.';
+  } catch(e) {
+    err.textContent = e.message.replace('EMAIL_EXISTS', 'That email is already registered.');
+  }
+  btn.disabled = false; btn.textContent = 'Create Account';
+}
+
 // ── AUTH ──
 function showLogin()  { document.getElementById('login-screen').classList.remove('hidden'); }
 function hideLogin()  {
@@ -2695,6 +2883,7 @@ auth.onAuthStateChanged(async user => {
         isAdmin = true;
         document.getElementById('admin-nav-item').style.display = 'flex';
         loadFamilies();
+        loadInviteCodeAdmin();
       }
     }
   } catch(e) {
