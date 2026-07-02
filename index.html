@@ -529,6 +529,22 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .msg-empty{font-size:13px;color:var(--t3);text-align:center;padding:30px 0;}
 .msg-layout{display:grid;grid-template-columns:1fr;gap:20px;}
 
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 120px);max-height:700px;}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:10px;}
+.chat-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;word-break:break-word;}
+.chat-bubble.mine{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
+.chat-bubble.theirs{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--t1);border-bottom-left-radius:4px;}
+.chat-bubble.admin-msg{background:#1A2535;color:#fff;border:none;}
+.chat-sender{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;opacity:.6;}
+.chat-time{font-size:10px;opacity:.5;margin-top:3px;text-align:right;}
+.chat-input-row{display:flex;gap:10px;padding-top:12px;border-top:1px solid var(--border);align-items:flex-end;}
+.chat-input{flex:1;padding:10px 13px;border:1px solid var(--border);border-radius:20px;font-size:14px;color:var(--t1);background:var(--bg);outline:none;resize:none;font-family:inherit;max-height:100px;overflow-y:auto;}
+.chat-send-btn{padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:20px;font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.chat-send-btn:disabled{opacity:.5;}
+.chat-empty{text-align:center;color:var(--t3);font-size:13px;padding:40px 0;}
+@media(max-width:600px){.chat-wrap{height:calc(100vh - 170px);}.chat-bubble{max-width:85%;}}
+
 /* ADMIN */
 .admin-family-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap;}
 .admin-family-row:last-child{border-bottom:none;}
@@ -949,6 +965,22 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     </div>
   </div>
 
+  <!-- CHAT -->
+  <div id="p-chat" class="page">
+    <div class="slabel">Team Chat</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="chat-wrap" style="padding:0 16px 16px;">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-empty">No messages yet. Say hello!</div>
+        </div>
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type a message…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
+          <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ADMIN PANEL -->
   <div id="p-admin" class="page">
     <div class="slabel">Admin Panel — Manage Families</div>
@@ -1133,7 +1165,7 @@ const PAGE_TITLES = {
   announcements:'Announcements',calendar:'Calendar & Schedule',
   schedule:'Calendar & Schedule',weather:'Weather',
   gallery:'Photo Gallery',documents:'Documents & Forms',
-  messages:'Messages',admin:'Admin Panel'
+  messages:'Messages',chat:'Team Chat',admin:'Admin Panel'
 };
 function gotoPage(id, el) {
   if (!document.getElementById('p-' + id)) return;
@@ -2163,6 +2195,63 @@ function closeNotifPanel() {
   document.getElementById('notif-panel').classList.remove('open');
 }
 
+// ── CHAT ──
+let _chatUnsub = null;
+let _chatSenderName = '';
+
+function initChat(displayName, role) {
+  _chatSenderName = displayName || 'Family';
+  if (_chatUnsub) _chatUnsub();
+  _chatUnsub = db.collection('chat').orderBy('sentAt','asc').limitToLast(100)
+    .onSnapshot(snap => {
+      const el = document.getElementById('chat-messages');
+      if (!el) return;
+      const user = auth.currentUser;
+      if (snap.empty) {
+        el.innerHTML = '<div class="chat-empty">No messages yet. Say hello!</div>';
+        return;
+      }
+      el.innerHTML = snap.docs.map(d => {
+        const m = d.data();
+        const mine = m.uid === user.uid;
+        const isAdmin = m.role === 'admin';
+        const time = m.sentAt ? m.sentAt.toDate().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '';
+        const bubbleClass = mine ? 'mine' : (isAdmin ? 'theirs admin-msg' : 'theirs');
+        return `<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'};">
+          ${!mine ? `<div class="chat-sender">${isAdmin?'⚡ CXA Staff':m.sender}</div>` : ''}
+          <div class="chat-bubble ${bubbleClass}">${m.text.replace(/</g,'&lt;')}</div>
+          <div class="chat-time">${time}</div>
+        </div>`;
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    });
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('chat-send-btn');
+  const text = input.value.trim();
+  if (!text) return;
+  const user = auth.currentUser;
+  if (!user) return;
+  input.value = '';
+  btn.disabled = true;
+  try {
+    await db.collection('chat').add({
+      text,
+      sender: _chatSenderName,
+      uid: user.uid,
+      role: isAdmin ? 'admin' : 'family',
+      sentAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e) {
+    input.value = text;
+    console.error('Chat send failed:', e);
+  }
+  btn.disabled = false;
+  input.focus();
+}
+
 // ── ADMIN ──
 const FIREBASE_API_KEY = 'AIzaSyDtB3WRTlmUcDPRg4m-MeBy8jMwxcakbQY';
 
@@ -2408,6 +2497,7 @@ auth.onAuthStateChanged(async user => {
   }
 
   renderStudent();
+  initChat(CONFIG.parent.name, isAdmin ? 'admin' : 'family');
   loadAnnouncements();
   loadDriveGallery();
   renderDocuments();
@@ -2525,6 +2615,10 @@ function moreNav(page) {
   <button class="more-sheet-item" onclick="moreNav('documents')">
     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
     Documents & Forms
+  </button>
+  <button class="more-sheet-item" onclick="moreNav('chat')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+    Team Chat
   </button>
   <button class="more-sheet-item" onclick="moreNav('messages')">
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
