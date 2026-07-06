@@ -98,7 +98,8 @@ tbody tr:last-child td{border-bottom:none;}
 .modal{background:#fff;border-radius:10px;padding:24px;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;}
 .modal h3{font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;margin-bottom:16px;}
 .modal-ft{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
-.student-row{display:flex;gap:8px;margin-bottom:8px;}
+.student-row{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.student-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
 .student-row input{flex:1;}
 .add-student-btn{font-size:12px;color:var(--gold);background:none;border:none;cursor:pointer;font-weight:700;padding:2px 0;}
 .qr-box{text-align:center;}
@@ -459,15 +460,20 @@ function renderRoster() {
 }
 
 // ── FAMILY MODAL ──
-function studentRowHtml(name, level) {
+function studentRowHtml(name, dob, level) {
   return `<div class="student-row">
-    <input class="fm-student-name" placeholder="Skater name" value="${escapeAttr(name||'')}">
-    <input class="fm-student-level" placeholder="Level (optional)" value="${escapeAttr(level||'')}" style="max-width:130px;">
-    <button class="mini-btn danger" onclick="this.parentElement.remove()">✕</button>
+    <div style="display:flex;gap:8px;">
+      <input class="fm-student-name" placeholder="Skater name" value="${escapeAttr(name||'')}">
+      <button class="mini-btn danger" onclick="this.closest('.student-row').remove()" style="flex-shrink:0;">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <input class="fm-student-dob" type="date" value="${escapeAttr(dob||'')}">
+      <input class="fm-student-level" placeholder="Level (optional)" value="${escapeAttr(level||'')}" style="max-width:130px;">
+    </div>
   </div>`;
 }
-function addStudentRow(name, level) {
-  document.getElementById('fm-students').insertAdjacentHTML('beforeend', studentRowHtml(name, level));
+function addStudentRow(name, dob, level) {
+  document.getElementById('fm-students').insertAdjacentHTML('beforeend', studentRowHtml(name, dob, level));
 }
 function openFamilyModal(code) {
   document.getElementById('family-modal-err').textContent = '';
@@ -480,7 +486,7 @@ function openFamilyModal(code) {
     document.getElementById('fm-parent-name').value = f.parentName || '';
     document.getElementById('fm-contact').value = f.contact || '';
     document.getElementById('fm-active').checked = f.active !== false;
-    (f.students && f.students.length ? f.students : [{}]).forEach(s => addStudentRow(s.name, s.level));
+    (f.students && f.students.length ? f.students : [{}]).forEach(s => addStudentRow(s.name, s.dob, s.level));
   } else {
     document.getElementById('family-modal-title').textContent = 'Add Family';
     document.getElementById('fm-code').value = '';
@@ -519,7 +525,8 @@ async function saveFamily() {
   const contact    = document.getElementById('fm-contact').value.trim();
   const active     = document.getElementById('fm-active').checked;
   const students = Array.from(document.querySelectorAll('#fm-students .student-row')).map(row => ({
-    name: row.querySelector('.fm-student-name').value.trim(),
+    name:  row.querySelector('.fm-student-name').value.trim(),
+    dob:   row.querySelector('.fm-student-dob').value,
     level: row.querySelector('.fm-student-level').value.trim()
   })).filter(s => s.name);
 

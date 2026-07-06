@@ -14,6 +14,9 @@ used for the parent portal (`users/{uid}.role == 'admin'`).
 
 - `index.html` — public kiosk screen. Opens the camera and scans QR codes, or
   accepts a typed code as a fallback. No login required.
+- `signup.html` — public self-registration form. A family fills in their info
+  and skaters (including date of birth), and gets a unique code + QR code to
+  use at the kiosk from then on. No login required.
 - `admin.html` — staff-only console: manage the family/skater roster, generate
   & print QR codes, and view a live attendance log with CSV export. Requires
   the same admin login as the parent portal.
@@ -21,13 +24,14 @@ used for the parent portal (`users/{uid}.role == 'admin'`).
 ## Data model
 
 **`lts_families/{code}`** — one document per family, keyed by a random
-6-character code (also encoded into the printed QR).
+6-character code (also encoded into the printed QR). Created either by staff
+via `admin.html` or by the family itself via `signup.html`.
 ```
 {
   familyName: "The Wolitski Family",
   parentName: "Carlos P.",
   contact: "carlos@coloradoextreme.org",
-  students: [ { name: "Vaughn Wolitski", level: "Basic 3" } ],
+  students: [ { name: "Vaughn Wolitski", dob: "2014-07-22", level: "Basic 3" } ],
   active: true,
   createdAt, updatedAt
 }
@@ -72,7 +76,19 @@ function isAdmin() {
 match /lts_families/{familyId} {
   // Public read so the kiosk can look up a scanned code without logging in.
   allow read: if true;
-  allow write: if isAdmin();
+  // Admins can always create/edit. Families can also self-register via
+  // signup.html — but only as a brand-new, tightly-shaped, active record.
+  // Editing or deleting an existing family still requires staff.
+  allow create: if isAdmin() || (
+    request.resource.data.keys().hasOnly(['familyName','parentName','contact','students','active','createdAt']) &&
+    request.resource.data.familyName is string && request.resource.data.familyName.size() > 0 &&
+    request.resource.data.parentName is string &&
+    request.resource.data.contact is string &&
+    request.resource.data.students is list &&
+    request.resource.data.students.size() > 0 && request.resource.data.students.size() <= 10 &&
+    request.resource.data.active == true
+  );
+  allow update, delete: if isAdmin();
 }
 
 match /lts_attendance/{recordId} {
@@ -90,28 +106,40 @@ match /lts_attendance/{recordId} {
 }
 ```
 
-**Note on scope:** allowing public `read` on `lts_families` and public
-`create` on `lts_attendance` is what makes an unattended, un-authenticated
-kiosk possible. It means anyone with the kiosk URL could technically read
-family/skater names or spam check-in writes (the `create` rule above at least
-requires a real, existing family code). If that's a concern for your
-deployment, consider adding Firebase App Check, or moving the write behind a
-Cloud Function later — that's a bigger change outside this app's current
-scope.
+**Note on scope:** allowing public `read` on `lts_families`, public (validated)
+`create` on `lts_families` for self-signup, and public `create` on
+`lts_attendance` is what makes an unattended kiosk and self-service signup
+possible without any login. It means anyone with the URL could technically
+read family/skater names, register junk families, or spam check-in writes
+(the rules above at least require well-shaped data and a real, existing
+family code). If that's a concern for your deployment, consider adding
+Firebase App Check, or moving the writes behind a Cloud Function later —
+that's a bigger change outside this app's current scope.
 
 ## Using it
 
-1. **Staff:** open `admin.html`, sign in with an admin account, go to
+**Option A — family self-registers:**
+1. Point a new family at `signup.html` (link it from your website, or hand out
+   the URL). They fill in their info and skaters (name + date of birth), and
+   get a unique code + QR code immediately, with print/download/screenshot
+   options.
+2. From then on they use that code at the kiosk (`index.html`).
+
+**Option B — staff registers them:**
+1. Open `admin.html`, sign in with an admin account, go to
    **Roster → Add Family**, enter the family/skater info, and save. A unique
    code is generated automatically.
 2. Click **QR Code** on that family's row to view/print/download a card with
    their QR code and the short code as text (for manual entry).
 3. Hand out the printed card, or let the family save/screenshot the QR.
-4. **Families:** on future visits, open the kiosk (`index.html`) on the
-   front-desk tablet/laptop and scan the code, or type the short code if
-   scanning fails.
+
+**Every visit after that:**
+4. **Families:** open the kiosk (`index.html`) on the front-desk
+   tablet/laptop and scan the code, or type the short code if scanning fails.
 5. **Staff:** the **Attendance** tab shows who has checked in for any given
-   day in real time, with a CSV export for record-keeping.
+   day in real time, with a CSV export for record-keeping. Editing or
+   deactivating a family (or fixing a signup typo) is admin-only, from the
+   **Roster** tab.
 
 ## Deployment
 
