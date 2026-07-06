@@ -549,17 +549,37 @@ async function deleteFamily(code) {
 
 // ── QR MODAL ──
 let currentQrCode = '';
+let qrReady = false;
 function openQrModal(code) {
   const f = rosterCache.find(r => r.id === code);
   currentQrCode = code;
+  qrReady = false;
   document.getElementById('qr-family-name').textContent = f?.familyName || '';
   document.getElementById('qr-code-text').textContent = code;
-  const canvas = document.getElementById('qr-canvas');
-  QRCode.toCanvas(canvas, code, { width: 220, margin: 1, color: { dark: '#1A2535', light: '#FFFFFF' } });
   document.getElementById('qr-modal').classList.remove('hidden');
+
+  const canvas = document.getElementById('qr-canvas');
+  try {
+    if (typeof QRCode === 'undefined') throw new Error('QR library failed to load');
+    QRCode.toCanvas(canvas, code, { width: 220, margin: 1, color: { dark: '#1A2535', light: '#FFFFFF' } }, err => {
+      if (err) { showQrFallback(canvas); return; }
+      qrReady = true;
+    });
+  } catch (e) {
+    console.error('QR generation failed:', e);
+    showQrFallback(canvas);
+  }
+}
+function showQrFallback(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#F0F2F5'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#5A6A80'; ctx.font = '13px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('QR image unavailable —', canvas.width / 2, canvas.height / 2 - 8);
+  ctx.fillText('use the code below instead', canvas.width / 2, canvas.height / 2 + 12);
 }
 function closeQrModal() { document.getElementById('qr-modal').classList.add('hidden'); }
 function downloadQr() {
+  if (!qrReady) { alert('The QR image is unavailable right now — please use the printed code text instead.'); return; }
   const canvas = document.getElementById('qr-canvas');
   const a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
