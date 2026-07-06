@@ -1,7 +1,7 @@
 {
-  "name": "CXA Learn to Skate Check-In",
-  "short_name": "LTS Check-In",
-  "description": "Colorado Extreme Academy Learn to Skate attendance check-in kiosk",
+  "name": "Colorado Extreme Learn to Skate Check-In",
+  "short_name": "CE Check-In",
+  "description": "Colorado Extreme Learn to Skate attendance check-in kiosk",
   "start_url": "/Carlos/learn-to-skate/",
   "display": "standalone",
   "background_color": "#1A2535",
@@ -9,7 +9,7 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "../Capture352.JPG",
+      "src": "colorado-extreme-logo.jpg",
       "sizes": "any",
       "type": "image/jpeg",
       "purpose": "any maskable"
