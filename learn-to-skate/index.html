@@ -173,21 +173,21 @@ async function handleCode(rawCode) {
     }
 
     const date = todayStr();
-    const existing = await db.collection('lts_attendance')
-      .where('familyId', '==', code)
-      .where('date', '==', date)
-      .limit(1)
-      .get();
+    // Deterministic doc ID (familyId_date) so the kiosk can look up "did this family
+    // already check in today" with a single-document read, without needing broad
+    // query/list access to everyone's attendance records.
+    const attendanceRef = db.collection('lts_attendance').doc(`${code}_${date}`);
+    const existing = await attendanceRef.get();
 
-    if (!existing.empty) {
-      const t = existing.docs[0].data().checkedInAt;
+    if (existing.exists) {
+      const t = existing.data().checkedInAt;
       const timeStr = t && t.toDate ? new Intl.DateTimeFormat('en-US', { timeZone:'America/Denver', hour:'numeric', minute:'2-digit' }).format(t.toDate()) : '';
       setStatus('ok', 'Already Checked In', `${fam.familyName || 'Your family'} checked in today${timeStr ? ' at ' + timeStr : ''}.`);
       resetStatusSoon(4000);
       return;
     }
 
-    await db.collection('lts_attendance').add({
+    await attendanceRef.set({
       familyId: code,
       familyName: fam.familyName || '',
       students: fam.students || [],
