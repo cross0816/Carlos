@@ -33,9 +33,13 @@ used for the parent portal (`users/{uid}.role == 'admin'`).
 }
 ```
 
-**`lts_attendance/{autoId}`** — one document per check-in event (student names
-are copied at check-in time so history stays intact even if the roster later
-changes).
+**`lts_attendance/{familyId}_{date}`** — one document per family per calendar
+day (student names are copied at check-in time so history stays intact even
+if the roster later changes). The document ID is deterministic
+(`familyId_date`) rather than a random ID — that's what lets the kiosk check
+"did this family already check in today" with a single-document read
+(cheap and safe to expose publicly) instead of a broader query (which would
+require being logged in).
 ```
 {
   familyId: "7F3K9Q",
@@ -46,9 +50,9 @@ changes).
 }
 ```
 
-A family can only be checked in once per calendar day — scanning again just
-shows "Already checked in" instead of creating a duplicate record. Staff can
-still log an extra manual check-in from the admin console if needed.
+A family can only be checked in once per calendar day — scanning again (or a
+staff manual check-in for the same day) just shows "Already checked in"
+instead of creating a duplicate record.
 
 ## Required setup: Firestore rules
 
@@ -72,8 +76,13 @@ match /lts_families/{familyId} {
 }
 
 match /lts_attendance/{recordId} {
-  allow read: if isAdmin();
+  // recordId is always `${familyId}_${date}` — a single-document read only tells
+  // you whether that exact family already checked in on that exact day, which is
+  // what the kiosk needs. "list" (browsing/querying all records) stays admin-only.
+  allow get: if true;
+  allow list: if isAdmin();
   allow create: if
+    recordId == request.resource.data.familyId + '_' + request.resource.data.date &&
     request.resource.data.familyId is string &&
     exists(/databases/$(database)/documents/lts_families/$(request.resource.data.familyId)) &&
     request.resource.data.keys().hasOnly(['familyId','familyName','students','date','checkedInAt']);

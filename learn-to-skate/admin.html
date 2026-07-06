@@ -412,9 +412,10 @@ async function manualCheckIn(code) {
     if (!famDoc.exists) { err.textContent = 'Family not found.'; return; }
     const fam = famDoc.data();
     const date = document.getElementById('att-date').value || todayStr();
-    const existing = await db.collection('lts_attendance').where('familyId','==',code).where('date','==',date).limit(1).get();
-    if (!existing.empty) { err.textContent = `${fam.familyName} is already checked in for ${date}.`; return; }
-    await db.collection('lts_attendance').add({
+    const attendanceRef = db.collection('lts_attendance').doc(`${code}_${date}`);
+    const existing = await attendanceRef.get();
+    if (existing.exists) { err.textContent = `${fam.familyName} is already checked in for ${date}.`; return; }
+    await attendanceRef.set({
       familyId: code,
       familyName: fam.familyName || '',
       students: fam.students || [],
