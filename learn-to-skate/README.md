@@ -12,11 +12,16 @@ used for the parent portal (`users/{uid}.role == 'admin'`).
 
 ## Pages
 
-- `index.html` — public kiosk screen. Opens the camera and scans QR codes, or
-  accepts a typed code as a fallback. No login required.
-- `signup.html` — public self-registration form. A family fills in their info
-  and skaters (including date of birth), and gets a unique code + QR code to
-  use at the kiosk from then on. No login required.
+- `index.html` — the check-in kiosk. **Staff-only**: requires the same admin
+  login as the parent portal before it shows the scanner. Once signed in on a
+  device, the session persists (Firebase Auth keeps you logged in), so staff
+  sign in once and can leave the device out for families to scan themselves —
+  families never see a login screen here, they just scan.
+- `signup.html` — public self-registration form, no login required. A family
+  fills in their info and skaters (including date of birth) and immediately
+  gets their unique code + QR code — this is how a new family gets a code to
+  use at the kiosk, without ever needing to log in or touch the kiosk's admin
+  login.
 - `admin.html` — staff-only console: manage the family/skater roster, generate
   & print QR codes, and view a live attendance log with CSV export. Requires
   the same admin login as the parent portal.
@@ -106,15 +111,17 @@ match /lts_attendance/{recordId} {
 }
 ```
 
-**Note on scope:** allowing public `read` on `lts_families`, public (validated)
-`create` on `lts_families` for self-signup, and public `create` on
-`lts_attendance` is what makes an unattended kiosk and self-service signup
-possible without any login. It means anyone with the URL could technically
-read family/skater names, register junk families, or spam check-in writes
-(the rules above at least require well-shaped data and a real, existing
-family code). If that's a concern for your deployment, consider adding
-Firebase App Check, or moving the writes behind a Cloud Function later —
-that's a bigger change outside this app's current scope.
+**Note on scope:** the kiosk itself is now behind admin login, but
+`signup.html` is intentionally still public (that's the whole point — a new
+family registers themselves without staff or a login). That means the public
+`read` on `lts_families`, the public (validated) `create` on `lts_families`
+for self-signup, and the public `get`/`create` on `lts_attendance` all still
+apply — anyone with the URL could technically read family/skater names,
+register junk families, or spam check-in writes (the rules above at least
+require well-shaped data and a real, existing family code). If that's a
+concern for your deployment, consider adding Firebase App Check, or moving
+the writes behind a Cloud Function later — that's a bigger change outside
+this app's current scope.
 
 ## Using it
 
@@ -134,12 +141,14 @@ that's a bigger change outside this app's current scope.
 3. Hand out the printed card, or let the family save/screenshot the QR.
 
 **Every visit after that:**
-4. **Families:** open the kiosk (`index.html`) on the front-desk
-   tablet/laptop and scan the code, or type the short code if scanning fails.
-5. **Staff:** the **Attendance** tab shows who has checked in for any given
-   day in real time, with a CSV export for record-keeping. Editing or
-   deactivating a family (or fixing a signup typo) is admin-only, from the
-   **Roster** tab.
+4. **Staff:** sign in once on the front-desk kiosk device (`index.html`) with
+   an admin account — the session stays signed in on that device afterward.
+5. **Families:** scan their code at the kiosk, or type the short code if
+   scanning fails. No login needed on their end.
+6. **Staff:** the **Attendance** tab (in `admin.html`) shows who has checked
+   in for any given day in real time, with a CSV export for record-keeping.
+   Editing or deactivating a family (or fixing a signup typo) is admin-only,
+   from the **Roster** tab.
 
 ## Deployment
 

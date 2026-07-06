@@ -17,6 +17,7 @@
 
 <!-- Firebase SDKs (same project as the CXA Parent Portal) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
@@ -29,7 +30,8 @@ const firebaseConfig = {
   appId:             "1:488155596502:web:6a37a1ba930db9b6f56b77"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const auth = firebase.auth();
+const db   = firebase.firestore();
 </script>
 
 <style>
@@ -41,6 +43,20 @@ const db = firebase.firestore();
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
 body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+.hidden{display:none!important;}
+
+/* LOGIN (staff-only access to the kiosk) */
+.login-screen{min-height:100vh;min-height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{width:100%;max-width:340px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px 28px;text-align:center;}
+.login-box img{width:56px;height:56px;border-radius:8px;object-fit:cover;margin-bottom:14px;}
+.login-box h1{font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:var(--t2);margin-bottom:4px;}
+.login-box h2{font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;margin-bottom:20px;color:#fff;}
+.field{margin-bottom:12px;text-align:left;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:5px;}
+.field input{width:100%;background:#0F1826;border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:14px;color:#fff;}
+.login-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--gold);color:#1A2535;border:none;border-radius:6px;padding:11px 18px;font-weight:800;font-size:13px;text-transform:uppercase;cursor:pointer;width:100%;margin-top:4px;}
+.login-btn:disabled{opacity:.55;cursor:default;}
+.login-err{color:#FF8A80;font-size:12.5px;margin-top:10px;min-height:16px;}
 
 .wrap{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column;padding:20px 20px 28px;}
 
@@ -81,7 +97,26 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 </head>
 <body>
 
-<div class="wrap">
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <img src="../Capture352.JPG" alt="CXA">
+    <h1>Colorado Extreme Academy</h1>
+    <h2>Learn to Skate Check-In</h2>
+    <div class="field">
+      <label>Email</label>
+      <input id="login-email" type="email" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="login-pass" type="password" autocomplete="current-password">
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err"></div>
+    <div style="margin-top:10px;font-size:11.5px;"><a href="signup.html" style="color:var(--t3);">Are you a family signing up? Go here →</a></div>
+  </div>
+</div>
+
+<div class="wrap hidden" id="kiosk-app">
   <div class="hdr">
     <img src="../Capture352.JPG" alt="CXA">
     <h1>Colorado Extreme Academy</h1>
@@ -113,7 +148,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
     </div>
   </div>
 
-  <div class="ft"><a href="signup.html">New family? Sign up here</a> &nbsp;·&nbsp; <a href="admin.html">Staff Login</a></div>
+  <div class="ft"><a href="admin.html">Admin Dashboard</a> &nbsp;·&nbsp; <a href="signup.html">New Family Sign Up</a> &nbsp;·&nbsp; <a href="#" onclick="doSignOut();return false;">Sign Out</a></div>
 </div>
 
 <script>
@@ -258,13 +293,63 @@ async function initCameras() {
     startScanner();
   }
 }
-initCameras();
-
 // Resume scanner on tap if it stalls
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && html5QrCode && scannerRunning && !busy) {
     html5QrCode.resume();
   }
+});
+
+// ── AUTH (staff-only access — families never see this kiosk without a login) ──
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-err');
+  err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  auth.signInWithEmailAndPassword(email, pass).catch(e => {
+    err.textContent = friendlyAuthError(e.code);
+  }).finally(() => { btn.disabled = false; btn.textContent = 'Sign In'; });
+}
+function doSignOut() {
+  if (scannerRunning) { html5QrCode.stop(); scannerRunning = false; }
+  auth.signOut();
+}
+function friendlyAuthError(code) {
+  const map = {
+    'auth/user-not-found':    'No account found with that email.',
+    'auth/wrong-password':    'Incorrect password. Try again.',
+    'auth/invalid-email':     'Please enter a valid email address.',
+    'auth/too-many-requests': 'Too many attempts. Try again later.',
+    'auth/invalid-credential':'Email or password is incorrect.'
+  };
+  return map[code] || 'Sign-in failed. Please try again.';
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+let camerasStarted = false;
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('kiosk-app').classList.add('hidden');
+    return;
+  }
+  try {
+    const doc = await db.collection('users').doc(user.uid).get();
+    if (!doc.exists || doc.data().role !== 'admin') {
+      document.getElementById('login-err').textContent = 'This account is not authorized for kiosk access.';
+      auth.signOut();
+      return;
+    }
+  } catch (e) {
+    document.getElementById('login-err').textContent = 'Could not verify access. Try again.';
+    auth.signOut();
+    return;
+  }
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('kiosk-app').classList.remove('hidden');
+  if (!camerasStarted) { camerasStarted = true; initCameras(); }
 });
 </script>
 </body>
