@@ -152,7 +152,13 @@ this app's current scope.
 
 ## Deployment
 
-This folder is part of the same GitHub Pages site as the parent portal, so
-once merged it will be reachable at `/Carlos/learn-to-skate/` and
-`/Carlos/learn-to-skate/admin.html`. Camera access requires HTTPS, which
-GitHub Pages provides.
+The app is live at **https://lts.coloradoextreme.org/** (this folder is
+served at that domain's root):
+
+- Kiosk (staff check-in): https://lts.coloradoextreme.org/
+- Family self-signup: https://lts.coloradoextreme.org/signup.html
+- Admin console: https://lts.coloradoextreme.org/admin.html
+
+All links inside the app are relative, so it also works unchanged if served
+from a subfolder (e.g. a GitHub Pages project path). Camera access requires
+HTTPS, which the hosting provides.
