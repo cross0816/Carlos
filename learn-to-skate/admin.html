@@ -593,6 +593,7 @@ function openQrModal(code) {
     qrReady = true;
   } catch (e) {
     console.error('QR generation failed:', e);
+    fallback.textContent = 'QR image unavailable — use the code below instead. (' + (e && e.message ? e.message : e) + ')';
     fallback.style.display = 'flex';
   }
 }
@@ -608,11 +609,6 @@ function downloadQr() {
 // ── UTIL ──
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function escapeAttr(str) { return escapeHtml(str); }
-</script>
-</body>
-</html>
 }
 function escapeAttr(str) { return escapeHtml(str); }
 </script>
