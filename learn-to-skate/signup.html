@@ -260,6 +260,7 @@ function showSuccess(familyName, code) {
     qrReady = true;
   } catch (e) {
     console.error('QR generation failed:', e);
+    fallback.textContent = 'QR image unavailable — use the code below instead. (' + (e && e.message ? e.message : e) + ')';
     fallback.style.display = 'flex';
   }
   window.scrollTo(0, 0);
