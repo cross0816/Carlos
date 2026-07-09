@@ -259,12 +259,15 @@ sorting happens in the browser.
 
 ## Deployment
 
-The folder deploys with the rest of the repo via GitHub Pages, so once
-merged it's live at the site root under `/athlete-hub/`:
+The folder deploys with the rest of the repo via GitHub Pages and is live
+at:
 
-- Athlete Hub: `https://<your-pages-domain>/athlete-hub/`
-- Coach Console: `https://<your-pages-domain>/athlete-hub/coach.html`
+- Athlete Hub: https://cross0816.github.io/Carlos/athlete-hub/
+- Coach Console: https://cross0816.github.io/Carlos/athlete-hub/coach.html
 
-All internal links are relative, so it also works unchanged behind a custom
-domain (e.g. a future `hub.coloradoextreme.org`), the same way
-`lts.coloradoextreme.org` serves the Learn to Skate folder.
+(Note: `lts.coloradoextreme.org` is a **separate** Pages site that serves
+only the Learn to Skate app, so the hub is not reachable there.) All
+internal links are relative, so the app also works unchanged behind a
+custom domain (e.g. a future `hub.coloradoextreme.org` pointed at this
+repo's Pages site) — the hub would then be at
+`hub.coloradoextreme.org/athlete-hub/`.
