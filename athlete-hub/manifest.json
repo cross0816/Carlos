@@ -1,0 +1,17 @@
+{
+  "name": "CXA Athlete Hub",
+  "short_name": "CXA Hub",
+  "description": "Colorado Extreme Academy athlete hub — training analysis, progress tracking, drills, and coach messaging",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1A2535",
+  "theme_color": "#1A2535",
+  "icons": [
+    {
+      "src": "colorado-extreme-logo.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
