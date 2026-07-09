@@ -254,8 +254,9 @@ tbody tr:hover{background:#FAFBFC;}
     <!-- FEED -->
     <section id="view-feed" hidden>
       <div class="card">
-        <div class="kicker">New Training Analysis</div>
+        <div class="kicker" id="postFormTitle">New Training Analysis</div>
         <form onsubmit="submitPost(event)">
+          <input type="hidden" id="postEditId" value="">
           <div class="field"><label>Title</label><input id="postTitle" required maxlength="120" placeholder="e.g. Week 3 skating review — crossover power"></div>
           <div class="field"><label>Analysis / Notes</label><textarea id="postBody" required placeholder="What you saw, what to work on, and what's next…"></textarea></div>
           <div class="field"><label>Video Link (optional)</label><input id="postVideo" type="url" placeholder="YouTube link — game film, practice clip, breakdown…"><div class="hint">Upload the clip to YouTube (an unlisted video works great) and paste the link here.</div></div>
@@ -270,7 +271,10 @@ tbody tr:hover{background:#FAFBFC;}
             <label>Choose Athletes</label>
             <div class="aud-list" id="audList"></div>
           </div>
-          <button class="btn gold" id="postBtn" type="submit">Publish Analysis</button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn gold" id="postBtn" type="submit">Publish Analysis</button>
+            <button class="btn ghost" type="button" id="postCancelBtn" onclick="resetPostForm()" hidden>Cancel Edit</button>
+          </div>
         </form>
       </div>
       <div class="section-h">Published Analysis</div>
@@ -326,11 +330,15 @@ tbody tr:hover{background:#FAFBFC;}
     <!-- ANNOUNCEMENTS -->
     <section id="view-announce" hidden>
       <div class="card">
-        <div class="kicker">New Announcement</div>
+        <div class="kicker" id="annFormTitle">New Announcement</div>
         <form onsubmit="submitAnnouncement(event)">
+          <input type="hidden" id="annEditId" value="">
           <div class="field"><label>Title</label><input id="annTitle" required maxlength="120" placeholder="e.g. Schedule change for Saturday skills session"></div>
           <div class="field"><label>Message</label><textarea id="annBody" required></textarea></div>
-          <button class="btn gold" id="annBtn" type="submit">Post Announcement</button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn gold" id="annBtn" type="submit">Post Announcement</button>
+            <button class="btn ghost" type="button" id="annCancelBtn" onclick="resetAnnForm()" hidden>Cancel Edit</button>
+          </div>
           <div class="hint" style="margin-top:8px;">Announcements are visible to every athlete and parent in the hub.</div>
         </form>
       </div>
@@ -761,6 +769,7 @@ function renderAudienceList(){
 async function submitPost(e){
   e.preventDefault();
   const btn=document.getElementById('postBtn'); btn.disabled=true;
+  const editId=document.getElementById('postEditId').value;
   try{
     const audience=document.getElementById('postAudience').value;
     let athleteIds=[], athleteNames=[];
@@ -768,21 +777,46 @@ async function submitPost(e){
       document.querySelectorAll('#audList input:checked').forEach(c=>{athleteIds.push(c.value);athleteNames.push(c.dataset.name);});
       if(!athleteIds.length){ toast('Pick at least one athlete, or share with all.'); btn.disabled=false; return; }
     }
-    await db.collection('ah_posts').add({
+    const data={
       title:document.getElementById('postTitle').value.trim(),
       body:document.getElementById('postBody').value.trim(),
       videoUrl:document.getElementById('postVideo').value.trim(),
       audience, athleteIds, athleteNames,
-      authorUid:auth.currentUser.uid, authorName:myName,
-      createdAt:FV.serverTimestamp()
-    });
-    document.getElementById('postTitle').value='';document.getElementById('postBody').value='';document.getElementById('postVideo').value='';
-    document.getElementById('postAudience').value='all';document.getElementById('postAthletePick').hidden=true;
-    document.querySelectorAll('#audList input').forEach(c=>c.checked=false);
-    toast('Analysis published.');
+    };
+    if(editId){
+      await db.collection('ah_posts').doc(editId).update({...data, updatedAt:FV.serverTimestamp()});
+      toast('Analysis updated.');
+    }else{
+      await db.collection('ah_posts').add({...data, authorUid:auth.currentUser.uid, authorName:myName, createdAt:FV.serverTimestamp()});
+      toast('Analysis published.');
+    }
+    resetPostForm();
     loadPosts();
-  }catch(err){ console.error(err); toast('Publish failed.'); }
+  }catch(err){ console.error(err); toast(editId?'Update failed.':'Publish failed.'); }
   btn.disabled=false;
+}
+function resetPostForm(){
+  document.getElementById('postEditId').value='';
+  document.getElementById('postTitle').value='';document.getElementById('postBody').value='';document.getElementById('postVideo').value='';
+  document.getElementById('postAudience').value='all';document.getElementById('postAthletePick').hidden=true;
+  document.querySelectorAll('#audList input').forEach(c=>c.checked=false);
+  document.getElementById('postFormTitle').textContent='New Training Analysis';
+  document.getElementById('postBtn').textContent='Publish Analysis';
+  document.getElementById('postCancelBtn').hidden=true;
+}
+function editPost(id){
+  const p=posts.find(x=>x.id===id); if(!p) return;
+  document.getElementById('postEditId').value=id;
+  document.getElementById('postTitle').value=p.title||'';
+  document.getElementById('postBody').value=p.body||'';
+  document.getElementById('postVideo').value=p.videoUrl||'';
+  document.getElementById('postAudience').value=p.audience==='select'?'select':'all';
+  document.getElementById('postAthletePick').hidden=p.audience!=='select';
+  document.querySelectorAll('#audList input').forEach(c=>{ c.checked=(p.athleteIds||[]).includes(c.value); });
+  document.getElementById('postFormTitle').textContent='Edit Training Analysis';
+  document.getElementById('postBtn').textContent='Save Changes';
+  document.getElementById('postCancelBtn').hidden=false;
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 async function loadPosts(){
   const box=document.getElementById('postList');
@@ -797,7 +831,8 @@ async function loadPosts(){
         <div class="chips">${p.audience==='all'?'<span class="chip">All athletes</span>':(p.athleteNames||[]).map(n=>`<span class="chip gold">${esc(n)}</span>`).join('')}</div>
         <div class="body">${esc(p.body)}</div>
         ${ytId(p.videoUrl)?`<div class="meta">📹 Includes video</div>`:''}
-        <div class="meta">${esc(p.authorName||'')} · ${fmtDate(p.createdAt)}
+        <div class="meta">${esc(p.authorName||'')} · ${fmtDate(p.createdAt)}${p.updatedAt?' · edited':''}
+          <button class="btn small ghost" onclick="editPost('${esc(p.id)}')">Edit</button>
           <button class="btn small dangerghost" onclick="deletePost('${esc(p.id)}')">Delete</button></div>
       </div>`).join('') : '<div class="empty">No analysis posted yet.</div>';
   }catch(err){ console.error(err); box.innerHTML='<div class="empty">Couldn’t load posts.</div>'; }
@@ -892,18 +927,40 @@ async function deleteLibItem(id){
 async function submitAnnouncement(e){
   e.preventDefault();
   const btn=document.getElementById('annBtn'); btn.disabled=true;
+  const editId=document.getElementById('annEditId').value;
   try{
-    await db.collection('ah_announcements').add({
+    const data={
       title:document.getElementById('annTitle').value.trim(),
       body:document.getElementById('annBody').value.trim(),
-      authorUid:auth.currentUser.uid, authorName:myName,
-      createdAt:FV.serverTimestamp()
-    });
-    document.getElementById('annTitle').value='';document.getElementById('annBody').value='';
-    toast('Announcement posted.');
+    };
+    if(editId){
+      await db.collection('ah_announcements').doc(editId).update({...data, updatedAt:FV.serverTimestamp()});
+      toast('Announcement updated.');
+    }else{
+      await db.collection('ah_announcements').add({...data, authorUid:auth.currentUser.uid, authorName:myName, createdAt:FV.serverTimestamp()});
+      toast('Announcement posted.');
+    }
+    resetAnnForm();
     loadAnnouncements();
-  }catch(err){ console.error(err); toast('Post failed.'); }
+  }catch(err){ console.error(err); toast(editId?'Update failed.':'Post failed.'); }
   btn.disabled=false;
+}
+function resetAnnForm(){
+  document.getElementById('annEditId').value='';
+  document.getElementById('annTitle').value='';document.getElementById('annBody').value='';
+  document.getElementById('annFormTitle').textContent='New Announcement';
+  document.getElementById('annBtn').textContent='Post Announcement';
+  document.getElementById('annCancelBtn').hidden=true;
+}
+function editAnnouncement(id){
+  const a=announcements.find(x=>x.id===id); if(!a) return;
+  document.getElementById('annEditId').value=id;
+  document.getElementById('annTitle').value=a.title||'';
+  document.getElementById('annBody').value=a.body||'';
+  document.getElementById('annFormTitle').textContent='Edit Announcement';
+  document.getElementById('annBtn').textContent='Save Changes';
+  document.getElementById('annCancelBtn').hidden=false;
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 async function loadAnnouncements(){
   const box=document.getElementById('annList');
@@ -916,7 +973,8 @@ async function loadAnnouncements(){
         <div class="kicker" style="color:var(--t2);">📣 Announcement</div>
         <h3>${esc(a.title)}</h3>
         <div class="body">${esc(a.body)}</div>
-        <div class="meta">${esc(a.authorName||'')} · ${fmtDate(a.createdAt)}
+        <div class="meta">${esc(a.authorName||'')} · ${fmtDate(a.createdAt)}${a.updatedAt?' · edited':''}
+          <button class="btn small ghost" onclick="editAnnouncement('${esc(a.id)}')">Edit</button>
           <button class="btn small dangerghost" onclick="deleteAnnouncement('${esc(a.id)}')">Delete</button></div>
       </div>`).join('') : '<div class="empty">No announcements yet.</div>';
   }catch(err){ console.error(err); box.innerHTML='<div class="empty">Couldn’t load announcements.</div>'; }
