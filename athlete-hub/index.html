@@ -373,8 +373,9 @@ function authError(code){
     'auth/user-not-found':'No account found with that email.','auth/email-already-in-use':'An account with that email already exists — try signing in.',
     'auth/weak-password':'Password must be at least 6 characters.','auth/invalid-email':'That email address doesn’t look right.',
     'auth/too-many-requests':'Too many attempts — wait a minute and try again.','auth/network-request-failed':'Network error — check your connection.',
+    'permission-denied':'The app was blocked by the database rules. Ask your admin to make sure the Athlete Hub Firestore rules are published.',
   };
-  return map[code] || 'Something went wrong. Please try again.';
+  return map[code] || 'Something went wrong. Please try again.' + (code ? ' ('+code+')' : '');
 }
 
 /* ============================== State ============================== */
@@ -430,27 +431,48 @@ async function doSignup(e){
   const email=document.getElementById('suEmail').value.trim();
   const pass=document.getElementById('suPass').value;
   const code=document.getElementById('suCode').value.trim().toUpperCase();
+  signingUp = true;
+  let createdLogin = false;
   try{
+    // The security rules only let signed-in users look up athlete codes,
+    // so create (or resume) the login first, then validate the code.
+    try{
+      await auth.createUserWithEmailAndPassword(email, pass);
+      createdLogin = true;
+    }catch(err){
+      if(err.code!=='auth/email-already-in-use') throw err;
+      // The login may exist from an earlier half-finished signup — resume it.
+      try{ await auth.signInWithEmailAndPassword(email, pass); }
+      catch(_){ throw {custom:'An account with that email already exists. Go to Sign In instead (or use "Forgot password?").'}; }
+      const existing = await db.collection('users').doc(auth.currentUser.uid).get();
+      if(existing.exists){
+        signingUp = false;
+        await initApp(auth.currentUser);
+        btn.disabled = false;
+        return;
+      }
+    }
+    const uid = auth.currentUser.uid;
     const snap = await db.collection('ah_athletes').doc(code).get();
     if(!snap.exists) throw {custom:'That athlete code wasn’t found. Double-check it with your coach.'};
     const a = snap.data();
-    if(signupRole==='athlete' && a.uid) throw {custom:'That athlete code is already linked to an athlete account. If this is a mistake, ask your coach to unlink it.'};
-
-    signingUp = true;
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    const uid = cred.user.uid;
     if(signupRole==='athlete'){
-      await db.collection('ah_athletes').doc(code).update({uid: uid, updatedAt: FV.serverTimestamp()});
+      if(a.uid && a.uid!==uid) throw {custom:'That athlete code is already linked to an athlete account. If this is a mistake, ask your coach to unlink it.'};
+      if(a.uid!==uid) await db.collection('ah_athletes').doc(code).update({uid: uid, updatedAt: FV.serverTimestamp()});
       await db.collection('users').doc(uid).set({name, email, role:'athlete', athleteId: code, createdAt: FV.serverTimestamp()});
     }else{
-      await db.collection('ah_athletes').doc(code).update({parentUids: FV.arrayUnion(uid), updatedAt: FV.serverTimestamp()});
+      if(!(a.parentUids||[]).includes(uid)) await db.collection('ah_athletes').doc(code).update({parentUids: FV.arrayUnion(uid), updatedAt: FV.serverTimestamp()});
       await db.collection('users').doc(uid).set({name, email, role:'parent', athleteIds: [code], createdAt: FV.serverTimestamp()});
     }
     signingUp = false;
-    await initApp(cred.user);
+    await initApp(auth.currentUser);
   }catch(err){
     signingUp = false;
-    if(auth.currentUser){ try{ await auth.signOut(); }catch(_){} }
+    // Don't leave a half-made login behind — remove it so they can retry cleanly.
+    if(auth.currentUser){
+      if(createdLogin){ try{ await auth.currentUser.delete(); }catch(_){ try{ await auth.signOut(); }catch(__){} } }
+      else{ try{ await auth.signOut(); }catch(_){} }
+    }
     setAuthMsg(esc(err.custom || authError(err.code)),'err');
   }
   btn.disabled=false;
