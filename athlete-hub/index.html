@@ -582,7 +582,7 @@ function feedCard(it){
     ${chips}
     <div class="body">${esc(it.body)}</div>
     ${vidHtml}
-    <div class="meta">${esc(it.authorName||'CXA Staff')} · ${fmtDate(it.createdAt)}</div>
+    <div class="meta">${esc(it.authorName||'CXA Staff')} · ${fmtDate(it.createdAt)}${it.updatedAt?' · edited':''}</div>
   </div>`;
 }
 function playVideo(el, id){
