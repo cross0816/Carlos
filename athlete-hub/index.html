@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2535">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/jpeg" href="cxa-logo.jpg">
+<link rel="apple-touch-icon" href="cxa-logo.jpg">
+<title>CXA Athlete Hub — Colorado Extreme Academy</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey:            "AIzaSyDtB3WRTlmUcDPRg4m-MeBy8jMwxcakbQY",
+  authDomain:        "cxa-parent-portal.firebaseapp.com",
+  projectId:         "cxa-parent-portal",
+  storageBucket:     "cxa-parent-portal.firebasestorage.app",
+  messagingSenderId: "488155596502",
+  appId:             "1:488155596502:web:6a37a1ba930db9b6f56b77"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+const FV   = firebase.firestore.FieldValue;
+</script>
+
+<style>
+:root{
+  --bg:#F5F6F8;--surface:#FFFFFF;--card:#FFFFFF;--border:#E4E7EC;
+  --t1:#1A2535;--t2:#5A6A80;--t3:#A0AABB;
+  --accent:#1A2535;--gold:#C4880A;
+  --ok:#2E7D32;--ok-bg:#EAF6EB;--err:#B3261E;--err-bg:#FCEBEA;--r:6px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
+[hidden]{display:none !important;}
+.narrow{font-family:'Arial Narrow',Arial,sans-serif;font-weight:900;text-transform:uppercase;}
+
+/* ---------- Auth screen ---------- */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 8px 30px rgba(26,37,53,.08);}
+.login-box .logo{display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 14px;border-radius:8px;}
+.login-box h1{font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:var(--t2);text-align:center;margin-bottom:2px;}
+.login-box h2{font-family:'Arial Narrow',Arial,sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;text-align:center;margin-bottom:20px;}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.auth-tab{flex:1;padding:10px 4px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);}
+.auth-tab.active{color:var(--t1);border-bottom-color:var(--gold);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t2);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:#FAFBFC;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);background:#fff;}
+.hint{font-size:12px;color:var(--t3);margin-top:4px;line-height:1.4;}
+.role-pick{display:flex;gap:10px;margin-bottom:14px;}
+.role-card{flex:1;border:1.5px solid var(--border);border-radius:var(--r);padding:12px 10px;text-align:center;background:#FAFBFC;font-size:13px;font-weight:700;color:var(--t2);}
+.role-card.active{border-color:var(--gold);background:#FFF9EE;color:var(--t1);}
+.role-card .big{font-size:20px;display:block;margin-bottom:4px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;background:var(--accent);color:#fff;}
+.btn:disabled{opacity:.55;cursor:default;}
+.btn.full{width:100%;}
+.btn.ghost{background:none;border:1px solid var(--border);color:var(--t1);}
+.btn.gold{background:var(--gold);}
+.btn.small{padding:7px 12px;font-size:13px;}
+.btn.danger{background:var(--err);}
+.linklike{background:none;border:none;color:var(--t2);font-size:13px;text-decoration:underline;}
+.msg{padding:10px 12px;border-radius:var(--r);font-size:13.5px;margin-bottom:14px;line-height:1.45;}
+.msg.err{background:var(--err-bg);color:var(--err);}
+.msg.ok{background:var(--ok-bg);color:var(--ok);}
+
+/* ---------- App shell ---------- */
+.topbar{background:var(--accent);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:40;}
+.topbar img{width:36px;height:36px;object-fit:contain;border-radius:6px;background:#fff;}
+.topbar .titles{flex:1;min-width:0;}
+.topbar .t-org{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#B9C2D0;}
+.topbar h1{font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar .who{font-size:12px;color:#B9C2D0;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar .signout{background:rgba(255,255,255,.12);border:none;color:#fff;padding:7px 12px;border-radius:var(--r);font-size:12.5px;font-weight:700;}
+.staff-banner{background:#FFF9EE;border-bottom:1px solid #EAD9AE;color:#7A5A10;font-size:13.5px;padding:9px 18px;text-align:center;}
+.staff-banner a{color:#7A5A10;font-weight:700;}
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;overflow-x:auto;position:sticky;top:60px;z-index:39;}
+.tab{padding:12px 4px;margin-right:22px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);white-space:nowrap;position:relative;}
+.tab.active{color:var(--t1);border-bottom-color:var(--gold);}
+.tab .dot{position:absolute;top:9px;right:-9px;width:7px;height:7px;border-radius:50%;background:var(--gold);}
+.wrap{max-width:860px;margin:0 auto;padding:20px 18px 60px;}
+.section-h{font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);margin:4px 0 12px;}
+.empty{border:1.5px dashed var(--border);border-radius:10px;padding:34px 20px;text-align:center;color:var(--t3);font-size:14px;line-height:1.5;}
+
+/* ---------- Feed ---------- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;}
+.card .kicker{font-family:'Arial Narrow',Arial,sans-serif;font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.card .kicker.ann{color:var(--t2);}
+.card h3{font-size:17px;font-weight:800;margin-bottom:6px;line-height:1.3;}
+.card .body{font-size:14.5px;color:var(--t1);line-height:1.55;white-space:pre-wrap;word-wrap:break-word;}
+.card .meta{font-size:12px;color:var(--t3);margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.chip{display:inline-block;background:#F0F2F5;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700;color:var(--t2);}
+.chip.gold{background:#FFF4DD;color:#7A5A10;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.video-thumb{position:relative;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;margin-top:12px;aspect-ratio:16/9;}
+.video-thumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85;}
+.video-thumb .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(26,37,53,.85);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;padding-left:4px;border:2px solid rgba(255,255,255,.7);}
+.video-frame{margin-top:12px;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000;}
+.video-frame iframe{width:100%;height:100%;border:none;display:block;}
+
+/* ---------- Progress ---------- */
+.prog-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.prog-head select{padding:9px 12px;border:1px solid var(--border);border-radius:var(--r);background:#fff;}
+.skill-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.skill-row .lbl{width:120px;font-size:13px;font-weight:700;color:var(--t2);flex-shrink:0;}
+.skill-row .bar{flex:1;height:10px;background:#EEF0F4;border-radius:999px;overflow:hidden;}
+.skill-row .bar i{display:block;height:100%;background:var(--gold);border-radius:999px;transition:width .4s;}
+.skill-row .val{width:34px;text-align:right;font-weight:800;font-size:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.legend .li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);font-weight:600;}
+.legend .sw{width:12px;height:12px;border-radius:3px;}
+.chart-box{overflow-x:auto;}
+.assess-item{border-top:1px solid var(--border);padding:14px 0;}
+.assess-item:first-child{border-top:none;}
+.assess-item .d{font-weight:800;font-size:14px;}
+.assess-item .c{font-size:12px;color:var(--t3);margin-left:8px;}
+.assess-item .notes{font-size:13.5px;color:var(--t1);margin-top:6px;line-height:1.5;white-space:pre-wrap;}
+.mini-skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+
+/* ---------- Library ---------- */
+.lib-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.pillset{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:3px;}
+.pill{border:none;background:none;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--t2);}
+.pill.active{background:var(--accent);color:#fff;}
+.lib-filters select,.lib-filters input{padding:9px 12px;border:1px solid var(--border);border-radius:var(--r);background:#fff;outline:none;}
+.lib-filters input{flex:1;min-width:140px;}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.lib-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:box-shadow .15s;}
+.lib-card:hover{box-shadow:0 6px 20px rgba(26,37,53,.1);}
+.lib-card .thumb{aspect-ratio:16/9;background:#1A2535;position:relative;}
+.lib-card .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.lib-card .thumb .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;color:#5A6A80;}
+.lib-card .kind{position:absolute;top:8px;left:8px;background:var(--gold);color:#fff;font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border-radius:4px;}
+.lib-card .kind.drill{background:#2E7D32;}
+.lib-card .in{padding:12px 14px;}
+.lib-card h4{font-size:14.5px;font-weight:800;line-height:1.3;margin-bottom:4px;}
+.lib-card .sub{font-size:12px;color:var(--t3);}
+
+/* ---------- Messages ---------- */
+.msg-wrap{display:grid;grid-template-columns:280px 1fr;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;min-height:460px;height:calc(100vh - 230px);}
+.thread-list{border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
+.thread-list .tl-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.thread-list .tl-head .h{font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);}
+.thread{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;position:relative;}
+.thread:hover{background:#FAFBFC;}
+.thread.active{background:#F0F2F5;}
+.thread .n{font-weight:800;font-size:14px;display:flex;align-items:center;gap:7px;}
+.thread .p{font-size:12.5px;color:var(--t3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.thread .t{position:absolute;top:12px;right:12px;font-size:10.5px;color:var(--t3);}
+.thread .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.thread-pane{display:flex;flex-direction:column;min-width:0;}
+.tp-head{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:800;display:flex;align-items:center;gap:10px;}
+.tp-head .back{display:none;background:none;border:none;font-size:18px;color:var(--t2);padding:2px 6px;}
+.tp-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:#FAFBFC;}
+.bubble{max-width:78%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word;}
+.bubble.me{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
+.bubble.them{align-self:flex-start;background:#fff;border:1px solid var(--border);border-bottom-left-radius:4px;}
+.bubble .bm{display:block;font-size:10px;opacity:.65;margin-top:4px;}
+.tp-compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:var(--surface);}
+.tp-compose textarea{flex:1;resize:none;border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;height:44px;outline:none;background:#FAFBFC;}
+.tp-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:14px;padding:20px;text-align:center;}
+
+/* ---------- Modal ---------- */
+.modal-back{position:fixed;inset:0;background:rgba(26,37,53,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;}
+.modal{background:var(--surface);border-radius:12px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;padding:22px;}
+.modal h3{font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.modal .x{background:none;border:none;font-size:22px;color:var(--t3);line-height:1;}
+.pick-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--border);padding:12px 4px;}
+.pick-item:hover{background:#FAFBFC;}
+.pick-item .av{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;}
+.pick-item .nm{font-weight:700;font-size:14.5px;}
+.pick-item .rl{font-size:12px;color:var(--t3);}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--t1);color:#fff;padding:11px 20px;border-radius:999px;font-size:13.5px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:opacity .3s;opacity:0;pointer-events:none;max-width:90vw;text-align:center;}
+#toast.show{opacity:1;}
+.loading{text-align:center;color:var(--t3);padding:40px 0;font-size:14px;}
+
+@media(max-width:680px){
+  .msg-wrap{grid-template-columns:1fr;height:calc(100vh - 210px);}
+  .thread-pane{display:none;}
+  .msg-wrap.show-thread .thread-list{display:none;}
+  .msg-wrap.show-thread .thread-pane{display:flex;}
+  .tp-head .back{display:block;}
+  .topbar .who{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= AUTH ======================= -->
+<div id="authScreen">
+  <div class="login-box">
+    <img class="logo" src="cxa-logo.jpg" alt="Colorado Extreme">
+    <h1>Colorado Extreme Academy</h1>
+    <h2>Athlete Hub</h2>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabSignin" onclick="showAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="tabSignup" onclick="showAuthTab('signup')">Create Account</button>
+    </div>
+    <div id="authMsg"></div>
+
+    <form id="signinForm" onsubmit="doSignin(event)">
+      <div class="field"><label>Email</label><input type="email" id="siEmail" required autocomplete="email"></div>
+      <div class="field"><label>Password</label><input type="password" id="siPass" required autocomplete="current-password"></div>
+      <button class="btn full" id="siBtn" type="submit">Sign In</button>
+      <div style="text-align:center;margin-top:12px;"><button type="button" class="linklike" onclick="forgotPass()">Forgot password?</button></div>
+    </form>
+
+    <form id="signupForm" onsubmit="doSignup(event)" hidden>
+      <div class="role-pick">
+        <button type="button" class="role-card active" id="roleAthlete" onclick="pickRole('athlete')"><span class="big">🏒</span>I'm an Athlete</button>
+        <button type="button" class="role-card" id="roleParent" onclick="pickRole('parent')"><span class="big">👤</span>I'm a Parent</button>
+      </div>
+      <div class="field"><label id="suNameLbl">Your Full Name</label><input type="text" id="suName" required maxlength="80"></div>
+      <div class="field"><label>Email</label><input type="email" id="suEmail" required autocomplete="email"></div>
+      <div class="field"><label>Password</label><input type="password" id="suPass" required minlength="6" autocomplete="new-password"><div class="hint">At least 6 characters.</div></div>
+      <div class="field">
+        <label>Athlete Code</label>
+        <input type="text" id="suCode" required maxlength="6" style="text-transform:uppercase;font-family:ui-monospace,Menlo,monospace;letter-spacing:.15em;" placeholder="e.g. 7F3K9Q">
+        <div class="hint" id="codeHint">Your coach gives every CXA athlete a 6-character code. Ask your coach if you don't have one yet.</div>
+      </div>
+      <button class="btn full gold" id="suBtn" type="submit">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<!-- ======================= APP ======================= -->
+<div id="app" hidden>
+  <div class="topbar">
+    <img src="cxa-logo.jpg" alt="">
+    <div class="titles">
+      <div class="t-org">Colorado Extreme Academy</div>
+      <h1>Athlete Hub</h1>
+    </div>
+    <span class="who" id="whoAmI"></span>
+    <button class="signout" onclick="auth.signOut()">Sign Out</button>
+  </div>
+  <div class="staff-banner" id="staffBanner" hidden>
+    You're signed in as staff — open the <a href="coach.html">Coach Console</a> to post analysis, run assessments, and manage the roster.
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-home" onclick="showView('home')">Home</button>
+    <button class="tab" id="tab-progress" onclick="showView('progress')">My Progress</button>
+    <button class="tab" id="tab-library" onclick="showView('library')">Library</button>
+    <button class="tab" id="tab-messages" onclick="showView('messages')">Messages<span class="dot" id="msgDot" hidden></span></button>
+  </div>
+
+  <div class="wrap">
+    <!-- HOME -->
+    <section id="view-home">
+      <div id="feedList"><div class="loading">Loading your feed…</div></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section id="view-progress" hidden>
+      <div class="prog-head">
+        <div class="section-h" style="margin:0;">Progress for</div>
+        <select id="progAthlete" onchange="renderProgress()"></select>
+      </div>
+      <div id="progBody"><div class="loading">Loading…</div></div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section id="view-library" hidden>
+      <div class="lib-filters">
+        <div class="pillset">
+          <button class="pill active" data-kind="all" onclick="setLibKind('all',this)">All</button>
+          <button class="pill" data-kind="video" onclick="setLibKind('video',this)">Videos</button>
+          <button class="pill" data-kind="drill" onclick="setLibKind('drill',this)">Drills</button>
+        </div>
+        <select id="libCat" onchange="renderLibrary()"><option value="">All Categories</option></select>
+        <input type="search" id="libSearch" placeholder="Search…" oninput="renderLibrary()">
+      </div>
+      <div id="libGrid"><div class="loading">Loading library…</div></div>
+    </section>
+
+    <!-- MESSAGES -->
+    <section id="view-messages" hidden>
+      <div class="msg-wrap" id="msgWrap">
+        <div class="thread-list">
+          <div class="tl-head">
+            <span class="h">Conversations</span>
+            <button class="btn small gold" onclick="openNewMessage()">+ New</button>
+          </div>
+          <div id="threadList"><div class="tp-empty">No conversations yet.<br>Start one with a coach!</div></div>
+        </div>
+        <div class="thread-pane" id="threadPane">
+          <div class="tp-empty" id="tpPlaceholder">Select a conversation, or start a new one with a coach.</div>
+          <div class="tp-head" id="tpHead" hidden><button class="back" onclick="closeThread()">←</button><span id="tpName"></span></div>
+          <div class="tp-body" id="tpBody" hidden></div>
+          <div class="tp-compose" id="tpCompose" hidden>
+            <textarea id="msgInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+            <button class="btn" onclick="sendMsg()">Send</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Library / video modal -->
+<div class="modal-back" id="libModalBack" hidden onclick="if(event.target===this)closeLibModal()">
+  <div class="modal">
+    <h3><span id="lmTitle"></span><button class="x" onclick="closeLibModal()">×</button></h3>
+    <div class="chips" id="lmChips"></div>
+    <div id="lmVideo"></div>
+    <div class="card-body" id="lmDesc" style="font-size:14.5px;line-height:1.6;white-space:pre-wrap;margin-top:14px;"></div>
+    <div class="meta" id="lmMeta" style="font-size:12px;color:var(--t3);margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- New message modal -->
+<div class="modal-back" id="newMsgBack" hidden onclick="if(event.target===this)closeNewMessage()">
+  <div class="modal" style="max-width:440px;">
+    <h3>Message a Coach<button class="x" onclick="closeNewMessage()">×</button></h3>
+    <div id="coachPickList"><div class="loading">Loading coaches…</div></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================== Shared constants ============================== */
+const SKILLS = [
+  {key:'skating',      label:'Skating'},
+  {key:'puckHandling', label:'Puck Handling'},
+  {key:'shooting',     label:'Shooting'},
+  {key:'passing',      label:'Passing'},
+  {key:'hockeyIQ',     label:'Hockey IQ'},
+  {key:'compete',      label:'Compete Level'},
+];
+const SKILL_COLORS = ['#1A2535','#C4880A','#2E7D32','#B3261E','#5A6A80','#7B1FA2'];
+
+/* ============================== Helpers ============================== */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function ytId(url){
+  if(!url) return null;
+  const m = String(url).match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+function tsMillis(ts){ return ts && ts.toMillis ? ts.toMillis() : 0; }
+function fmtDate(ts){
+  const ms = tsMillis(ts); if(!ms) return 'Just now';
+  const d = new Date(ms), now = new Date();
+  const opts = {month:'short', day:'numeric'};
+  if(d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+  return d.toLocaleDateString('en-US', opts);
+}
+function fmtTime(ts){
+  const ms = tsMillis(ts); if(!ms) return '';
+  return new Date(ms).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+function fmtDay(str){ // 'YYYY-MM-DD' -> 'Jul 9, 2026'
+  if(!str) return '';
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+let toastTimer=null;
+function toast(t){
+  const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),3200);
+}
+function authError(code){
+  const map={
+    'auth/invalid-credential':'Wrong email or password.','auth/wrong-password':'Wrong email or password.',
+    'auth/user-not-found':'No account found with that email.','auth/email-already-in-use':'An account with that email already exists — try signing in.',
+    'auth/weak-password':'Password must be at least 6 characters.','auth/invalid-email':'That email address doesn’t look right.',
+    'auth/too-many-requests':'Too many attempts — wait a minute and try again.','auth/network-request-failed':'Network error — check your connection.',
+  };
+  return map[code] || 'Something went wrong. Please try again.';
+}
+
+/* ============================== State ============================== */
+let profile=null, isStaffUser=false, signingUp=false;
+let myAthletes=[];            // [{id, ...data}] athletes linked to this account
+let assessCache={};           // athleteId -> [assessments]
+let libItems=[], libKind='all';
+let threads=[], unsubThreads=null, unsubMsgs=null, currentThreadId=null;
+let staffList=null;
+const lastReadKey = () => 'ah_lastread_' + (auth.currentUser ? auth.currentUser.uid : '');
+function getLastRead(){ try{return JSON.parse(localStorage.getItem(lastReadKey())||'{}');}catch(e){return {};} }
+function setLastRead(tid, ms){ const m=getLastRead(); m[tid]=ms; localStorage.setItem(lastReadKey(), JSON.stringify(m)); }
+
+/* ============================== Auth flow ============================== */
+function showAuthTab(which){
+  document.getElementById('tabSignin').classList.toggle('active', which==='signin');
+  document.getElementById('tabSignup').classList.toggle('active', which==='signup');
+  document.getElementById('signinForm').hidden = which!=='signin';
+  document.getElementById('signupForm').hidden = which!=='signup';
+  document.getElementById('authMsg').innerHTML='';
+}
+let signupRole='athlete';
+function pickRole(r){
+  signupRole=r;
+  document.getElementById('roleAthlete').classList.toggle('active', r==='athlete');
+  document.getElementById('roleParent').classList.toggle('active', r==='parent');
+  document.getElementById('suNameLbl').textContent = r==='athlete' ? 'Your Full Name (Athlete)' : 'Your Full Name (Parent)';
+  document.getElementById('codeHint').textContent = r==='athlete'
+    ? 'Your coach gives every CXA athlete a 6-character code. Ask your coach if you don’t have one yet.'
+    : 'Enter your athlete’s 6-character code to link your account to them.';
+}
+function setAuthMsg(html, cls){ document.getElementById('authMsg').innerHTML = html?`<div class="msg ${cls}">${html}</div>`:''; }
+
+async function doSignin(e){
+  e.preventDefault();
+  const btn=document.getElementById('siBtn'); btn.disabled=true; setAuthMsg('');
+  try{
+    await auth.signInWithEmailAndPassword(document.getElementById('siEmail').value.trim(), document.getElementById('siPass').value);
+  }catch(err){ setAuthMsg(esc(authError(err.code)),'err'); }
+  btn.disabled=false;
+}
+async function forgotPass(){
+  const email=document.getElementById('siEmail').value.trim();
+  if(!email){ setAuthMsg('Enter your email above first, then tap "Forgot password?" again.','err'); return; }
+  try{ await auth.sendPasswordResetEmail(email); setAuthMsg('Password reset email sent — check your inbox.','ok'); }
+  catch(err){ setAuthMsg(esc(authError(err.code)),'err'); }
+}
+
+async function doSignup(e){
+  e.preventDefault();
+  const btn=document.getElementById('suBtn'); btn.disabled=true; setAuthMsg('');
+  const name=document.getElementById('suName').value.trim();
+  const email=document.getElementById('suEmail').value.trim();
+  const pass=document.getElementById('suPass').value;
+  const code=document.getElementById('suCode').value.trim().toUpperCase();
+  try{
+    const snap = await db.collection('ah_athletes').doc(code).get();
+    if(!snap.exists) throw {custom:'That athlete code wasn’t found. Double-check it with your coach.'};
+    const a = snap.data();
+    if(signupRole==='athlete' && a.uid) throw {custom:'That athlete code is already linked to an athlete account. If this is a mistake, ask your coach to unlink it.'};
+
+    signingUp = true;
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    if(signupRole==='athlete'){
+      await db.collection('ah_athletes').doc(code).update({uid: uid, updatedAt: FV.serverTimestamp()});
+      await db.collection('users').doc(uid).set({name, email, role:'athlete', athleteId: code, createdAt: FV.serverTimestamp()});
+    }else{
+      await db.collection('ah_athletes').doc(code).update({parentUids: FV.arrayUnion(uid), updatedAt: FV.serverTimestamp()});
+      await db.collection('users').doc(uid).set({name, email, role:'parent', athleteIds: [code], createdAt: FV.serverTimestamp()});
+    }
+    signingUp = false;
+    await initApp(cred.user);
+  }catch(err){
+    signingUp = false;
+    if(auth.currentUser){ try{ await auth.signOut(); }catch(_){} }
+    setAuthMsg(esc(err.custom || authError(err.code)),'err');
+  }
+  btn.disabled=false;
+}
+
+auth.onAuthStateChanged(async user=>{
+  if(signingUp) return;
+  if(!user){ teardown(); document.getElementById('app').hidden=true; document.getElementById('authScreen').hidden=false; return; }
+  await initApp(user);
+});
+
+function teardown(){
+  if(unsubThreads){unsubThreads();unsubThreads=null;}
+  if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
+  profile=null; myAthletes=[]; threads=[]; assessCache={}; libItems=[]; currentThreadId=null; staffList=null;
+}
+
+async function initApp(user){
+  try{
+    const pSnap = await db.collection('users').doc(user.uid).get();
+    if(!pSnap.exists){
+      await auth.signOut();
+      setAuthMsg('Your account isn’t fully set up yet. Try creating your account again, or ask your coach for help.','err');
+      return;
+    }
+    profile = pSnap.data();
+    isStaffUser = ['coach','admin'].includes(profile.role);
+    document.getElementById('whoAmI').textContent = profile.name || user.email;
+    document.getElementById('staffBanner').hidden = !isStaffUser;
+    document.getElementById('tab-progress').hidden = isStaffUser;
+
+    // Load linked athletes
+    const ids = profile.role==='athlete' ? [profile.athleteId].filter(Boolean) : (profile.athleteIds||[]);
+    myAthletes = [];
+    for(const id of ids){
+      try{
+        const s = await db.collection('ah_athletes').doc(id).get();
+        if(s.exists) myAthletes.push({id: s.id, ...s.data()});
+      }catch(_){}
+    }
+    document.getElementById('authScreen').hidden=true;
+    document.getElementById('app').hidden=false;
+    showView('home');
+    loadFeed(); loadLibrary(); subThreads(); buildProgressPicker();
+  }catch(err){
+    console.error(err);
+    setAuthMsg('Could not load your account. Check your connection and try again.','err');
+    try{ await auth.signOut(); }catch(_){}
+  }
+}
+
+/* ============================== Navigation ============================== */
+function showView(v){
+  for(const name of ['home','progress','library','messages']){
+    document.getElementById('view-'+name).hidden = name!==v;
+    document.getElementById('tab-'+name).classList.toggle('active', name===v);
+  }
+  if(v==='messages') updateMsgDot();
+}
+
+/* ============================== Feed ============================== */
+async function loadFeed(){
+  const box=document.getElementById('feedList');
+  try{
+    const items=[];
+    const annSnap = await db.collection('ah_announcements').get();
+    annSnap.forEach(d=>items.push({id:d.id, type:'announcement', ...d.data()}));
+
+    const ids = myAthletes.map(a=>a.id);
+    const seen = new Set();
+    const pushPost = d => { if(!seen.has(d.id)){ seen.add(d.id); items.push({id:d.id, type:'post', ...d.data()}); } };
+    if(isStaffUser){
+      (await db.collection('ah_posts').get()).forEach(pushPost);
+    }else{
+      (await db.collection('ah_posts').where('audience','==','all').get()).forEach(pushPost);
+      if(ids.length){
+        (await db.collection('ah_posts').where('athleteIds','array-contains-any', ids.slice(0,10)).get()).forEach(pushPost);
+      }
+    }
+    items.sort((a,b)=>tsMillis(b.createdAt)-tsMillis(a.createdAt));
+    if(!items.length){
+      box.innerHTML = '<div class="empty">Nothing here yet.<br>Training analysis and announcements from your coaches will show up here.</div>';
+      return;
+    }
+    box.innerHTML = items.map(feedCard).join('');
+  }catch(err){
+    console.error(err);
+    box.innerHTML = '<div class="empty">Couldn’t load the feed. Pull to refresh or try again later.</div>';
+  }
+}
+function feedCard(it){
+  const isAnn = it.type==='announcement';
+  let chips='';
+  if(!isAnn){
+    if(it.audience==='all') chips = '<div class="chips"><span class="chip">All athletes</span></div>';
+    else if(it.athleteNames && it.athleteNames.length) chips = '<div class="chips">'+it.athleteNames.map(n=>`<span class="chip gold">${esc(n)}</span>`).join('')+'</div>';
+  }
+  const vid = ytId(it.videoUrl);
+  const vidHtml = vid ? `
+    <div class="video-thumb" onclick="playVideo(this,'${vid}')">
+      <img loading="lazy" src="https://i.ytimg.com/vi/${vid}/hqdefault.jpg" alt="">
+      <span class="play">▶</span>
+    </div>` : '';
+  return `<div class="card">
+    <div class="kicker ${isAnn?'ann':''}">${isAnn?'📣 Announcement':'🎯 Training Analysis'}</div>
+    <h3>${esc(it.title)}</h3>
+    ${chips}
+    <div class="body">${esc(it.body)}</div>
+    ${vidHtml}
+    <div class="meta">${esc(it.authorName||'CXA Staff')} · ${fmtDate(it.createdAt)}</div>
+  </div>`;
+}
+function playVideo(el, id){
+  const wrap=document.createElement('div');
+  wrap.className='video-frame';
+  wrap.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  el.replaceWith(wrap);
+}
+
+/* ============================== Progress ============================== */
+function buildProgressPicker(){
+  const sel=document.getElementById('progAthlete');
+  sel.innerHTML = myAthletes.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+  if(myAthletes.length) renderProgress();
+  else document.getElementById('progBody').innerHTML='<div class="empty">No athlete is linked to this account yet.</div>';
+  sel.parentElement.style.display = myAthletes.length>1 ? '' : 'flex';
+  sel.hidden = myAthletes.length<=1;
+  if(myAthletes.length===1){
+    document.querySelector('#view-progress .section-h').textContent = 'Progress — ' + myAthletes[0].name;
+  }
+}
+async function renderProgress(){
+  const id=document.getElementById('progAthlete').value || (myAthletes[0]&&myAthletes[0].id);
+  if(!id) return;
+  const box=document.getElementById('progBody');
+  box.innerHTML='<div class="loading">Loading…</div>';
+  try{
+    if(!assessCache[id]){
+      const snap = await db.collection('ah_assessments').where('athleteId','==',id).get();
+      const rows=[]; snap.forEach(d=>rows.push({id:d.id, ...d.data()}));
+      rows.sort((a,b)=> (a.date||'') < (b.date||'') ? -1 : 1);
+      assessCache[id]=rows;
+    }
+    const rows=assessCache[id];
+    if(!rows.length){
+      box.innerHTML='<div class="empty">No assessments yet.<br>When your coach evaluates your skills, your progress will appear here.</div>';
+      return;
+    }
+    const latest=rows[rows.length-1];
+    let html = `<div class="card">
+      <div class="kicker">Latest Assessment · ${esc(fmtDay(latest.date))}</div>
+      ${SKILLS.map(s=>{
+        const v = latest.skills && latest.skills[s.key] != null ? latest.skills[s.key] : null;
+        return v==null?'':`<div class="skill-row"><span class="lbl">${s.label}</span><span class="bar"><i style="width:${v/5*100}%"></i></span><span class="val">${v}/5</span></div>`;
+      }).join('')}
+      ${latest.notes?`<div class="assess-item" style="border-top:1px solid var(--border);margin-top:10px;"><div class="notes">${esc(latest.notes)}</div></div>`:''}
+      <div class="meta">Assessed by ${esc(latest.coachName||'CXA Staff')}</div>
+    </div>`;
+
+    if(rows.length>=2){
+      html += `<div class="card"><div class="kicker">Progress Over Time</div><div class="chart-box">${progressChart(rows)}</div>
+        <div class="legend">${SKILLS.map((s,i)=>`<span class="li"><span class="sw" style="background:${SKILL_COLORS[i]}"></span>${s.label}</span>`).join('')}</div>
+      </div>`;
+    }
+    html += `<div class="card"><div class="kicker">Assessment History</div>` + rows.slice().reverse().map(r=>`
+      <div class="assess-item">
+        <span class="d">${esc(fmtDay(r.date))}</span><span class="c">${esc(r.coachName||'')}</span>
+        <div class="mini-skills">${SKILLS.map(s=> r.skills&&r.skills[s.key]!=null?`<span class="chip">${s.label} ${r.skills[s.key]}</span>`:'').join('')}</div>
+        ${r.notes?`<div class="notes">${esc(r.notes)}</div>`:''}
+      </div>`).join('') + `</div>`;
+    box.innerHTML=html;
+  }catch(err){
+    console.error(err);
+    box.innerHTML='<div class="empty">Couldn’t load progress data.</div>';
+  }
+}
+function progressChart(rows){
+  const W=640,H=250,L=28,R=12,T=12,B=26;
+  const n=rows.length;
+  const x=i=> L+(W-L-R)*(n===1?0.5:i/(n-1));
+  const y=v=> T+(H-T-B)*(1-(v-1)/4);
+  let g='';
+  for(let v=1;v<=5;v++){
+    g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#EEF0F4" stroke-width="1"/>
+        <text x="${L-8}" y="${y(v)+4}" font-size="10" fill="#A0AABB" text-anchor="end">${v}</text>`;
+  }
+  const step=Math.max(1,Math.ceil(n/6));
+  rows.forEach((r,i)=>{
+    if(i%step===0 || i===n-1){
+      const lbl=(r.date||'').slice(5).replace('-','/');
+      g+=`<text x="${x(i)}" y="${H-8}" font-size="10" fill="#A0AABB" text-anchor="middle">${lbl}</text>`;
+    }
+  });
+  SKILLS.forEach((s,si)=>{
+    const pts=[];
+    rows.forEach((r,i)=>{ if(r.skills&&r.skills[s.key]!=null) pts.push([x(i),y(r.skills[s.key])]); });
+    if(pts.length<1) return;
+    g+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${SKILL_COLORS[si]}" stroke-width="2" stroke-linejoin="round"/>`;
+    pts.forEach(p=>{ g+=`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${SKILL_COLORS[si]}"/>`; });
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:420px;display:block;">${g}</svg>`;
+}
+
+/* ============================== Library ============================== */
+async function loadLibrary(){
+  const grid=document.getElementById('libGrid');
+  try{
+    const snap = await db.collection('ah_library').get();
+    libItems=[]; snap.forEach(d=>libItems.push({id:d.id, ...d.data()}));
+    libItems.sort((a,b)=>tsMillis(b.createdAt)-tsMillis(a.createdAt));
+    const cats=[...new Set(libItems.map(i=>i.category).filter(Boolean))].sort();
+    document.getElementById('libCat').innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');
+    renderLibrary();
+  }catch(err){
+    console.error(err);
+    grid.innerHTML='<div class="empty">Couldn’t load the library.</div>';
+  }
+}
+function setLibKind(k, btn){
+  libKind=k;
+  document.querySelectorAll('.pillset .pill').forEach(p=>p.classList.toggle('active',p===btn));
+  renderLibrary();
+}
+function renderLibrary(){
+  const cat=document.getElementById('libCat').value;
+  const q=document.getElementById('libSearch').value.trim().toLowerCase();
+  const rows=libItems.filter(i=>
+    (libKind==='all'||i.kind===libKind) &&
+    (!cat||i.category===cat) &&
+    (!q||(i.title||'').toLowerCase().includes(q)||(i.description||'').toLowerCase().includes(q))
+  );
+  const grid=document.getElementById('libGrid');
+  if(!rows.length){ grid.innerHTML='<div class="empty">No videos or drills match.<br>Your coaches are building the library — check back soon!</div>'; return; }
+  grid.innerHTML='<div class="lib-grid">'+rows.map(i=>{
+    const vid=ytId(i.videoUrl);
+    return `<div class="lib-card" onclick="openLibItem('${esc(i.id)}')">
+      <div class="thumb">
+        ${vid?`<img loading="lazy" src="https://i.ytimg.com/vi/${vid}/hqdefault.jpg" alt="">`:`<span class="ph">${i.kind==='drill'?'📋':'🎬'}</span>`}
+        <span class="kind ${i.kind==='drill'?'drill':''}">${i.kind==='drill'?'Drill':'Video'}</span>
+      </div>
+      <div class="in"><h4>${esc(i.title)}</h4><div class="sub">${esc(i.category||'General')}${i.level?' · '+esc(i.level):''}</div></div>
+    </div>`;
+  }).join('')+'</div>';
+}
+function openLibItem(id){
+  const i=libItems.find(x=>x.id===id); if(!i) return;
+  document.getElementById('lmTitle').textContent=i.title||'';
+  document.getElementById('lmChips').innerHTML =
+    `<span class="chip gold">${i.kind==='drill'?'Drill':'Video'}</span>`+
+    (i.category?`<span class="chip">${esc(i.category)}</span>`:'')+
+    (i.level?`<span class="chip">${esc(i.level)}</span>`:'');
+  const vid=ytId(i.videoUrl);
+  document.getElementById('lmVideo').innerHTML = vid
+    ? `<div class="video-frame"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?rel=0" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : '';
+  document.getElementById('lmDesc').textContent=i.description||'';
+  document.getElementById('lmMeta').textContent=(i.authorName?('Added by '+i.authorName+' · '):'')+fmtDate(i.createdAt);
+  document.getElementById('libModalBack').hidden=false;
+}
+function closeLibModal(){
+  document.getElementById('libModalBack').hidden=true;
+  document.getElementById('lmVideo').innerHTML='';
+}
+
+/* ============================== Messages ============================== */
+function subThreads(){
+  if(unsubThreads) unsubThreads();
+  unsubThreads = db.collection('ah_threads')
+    .where('participantUids','array-contains', auth.currentUser.uid)
+    .onSnapshot(snap=>{
+      threads=[]; snap.forEach(d=>threads.push({id:d.id, ...d.data()}));
+      threads.sort((a,b)=>tsMillis(b.updatedAt)-tsMillis(a.updatedAt));
+      renderThreadList(); updateMsgDot();
+    }, err=>console.error('threads', err));
+}
+function otherName(t){
+  const uid=auth.currentUser.uid;
+  const others=(t.participantUids||[]).filter(u=>u!==uid);
+  return (t.participants && others.map(u=>t.participants[u]).filter(Boolean).join(', ')) || 'Conversation';
+}
+function threadUnread(t){
+  const lr=getLastRead()[t.id]||0;
+  return t.lastSenderUid && t.lastSenderUid!==auth.currentUser.uid && tsMillis(t.updatedAt)>lr;
+}
+function updateMsgDot(){
+  document.getElementById('msgDot').hidden = !threads.some(threadUnread);
+}
+function renderThreadList(){
+  const box=document.getElementById('threadList');
+  if(!threads.length){ box.innerHTML='<div class="tp-empty">No conversations yet.<br>Start one with a coach!</div>'; return; }
+  box.innerHTML=threads.map(t=>`
+    <div class="thread ${t.id===currentThreadId?'active':''}" onclick="openThread('${esc(t.id)}')">
+      <div class="n">${threadUnread(t)?'<span class="dot"></span>':''}${esc(otherName(t))}</div>
+      <div class="p">${esc(t.lastMessage||'')}</div>
+      <div class="t">${fmtDate(t.updatedAt)}</div>
+    </div>`).join('');
+}
+function openThread(tid){
+  currentThreadId=tid;
+  const t=threads.find(x=>x.id===tid);
+  document.getElementById('tpPlaceholder').hidden=true;
+  document.getElementById('tpHead').hidden=false;
+  document.getElementById('tpBody').hidden=false;
+  document.getElementById('tpCompose').hidden=false;
+  document.getElementById('tpName').textContent=t?otherName(t):'';
+  document.getElementById('msgWrap').classList.add('show-thread');
+  renderThreadList();
+  if(unsubMsgs) unsubMsgs();
+  unsubMsgs = db.collection('ah_threads').doc(tid).collection('messages').orderBy('createdAt')
+    .onSnapshot(snap=>{
+      const body=document.getElementById('tpBody');
+      const msgs=[]; snap.forEach(d=>msgs.push(d.data()));
+      body.innerHTML=msgs.map(m=>`
+        <div class="bubble ${m.senderUid===auth.currentUser.uid?'me':'them'}">${esc(m.text)}<span class="bm">${esc(m.senderName||'')} · ${fmtTime(m.createdAt)||'sending…'}</span></div>`).join('')
+        || '<div class="tp-empty">Say hello 👋</div>';
+      body.scrollTop=body.scrollHeight;
+      setLastRead(tid, Date.now()); renderThreadList(); updateMsgDot();
+    }, err=>console.error('msgs', err));
+}
+function closeThread(){
+  document.getElementById('msgWrap').classList.remove('show-thread');
+  currentThreadId=null; renderThreadList();
+  if(unsubMsgs){unsubMsgs();unsubMsgs=null;}
+  document.getElementById('tpHead').hidden=true;
+  document.getElementById('tpBody').hidden=true;
+  document.getElementById('tpCompose').hidden=true;
+  document.getElementById('tpPlaceholder').hidden=false;
+}
+async function sendMsg(){
+  const inp=document.getElementById('msgInput');
+  const text=inp.value.trim();
+  if(!text||!currentThreadId) return;
+  inp.value='';
+  const uid=auth.currentUser.uid;
+  const name=profile.name||auth.currentUser.email;
+  try{
+    const tRef=db.collection('ah_threads').doc(currentThreadId);
+    await tRef.collection('messages').add({senderUid:uid, senderName:name, text, createdAt:FV.serverTimestamp()});
+    await tRef.update({lastMessage:text.slice(0,80), lastSenderUid:uid, updatedAt:FV.serverTimestamp()});
+  }catch(err){ console.error(err); toast('Message failed to send.'); inp.value=text; }
+}
+async function openNewMessage(){
+  document.getElementById('newMsgBack').hidden=false;
+  const box=document.getElementById('coachPickList');
+  if(!staffList){
+    try{
+      const snap=await db.collection('ah_staff').get();
+      staffList=[]; snap.forEach(d=>staffList.push({uid:d.id, ...d.data()}));
+    }catch(err){ console.error(err); staffList=[]; }
+  }
+  const list=staffList.filter(c=>c.uid!==auth.currentUser.uid);
+  box.innerHTML = list.length ? list.map(c=>`
+    <button class="pick-item" onclick="startThreadWith('${esc(c.uid)}','${esc((c.name||'Coach').replace(/'/g,''))}')">
+      <span class="av">${esc((c.name||'C').charAt(0).toUpperCase())}</span>
+      <span><span class="nm">${esc(c.name||'Coach')}</span><br><span class="rl">CXA Coach</span></span>
+    </button>`).join('')
+    : '<div class="empty">No coaches are set up for messaging yet.</div>';
+}
+function closeNewMessage(){ document.getElementById('newMsgBack').hidden=true; }
+async function startThreadWith(otherUid, name){
+  closeNewMessage();
+  const uid=auth.currentUser.uid;
+  const existing=threads.find(t=>(t.participantUids||[]).includes(otherUid));
+  if(existing){ showView('messages'); openThread(existing.id); return; }
+  const tid=[uid,otherUid].sort().join('_');
+  const parts={}; parts[uid]=profile.name||auth.currentUser.email; parts[otherUid]=name;
+  try{
+    await db.collection('ah_threads').doc(tid).set({
+      participantUids:[uid,otherUid].sort(), participants:parts,
+      lastMessage:'', lastSenderUid:'', createdAt:FV.serverTimestamp(), updatedAt:FV.serverTimestamp()
+    });
+    showView('messages'); openThread(tid);
+  }catch(err){ console.error(err); toast('Couldn’t start the conversation.'); }
+}
+</script>
+</body>
+</html>
