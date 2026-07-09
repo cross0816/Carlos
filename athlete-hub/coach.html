@@ -69,7 +69,9 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 .topbar .titles{flex:1;min-width:0;}
 .topbar .t-org{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#B9C2D0;}
 .topbar h1{font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.topbar .who{font-size:12px;color:#B9C2D0;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar .who{font-size:12px;color:#B9C2D0;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;border:none;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;}
+.topbar .who:hover{color:#fff;}
+.topbar .who::after{content:' ✏️';font-size:10px;}
 .topbar .signout{background:rgba(255,255,255,.12);border:none;color:#fff;padding:7px 12px;border-radius:var(--r);font-size:12.5px;font-weight:700;}
 .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;overflow-x:auto;position:sticky;top:60px;z-index:39;}
 .tab{padding:12px 4px;margin-right:22px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);white-space:nowrap;}
@@ -195,7 +197,7 @@ tbody tr:hover{background:#FAFBFC;}
   .msg-wrap.show-thread .thread-list{display:none;}
   .msg-wrap.show-thread .thread-pane{display:flex;}
   .tp-head .back{display:block;}
-  .topbar .who{display:none;}
+  .topbar .who{max-width:110px;}
 }
 </style>
 </head>
@@ -225,7 +227,7 @@ tbody tr:hover{background:#FAFBFC;}
       <div class="t-org">CXA Athlete Hub</div>
       <h1>Coach Console</h1>
     </div>
-    <span class="who" id="whoAmI"></span>
+    <button class="who" id="whoAmI" onclick="editMyName()" title="Click to change your display name"></button>
     <button class="signout" onclick="auth.signOut()">Sign Out</button>
   </div>
   <div class="tabs">
@@ -516,6 +518,20 @@ auth.onAuthStateChanged(async user=>{
     try{await auth.signOut();}catch(_){}
   }
 });
+
+async function editMyName(){
+  const name=prompt('Your display name — this is what athletes and parents see on your posts, assessments, and messages:', myName);
+  if(name==null) return;
+  const trimmed=name.trim();
+  if(!trimmed || trimmed===myName) return;
+  try{
+    await db.collection('users').doc(auth.currentUser.uid).update({name:trimmed});
+    myName=trimmed;
+    document.getElementById('whoAmI').textContent=myName;
+    db.collection('ah_staff').doc(auth.currentUser.uid).set({name:myName, email:auth.currentUser.email, updatedAt:FV.serverTimestamp()},{merge:true}).catch(()=>{});
+    toast('Name updated — new posts and messages will use it.');
+  }catch(err){ console.error(err); toast('Couldn’t update your name.'); }
+}
 
 /* ============================== Navigation ============================== */
 function showView(v){
