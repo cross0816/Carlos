@@ -1812,15 +1812,36 @@ let _calMonthIdx = 0;
 function buildFullCal() {
   const bar = document.getElementById('cal-month-bar');
   if (bar) {
-    bar.innerHTML = CXA_SCHOOL_MONTHS.map(({label}, i) =>
-      `<button onclick="showCalMonth(${i})" id="cal-mb-${i}" style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--t2);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">${label}</button>`
-    ).join('');
+    bar.innerHTML =
+      `<button onclick="showCalMain()" id="cal-mb-main" style="padding:6px 14px;border-radius:20px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">Full Year</button>` +
+      CXA_SCHOOL_MONTHS.map(({label}, i) =>
+        `<button onclick="showCalMonth(${i})" id="cal-mb-${i}" style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--t2);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">${label}</button>`
+      ).join('');
   }
-  showCalMonth(0);
+  showCalMain();
+}
+
+function showCalMain() {
+  // Reset all month buttons
+  const mainBtn = document.getElementById('cal-mb-main');
+  if (mainBtn) { mainBtn.style.background='var(--accent)'; mainBtn.style.color='#fff'; mainBtn.style.borderColor='var(--accent)'; }
+  CXA_SCHOOL_MONTHS.forEach((_, i) => {
+    const btn = document.getElementById('cal-mb-' + i);
+    if (!btn) return;
+    btn.style.background = 'var(--card)';
+    btn.style.color = 'var(--t2)';
+    btn.style.borderColor = 'var(--border)';
+  });
+  document.getElementById('calendar-content').innerHTML =
+    `<div class="card" style="padding:8px;overflow:hidden;">
+       <img src="cxa-calendar-2026-27.png" style="width:100%;height:auto;display:block;border-radius:6px;" alt="CXA 2026/27 School Calendar">
+     </div>`;
 }
 
 function showCalMonth(idx) {
   _calMonthIdx = idx;
+  const mainBtn = document.getElementById('cal-mb-main');
+  if (mainBtn) { mainBtn.style.background='var(--card)'; mainBtn.style.color='var(--t2)'; mainBtn.style.borderColor='var(--border)'; }
   CXA_SCHOOL_MONTHS.forEach((_, i) => {
     const btn = document.getElementById('cal-mb-' + i);
     if (!btn) return;
