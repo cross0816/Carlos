@@ -970,13 +970,11 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
   <!-- CALENDAR & SCHEDULE -->
   <div id="p-calendar" class="page">
-    <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);margin-bottom:10px;">CXA 2026/27 Calendar</div>
-    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#16a34a;display:inline-block;"></span>First Day</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#2563eb;display:inline-block;"></span>Last Day</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#fca5a5;display:inline-block;"></span>Holiday / No School</span>
+    <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);margin-bottom:14px;">CXA 2026/27 Calendar</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <iframe src="cxa-calendar-2026-27.pdf" style="width:100%;height:500px;border:none;display:block;"></iframe>
     </div>
-    <div id="calendar-content"></div>
+    <div id="calendar-content" style="display:none;"></div>
 
     <div class="slabel" style="margin-top:28px;margin-bottom:12px;">Weekly Schedule</div>
     <div class="wh">
