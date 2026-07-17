@@ -59,7 +59,7 @@ const CONFIG = {
   // 2. Copy the "Embed code" src URL and paste it below.
   // 3. Make sure the calendar is set to "Public" or shared with viewers.
   // Leave as empty string ('') to hide the calendar embed tab.
-  calendarEmbedSrc: 'https://calendar.google.com/calendar/embed?src=3e545e9187aae0998e59460c8ff2a36345c87ce6047f50c386fe4108139fd82e%40group.calendar.google.com&ctz=America%2FDenver',
+  calendarEmbedSrc: '',
 
   // Announcements (add/remove objects; newest first)
   announcements: [
@@ -970,13 +970,11 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 
   <!-- CALENDAR & SCHEDULE -->
   <div id="p-calendar" class="page">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);" id="fullcal-title"></div>
-      <div style="display:flex;gap:12px;align-items:center;font-size:11px;color:var(--t2);">
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:1px;background:var(--accent);display:inline-block;"></span>School</span>
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:1px;background:var(--gold);display:inline-block;"></span>Athletics</span>
-        <span style="display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:1px;background:#555;display:inline-block;"></span>Events</span>
-      </div>
+    <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);margin-bottom:10px;">CXA 2026/27 Calendar</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#16a34a;display:inline-block;"></span>First Day</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#2563eb;display:inline-block;"></span>Last Day</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#fca5a5;display:inline-block;"></span>Holiday / No School</span>
     </div>
     <div id="calendar-content"></div>
 
@@ -1800,49 +1798,63 @@ function buildDashCal() {
 }
 
 function buildFullCal() {
-  const yr = 2026, mo = 5;
-  document.getElementById('fullcal-title').textContent = MONTHS[mo] + ' ' + yr;
   const cont = document.getElementById('calendar-content');
-
-  if (CONFIG.calendarEmbedSrc) {
-    cont.innerHTML = `<div class="cal-embed"><iframe src="${CONFIG.calendarEmbedSrc}&mode=MONTH&showTitle=1&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1&bgcolor=%23FFFFFF" height="640"></iframe></div>`;
-    return;
-  }
-
-  // Built-in static calendar
-  let html = '<div class="fcal-grid" style="margin-bottom:3px;">';
-  DAYS_F.forEach(d => { html += `<div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);text-align:center;padding-bottom:5px;">${d}</div>`; });
-  html += '</div><div class="fcal-grid">';
-
-  const first = new Date(yr, mo, 1).getDay();
-  const days  = new Date(yr, mo + 1, 0).getDate();
-  const prev  = new Date(yr, mo, 0).getDate();
   const today = new Date();
 
-  for (let i = 0; i < first; i++) {
-    html += `<div class="fcal-day other"><div class="fcdn">${prev - first + 1 + i}</div></div>`;
-  }
-  for (let d = 1; d <= days; d++) {
-    const key    = `${yr}-${mo+1}-${d}`;
-    const isT    = yr===today.getFullYear()&&mo===today.getMonth()&&d===today.getDate();
-    const evs    = (CAL_EVENTS[key]||[]).map(e => `<div class="fcdev ${e.c}">${e.t}</div>`).join('');
-    html += `<div class="fcal-day${isT?' today':''}"><div class="fcdn">${d}</div>${evs}</div>`;
-  }
-  const used = first + days;
-  const tail = used % 7 === 0 ? 0 : 7 - (used % 7);
-  for (let d = 1; d <= tail; d++) html += `<div class="fcal-day other"><div class="fcdn">${d}</div></div>`;
-  html += '</div>';
+  const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAY_HDRS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
-  cont.innerHTML = html +
-    `<div style="margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;" class="cal-setup">
-      <strong style="color:var(--t1);font-size:13px;">Connect Google Calendar</strong>
-      <p style="margin-top:6px;color:var(--t3);font-size:12px;">To display CXA's live calendar, add their Google Calendar embed URL to the <code>CONFIG.calendarEmbedSrc</code> field in <code>index.html</code>:</p>
-      <ol style="margin-top:10px;font-size:12px;color:var(--t2);">
-        <li>Open Google Calendar → Settings (⚙️) → select the CXA calendar</li>
-        <li>Scroll to <strong>Integrate calendar</strong> → copy the <strong>Embed code</strong></li>
-        <li>Paste the <code>src="..."</code> URL into <code>CONFIG.calendarEmbedSrc</code> in index.html</li>
-      </ol>
-    </div>`;
+  // CXA 2026/27 school year highlighted dates
+  const FIRST_DAY = '2026-8-17';
+  const LAST_DAY  = '2027-5-20';
+  const HOLIDAYS  = new Set([
+    '2026-9-7',
+    '2026-10-9','2026-10-23',
+    '2026-11-23','2026-11-24','2026-11-25','2026-11-26','2026-11-27',
+    '2026-12-17','2026-12-18','2026-12-19','2026-12-20','2026-12-21','2026-12-22',
+    '2026-12-23','2026-12-24','2026-12-25','2026-12-26','2026-12-27','2026-12-28',
+    '2026-12-29','2026-12-30','2026-12-31',
+    '2027-1-1','2027-1-15','2027-1-18',
+    '2027-2-15',
+    '2027-3-5'
+  ]);
+
+  const schoolMonths = [
+    {y:2026,m:7},{y:2026,m:8},{y:2026,m:9},{y:2026,m:10},{y:2026,m:11},
+    {y:2027,m:0},{y:2027,m:1},{y:2027,m:2},{y:2027,m:3},{y:2027,m:4},
+    {y:2027,m:5},{y:2027,m:6}
+  ];
+
+  function buildMonth(y, m) {
+    const first = new Date(y, m, 1).getDay();
+    const days  = new Date(y, m + 1, 0).getDate();
+    const prev  = new Date(y, m, 0).getDate();
+    let html = `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;margin-bottom:14px;">
+      <div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);margin-bottom:8px;">${MONTHS_FULL[m]} ${y}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:3px;">`;
+    DAY_HDRS.forEach(d => { html += `<div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--t3);text-align:center;">${d}</div>`; });
+    html += `</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;">`;
+    for (let i = 0; i < first; i++) {
+      html += `<div style="text-align:center;padding:3px 0;font-size:11px;color:var(--t3);opacity:.3;">${prev-first+1+i}</div>`;
+    }
+    for (let d = 1; d <= days; d++) {
+      const key = `${y}-${m+1}-${d}`;
+      const isToday = y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();
+      const isFirst = key===FIRST_DAY, isLast=key===LAST_DAY, isHol=HOLIDAYS.has(key);
+      let bg='transparent',color='var(--t1)',fw='400',extra='';
+      if (isFirst)      { bg='#16a34a'; color='#fff'; fw='700'; }
+      else if (isLast)  { bg='#2563eb'; color='#fff'; fw='700'; }
+      else if (isHol)   { bg='#fca5a5'; color='#991b1b'; fw='600'; }
+      else if (isToday) { bg='var(--accent)'; color='#fff'; fw='700'; }
+      html += `<div style="text-align:center;padding:2px 0;"><div style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:${bg};color:${color};font-size:11px;font-weight:${fw};">${d}</div></div>`;
+    }
+    const used = first+days, tail = used%7===0?0:7-used%7;
+    for (let d=1;d<=tail;d++) html+=`<div style="text-align:center;padding:3px 0;font-size:11px;color:var(--t3);opacity:.3;">${d}</div>`;
+    html += '</div></div>';
+    return html;
+  }
+
+  cont.innerHTML = schoolMonths.map(({y,m}) => buildMonth(y,m)).join('');
 }
 
 // ── SCHEDULE ──
