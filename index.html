@@ -977,13 +977,6 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
       <div id="cal-month-bar" style="display:flex;gap:6px;min-width:max-content;padding-bottom:4px;"></div>
     </div>
 
-    <!-- Legend -->
-    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#16a34a;display:inline-block;"></span>First Day</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#2563eb;display:inline-block;"></span>Last Day</span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);"><span style="width:12px;height:12px;border-radius:50%;background:#fca5a5;display:inline-block;"></span>Holiday / No School</span>
-    </div>
-
     <div id="calendar-content"></div>
 
     <div class="slabel" style="margin-top:28px;margin-bottom:12px;">Weekly Schedule</div>
@@ -1806,48 +1799,28 @@ function buildDashCal() {
 }
 
 const CXA_SCHOOL_MONTHS = [
-  {y:2026,m:7,label:'Aug'},{y:2026,m:8,label:'Sep'},{y:2026,m:9,label:'Oct'},
-  {y:2026,m:10,label:'Nov'},{y:2026,m:11,label:'Dec'},{y:2027,m:0,label:'Jan'},
-  {y:2027,m:1,label:'Feb'},{y:2027,m:2,label:'Mar'},{y:2027,m:3,label:'Apr'},
-  {y:2027,m:4,label:'May'},{y:2027,m:5,label:'Jun'},{y:2027,m:6,label:'Jul'}
+  {label:'Aug',file:'cal-aug.jpg'},{label:'Sep',file:'cal-sep.jpg'},
+  {label:'Oct',file:'cal-oct.jpg'},{label:'Nov',file:'cal-nov.jpg'},
+  {label:'Dec',file:'cal-dec.jpg'},{label:'Jan',file:'cal-jan.jpg'},
+  {label:'Feb',file:'cal-feb.jpg'},{label:'Mar',file:'cal-mar.jpg'},
+  {label:'Apr',file:'cal-apr.jpg'},{label:'May',file:'cal-may.jpg'},
+  {label:'Jun',file:'cal-jun.jpg'},{label:'Jul',file:'cal-jul.jpg'}
 ];
-const CXA_FIRST_DAY = '2026-8-17';
-const CXA_LAST_DAY  = '2027-5-20';
-const CXA_HOLIDAYS  = new Set([
-  '2026-9-7','2026-10-9','2026-10-23',
-  '2026-11-23','2026-11-24','2026-11-25','2026-11-26','2026-11-27',
-  '2026-12-17','2026-12-18','2026-12-19','2026-12-20','2026-12-21','2026-12-22',
-  '2026-12-23','2026-12-24','2026-12-25','2026-12-26','2026-12-27','2026-12-28',
-  '2026-12-29','2026-12-30','2026-12-31',
-  '2027-1-1','2027-1-15','2027-1-18','2027-2-15','2027-3-5'
-]);
 
 let _calMonthIdx = 0;
 
 function buildFullCal() {
-  const today = new Date();
-  // Default to current month if in school year, else August
-  const nowIdx = CXA_SCHOOL_MONTHS.findIndex(({y,m}) => y===today.getFullYear()&&m===today.getMonth());
-  _calMonthIdx = nowIdx >= 0 ? nowIdx : 0;
-
-  // Build month bar
   const bar = document.getElementById('cal-month-bar');
   if (bar) {
     bar.innerHTML = CXA_SCHOOL_MONTHS.map(({label}, i) =>
       `<button onclick="showCalMonth(${i})" id="cal-mb-${i}" style="padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--t2);font-family:'Arial Narrow',Arial,sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">${label}</button>`
     ).join('');
   }
-
-  showCalMonth(_calMonthIdx);
+  showCalMonth(0);
 }
 
 function showCalMonth(idx) {
   _calMonthIdx = idx;
-  const today = new Date();
-  const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const DAY_HDRS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-
-  // Update bar active state
   CXA_SCHOOL_MONTHS.forEach((_, i) => {
     const btn = document.getElementById('cal-mb-' + i);
     if (!btn) return;
@@ -1855,37 +1828,12 @@ function showCalMonth(idx) {
     btn.style.color = i===idx ? '#fff' : 'var(--t2)';
     btn.style.borderColor = i===idx ? 'var(--accent)' : 'var(--border)';
   });
-
-  const {y, m} = CXA_SCHOOL_MONTHS[idx];
-  const first = new Date(y, m, 1).getDay();
-  const days  = new Date(y, m + 1, 0).getDate();
-  const prev  = new Date(y, m, 0).getDate();
-
-  let html = `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 16px;">`;
-  html += `<div style="font-family:'Arial Narrow',Arial,sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t1);margin-bottom:14px;">${MONTHS_FULL[m]} ${y}</div>`;
-  html += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">`;
-  DAY_HDRS.forEach(d => { html += `<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);text-align:center;">${d}</div>`; });
-  html += `</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">`;
-
-  for (let i = 0; i < first; i++) {
-    html += `<div style="text-align:center;padding:4px 0;font-size:13px;color:var(--t3);opacity:.3;">${prev-first+1+i}</div>`;
-  }
-  for (let d = 1; d <= days; d++) {
-    const key = `${y}-${m+1}-${d}`;
-    const isToday = y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate();
-    const isFirst = key===CXA_FIRST_DAY, isLast=key===CXA_LAST_DAY, isHol=CXA_HOLIDAYS.has(key);
-    let bg='transparent', color='var(--t1)', fw='400';
-    if (isFirst)      { bg='#16a34a'; color='#fff'; fw='700'; }
-    else if (isLast)  { bg='#2563eb'; color='#fff'; fw='700'; }
-    else if (isHol)   { bg='#fca5a5'; color='#991b1b'; fw='600'; }
-    else if (isToday) { bg='var(--accent)'; color='#fff'; fw='700'; }
-    html += `<div style="text-align:center;"><div style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:${bg};color:${color};font-size:13px;font-weight:${fw};">${d}</div></div>`;
-  }
-  const used = first+days, tail = used%7===0?0:7-used%7;
-  for (let d=1;d<=tail;d++) html+=`<div style="text-align:center;padding:4px 0;font-size:13px;color:var(--t3);opacity:.3;">${d}</div>`;
-  html += '</div></div>';
-
-  document.getElementById('calendar-content').innerHTML = html;
+  const {label, file} = CXA_SCHOOL_MONTHS[idx];
+  document.getElementById('calendar-content').innerHTML =
+    `<div class="card" style="padding:8px;overflow:hidden;">
+       <img src="${file}" style="width:100%;height:auto;display:block;border-radius:6px;" alt="${label} Calendar"
+         onerror="this.parentElement.innerHTML='<div style=\'padding:24px;text-align:center;color:var(--t3);font-size:13px;\'>No calendar uploaded for ${label} yet.</div>'">
+     </div>`;
 }
 
 // ── SCHEDULE ──
