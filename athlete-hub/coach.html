@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#1A2535">
 <link rel="icon" type="image/jpeg" href="cxa-logo.jpg">
 <link rel="apple-touch-icon" href="cxa-logo.jpg">
-<title>Coach Console — CXA Athlete Hub</title>
+<title>Coach Console — Colorado Extreme Sports Academy</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -68,11 +68,16 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 .topbar img{width:36px;height:36px;object-fit:contain;border-radius:6px;background:#fff;}
 .topbar .titles{flex:1;min-width:0;}
 .topbar .t-org{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#B9C2D0;}
-.topbar h1{font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar h1{font-size:19px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .topbar .who{font-size:12px;color:#B9C2D0;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:none;border:none;cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;}
 .topbar .who:hover{color:#fff;}
 .topbar .who::after{content:' ✏️';font-size:10px;}
 .topbar .signout{background:rgba(255,255,255,.12);border:none;color:#fff;padding:7px 12px;border-radius:var(--r);font-size:12.5px;font-weight:700;}
+.sport-switch{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:none;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;}
+.sport-switch .sdot{width:7px;height:7px;border-radius:50%;background:#5B9EE8;flex-shrink:0;}
+.sport-switch .car{color:#8894A8;font-size:15px;margin-left:2px;}
+.dash-badge{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);white-space:nowrap;}
+.dash-badge .bdot{width:7px;height:7px;border-radius:50%;background:var(--gold);}
 .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;overflow-x:auto;position:sticky;top:60px;z-index:39;}
 .tab{padding:12px 4px;margin-right:22px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);white-space:nowrap;}
 .tab.active{color:var(--t1);border-bottom-color:var(--gold);}
@@ -80,6 +85,40 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 .section-h{font-family:'Arial Narrow',Arial,sans-serif;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--t2);margin:4px 0 12px;}
 .bar-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
 .empty{border:1.5px dashed var(--border);border-radius:10px;padding:34px 20px;text-align:center;color:var(--t3);font-size:14px;line-height:1.5;}
+
+/* Dashboard */
+.dash-hero{background:linear-gradient(135deg,#1A2535 0%,#0F1928 100%);border-radius:14px;padding:28px 30px;margin-bottom:22px;color:#fff;}
+.dash-eyebrow{display:flex;align-items:center;gap:8px;font-family:'Arial Narrow',Arial,sans-serif;font-size:11.5px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#8FA3C7;margin-bottom:10px;}
+.dash-eyebrow .edot{width:7px;height:7px;border-radius:50%;background:#5B9EE8;flex-shrink:0;}
+.dash-hero h2{font-family:'Arial Narrow',Arial,sans-serif;font-size:30px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;}
+.dash-sub{font-size:14.5px;color:#B9C2D0;margin-bottom:22px;cursor:pointer;display:inline-block;}
+.dash-sub:hover{color:#fff;text-decoration:underline dotted;}
+.dash-stats{display:flex;gap:40px;flex-wrap:wrap;}
+.dash-stats>div{display:flex;flex-direction:column;gap:2px;}
+.dash-stats .n{font-family:'Arial Narrow',Arial,sans-serif;font-size:32px;font-weight:900;}
+.dash-stats .l{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#8FA3C7;}
+
+.ath-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:16px;}
+.ath-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.ath-card .top{display:flex;gap:14px;margin-bottom:16px;}
+.ath-avatar{width:52px;height:52px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:var(--accent);background:#EEF0F4;border:3px solid var(--gold);}
+.ath-avatar.stale{border-color:#E4E7EC;}
+.ath-card h4{font-size:16px;font-weight:800;margin-bottom:3px;}
+.ath-card .info{font-size:13px;color:var(--t2);line-height:1.4;}
+.ath-card .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--border);padding-top:14px;flex-wrap:wrap;}
+.ath-card .last{font-size:12.5px;color:var(--t3);display:flex;align-items:center;gap:6px;}
+.ath-card .last .ldot{width:7px;height:7px;border-radius:50%;background:#5B9EE8;flex-shrink:0;}
+.btn.mic{background:var(--accent);color:#fff;}
+.add-ath-btn{background:var(--surface);border:1.5px dashed var(--border);border-radius:10px;padding:16px;width:100%;text-align:center;font-weight:800;font-size:14px;color:var(--t1);margin-bottom:20px;}
+
+/* Stage scale (Beginning…Advanced) */
+.stage-row{margin-bottom:14px;}
+.stage-row .lbl{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:6px;display:block;}
+.stage-picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+.stage-btn{padding:9px 4px;border:1px solid var(--border);background:#FAFBFC;border-radius:var(--r);font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--t3);text-align:center;line-height:1.25;overflow-wrap:anywhere;}
+.stage-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+.app-footer{text-align:center;font-family:'Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);padding:30px 18px 10px;}
 .loading{text-align:center;color:var(--t3);padding:40px 0;font-size:14px;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;}
 .card .kicker{font-family:'Arial Narrow',Arial,sans-serif;font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:6px;}
@@ -118,22 +157,6 @@ tbody tr:hover{background:#FAFBFC;}
 .acct-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;font-size:13.5px;border-bottom:1px solid #F0F2F5;}
 .acct-row:last-child{border-bottom:none;}
 
-/* Sliders */
-.slider-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.slider-row .lbl{width:118px;font-size:13px;font-weight:700;color:var(--t2);flex-shrink:0;}
-.slider-row input[type=range]{flex:1;accent-color:var(--gold);}
-.slider-row .val{width:34px;text-align:right;font-weight:800;font-size:15px;}
-
-/* Progress bits (shared with athlete app) */
-.skill-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.skill-row .lbl{width:118px;font-size:13px;font-weight:700;color:var(--t2);flex-shrink:0;}
-.skill-row .bar{flex:1;height:10px;background:#EEF0F4;border-radius:999px;overflow:hidden;}
-.skill-row .bar i{display:block;height:100%;background:var(--gold);border-radius:999px;}
-.skill-row .val{width:34px;text-align:right;font-weight:800;font-size:14px;}
-.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
-.legend .li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);font-weight:600;}
-.legend .sw{width:12px;height:12px;border-radius:3px;}
-.chart-box{overflow-x:auto;}
 .assess-item{border-top:1px solid var(--border);padding:12px 0;}
 .assess-item .d{font-weight:800;font-size:14px;}
 .assess-item .c{font-size:12px;color:var(--t3);margin-left:8px;}
@@ -197,7 +220,12 @@ tbody tr:hover{background:#FAFBFC;}
   .msg-wrap.show-thread .thread-list{display:none;}
   .msg-wrap.show-thread .thread-pane{display:flex;}
   .tp-head .back{display:block;}
-  .topbar .who{max-width:110px;}
+  .topbar .who{max-width:80px;}
+  .dash-badge{display:none;}
+  .sport-switch .car{display:none;}
+  .dash-hero{padding:22px 20px;}
+  .dash-hero h2{font-size:24px;}
+  .dash-stats{gap:24px;}
 }
 </style>
 </head>
@@ -224,14 +252,16 @@ tbody tr:hover{background:#FAFBFC;}
   <div class="topbar">
     <img src="cxa-logo.jpg" alt="">
     <div class="titles">
-      <div class="t-org">CXA Athlete Hub</div>
-      <h1>Coach Console</h1>
+      <div class="t-org">Sports Academy</div>
+      <h1>Colorado Extreme</h1>
     </div>
+    <button class="sport-switch" onclick="toast('More sports are coming soon — Hockey is live today.')"><span class="sdot"></span> 🏒 Hockey <span class="car">›</span></button>
+    <span class="dash-badge"><span class="bdot"></span>Coach Dashboard</span>
     <button class="who" id="whoAmI" onclick="editMyName()" title="Click to change your display name"></button>
     <button class="signout" onclick="auth.signOut()">Sign Out</button>
   </div>
   <div class="tabs">
-    <button class="tab active" id="tab-athletes" onclick="showView('athletes')">Athletes</button>
+    <button class="tab active" id="tab-athletes" onclick="showView('athletes')">Dashboard</button>
     <button class="tab" id="tab-feed" onclick="showView('feed')">Training Feed</button>
     <button class="tab" id="tab-library" onclick="showView('library')">Library</button>
     <button class="tab" id="tab-messages" onclick="showView('messages')">Messages</button>
@@ -239,18 +269,20 @@ tbody tr:hover{background:#FAFBFC;}
   </div>
 
   <div class="wrap">
-    <!-- ATHLETES -->
+    <!-- ATHLETES / DASHBOARD -->
     <section id="view-athletes">
-      <div class="stats">
-        <div class="stat"><div class="n" id="statTotal">–</div><div class="l">Athletes</div></div>
-        <div class="stat"><div class="n" id="statLinked">–</div><div class="l">Linked Accounts</div></div>
-        <div class="stat"><div class="n" id="statParents">–</div><div class="l">Parent Links</div></div>
+      <div class="dash-hero">
+        <div class="dash-eyebrow" id="heroEyebrow"></div>
+        <h2 id="heroGreeting">Good morning, Coach</h2>
+        <div class="dash-sub" id="heroSub" onclick="editProgram()" title="Click to change the program/season name"></div>
+        <div class="dash-stats">
+          <div><span class="n" id="statTotal">–</span><span class="l">Hockey Athletes</span></div>
+          <div><span class="n" id="statUpdated">–</span><span class="l">Updated This Week</span></div>
+          <div><span class="n" id="statNeed">–</span><span class="l">Need An Update</span></div>
+        </div>
       </div>
-      <div class="bar-actions">
-        <div class="section-h" style="margin:0;">Roster</div>
-        <button class="btn gold" onclick="openAddAthlete()">+ Add Athlete</button>
-      </div>
-      <div id="rosterBox"><div class="loading">Loading roster…</div></div>
+      <div class="ath-grid" id="rosterBox"><div class="loading">Loading roster…</div></div>
+      <button class="add-ath-btn" onclick="openAddAthlete()">+ Add Hockey Athlete</button>
     </section>
 
     <!-- FEED -->
@@ -348,6 +380,7 @@ tbody tr:hover{background:#FAFBFC;}
       <div id="annList"><div class="loading">Loading…</div></div>
     </section>
   </div>
+  <div class="app-footer">Colorado Extreme Sports Academy · Building Better Young Athletes</div>
 </div>
 
 <!-- Add athlete modal -->
@@ -361,6 +394,7 @@ tbody tr:hover{background:#FAFBFC;}
         <div class="field"><label>Position</label><select id="naPos"><option>Forward</option><option>Defense</option><option>Goalie</option><option>Skater</option></select></div>
       </div>
       <div class="field"><label>Team / Group</label><input id="naTeam" maxlength="60" placeholder="e.g. 12U AA"></div>
+      <div class="field"><label>Other Sports (optional)</label><input id="naOther" maxlength="120" placeholder="e.g. Golf, Lacrosse"><div class="hint">Comma-separated — shows as "also ___" on the dashboard.</div></div>
       <button class="btn gold full" onclick="saveNewAthlete()" id="naBtn">Create Athlete</button>
     </div>
     <div id="addAthleteDone" hidden>
@@ -387,6 +421,7 @@ tbody tr:hover{background:#FAFBFC;}
       <div class="field"><label>Position</label><select id="dEditPos"><option>Forward</option><option>Defense</option><option>Goalie</option><option>Skater</option></select></div>
       <div class="field"><label>Team / Group</label><input id="dEditTeam"></div>
     </div>
+    <div class="field"><label>Other Sports</label><input id="dEditOther" placeholder="e.g. Golf, Lacrosse"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn small" onclick="saveAthleteEdits()">Save Profile</button>
       <button class="btn small dangerghost" id="dToggleActive" onclick="toggleAthleteActive()"></button>
@@ -406,7 +441,6 @@ tbody tr:hover{background:#FAFBFC;}
         <button class="btn ghost small" onclick="toggleAssessForm(false)">Cancel</button>
       </div>
     </div>
-    <div id="dChart"></div>
     <div id="dAssessList" style="margin-top:8px;"><div class="loading">Loading…</div></div>
   </div>
 </div>
@@ -425,14 +459,30 @@ tbody tr:hover{background:#FAFBFC;}
 <script>
 /* ============================== Constants ============================== */
 const SKILLS = [
-  {key:'skating',      label:'Skating'},
-  {key:'puckHandling', label:'Puck Handling'},
-  {key:'shooting',     label:'Shooting'},
-  {key:'passing',      label:'Passing'},
-  {key:'hockeyIQ',     label:'Hockey IQ'},
-  {key:'compete',      label:'Compete Level'},
+  {key:'skating',          label:'Skating'},
+  {key:'stickhandling',    label:'Stickhandling'},
+  {key:'passing',          label:'Passing'},
+  {key:'shooting',         label:'Shooting'},
+  {key:'puckControl',      label:'Puck Control'},
+  {key:'hockeyIQ',         label:'Hockey IQ'},
+  {key:'mentalGame',       label:'Mental Game'},
+  {key:'sportsmanship',    label:'Sportsmanship'},
+  {key:'athleticMovement', label:'Athletic Movement'},
+  {key:'confidence',       label:'Confidence'},
+  {key:'focus',            label:'Focus'},
+  {key:'effortAttitude',   label:'Effort & Attitude'},
 ];
-const SKILL_COLORS = ['#1A2535','#C4880A','#2E7D32','#B3261E','#5A6A80','#7B1FA2'];
+const STAGES = [
+  {key:'beginning',  label:'Beginning'},
+  {key:'developing', label:'Developing'},
+  {key:'improving',  label:'Improving'},
+  {key:'consistent', label:'Consistent'},
+  {key:'advanced',   label:'Advanced'},
+];
+const STAGE_INDEX = Object.fromEntries(STAGES.map((s,i)=>[s.key,i]));
+function stageLabel(key){ const s=STAGES.find(x=>x.key===key); return s?s.label:'—'; }
+const SPORTS = { hockey: {label:'Hockey', icon:'🏒', seasonLabel:'On-Ice Season'} };
+const CURRENT_SPORT = 'hockey';
 const CATEGORIES = ['Skating','Puck Handling','Shooting','Passing','Defense','Offense','Goaltending','Conditioning','Hockey IQ','Team Play','Other'];
 const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
@@ -454,6 +504,11 @@ function fmtDate(ts){
 function fmtTime(ts){ const ms=tsMillis(ts); return ms?new Date(ms).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):''; }
 function fmtDay(str){ if(!str)return''; const [y,m,d]=str.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
 function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function daysSince(dateStr){
+  if(!dateStr) return Infinity;
+  const [y,m,d]=dateStr.split('-').map(Number);
+  return Math.floor((new Date()-new Date(y,m-1,d))/86400000);
+}
 let toastTimer=null;
 function toast(t){
   const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show');
@@ -467,6 +522,9 @@ let profile=null, myName='';
 let roster=[];                 // athletes
 let detailId=null;             // athlete open in detail modal
 let detailAssessments=[];
+let assessByAthlete={};        // athleteId -> latest assessment (for dashboard stats/focus)
+let assessDraft={};            // in-progress stage picks while the assessment form is open
+let settings={programName:'Development Program'};
 let posts=[], libItems=[], announcements=[];
 let threads=[], unsubThreads=null, unsubMsgs=null, currentThreadId=null;
 let hubUsers=null;             // athlete/parent users for messaging
@@ -510,7 +568,7 @@ auth.onAuthStateChanged(async user=>{
     db.collection('ah_staff').doc(user.uid).set({name:myName, email:user.email, updatedAt:FV.serverTimestamp()},{merge:true}).catch(()=>{});
     document.getElementById('loginScreen').hidden=true;
     document.getElementById('app').hidden=false;
-    buildAssessSliders(); buildCategorySelect();
+    buildAssessStages(); buildCategorySelect(); loadSettings();
     loadRoster(); loadPosts(); loadLibrary(); loadAnnouncements(); subThreads();
   }catch(err){
     console.error(err);
@@ -533,6 +591,29 @@ async function editMyName(){
   }catch(err){ console.error(err); toast('Couldn’t update your name.'); }
 }
 
+/* ============================== Dashboard hero ============================== */
+function loadSettings(){
+  try{ settings.programName = localStorage.getItem('ah_program_'+CURRENT_SPORT) || settings.programName; }catch(_){}
+  renderHero();
+}
+function editProgram(){
+  const val = prompt('Program / season name — shown on your dashboard:', settings.programName||'');
+  if(val==null) return;
+  const trimmed=val.trim(); if(!trimmed) return;
+  settings.programName=trimmed;
+  try{ localStorage.setItem('ah_program_'+CURRENT_SPORT, trimmed); }catch(_){}
+  renderHero();
+}
+function renderHero(){
+  const hour=new Date().getHours();
+  const greeting = hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+  document.getElementById('heroGreeting').textContent = `${greeting}, Coach`;
+  const dateStr = new Date().toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric'});
+  document.getElementById('heroSub').textContent = `${dateStr} · ${settings.programName}`;
+  const sp=SPORTS[CURRENT_SPORT];
+  document.getElementById('heroEyebrow').innerHTML = `<span class="edot"></span> ${sp.icon} ${esc(sp.label.toUpperCase())} · ${esc(sp.seasonLabel.toUpperCase())}`;
+}
+
 /* ============================== Navigation ============================== */
 function showView(v){
   for(const name of ['athletes','feed','library','messages','announce']){
@@ -541,45 +622,81 @@ function showView(v){
   }
 }
 
-/* ============================== Roster ============================== */
+/* ============================== Roster / Dashboard ============================== */
 async function loadRoster(){
   const box=document.getElementById('rosterBox');
   try{
     const snap=await db.collection('ah_athletes').get();
     roster=[]; snap.forEach(d=>roster.push({id:d.id,...d.data()}));
     roster.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
-    document.getElementById('statTotal').textContent=roster.filter(a=>a.active!==false).length;
-    document.getElementById('statLinked').textContent=roster.filter(a=>a.uid).length;
-    document.getElementById('statParents').textContent=roster.reduce((s,a)=>s+((a.parentUids||[]).length),0);
+    await loadAllLatestAssessments();
+    const active=roster.filter(a=>a.active!==false && (a.sport||'hockey')===CURRENT_SPORT);
+    const updated=active.filter(a=>assessByAthlete[a.id] && daysSince(assessByAthlete[a.id].date)<=7).length;
+    document.getElementById('statTotal').textContent=active.length;
+    document.getElementById('statUpdated').textContent=updated;
+    document.getElementById('statNeed').textContent=active.length-updated;
     renderRoster(); renderAudienceList();
   }catch(err){
     console.error(err);
     box.innerHTML='<div class="empty">Couldn’t load the roster. Are the Firestore rules from the README in place?</div>';
   }
 }
+async function loadAllLatestAssessments(){
+  assessByAthlete={};
+  try{
+    const snap=await db.collection('ah_assessments').get();
+    snap.forEach(d=>{
+      const r=d.data();
+      const cur=assessByAthlete[r.athleteId];
+      if(!cur || (r.date||'')>(cur.date||'')) assessByAthlete[r.athleteId]=r;
+    });
+  }catch(err){ console.error(err); }
+}
+function athleteFocusSkill(latest){
+  if(!latest || !latest.skills) return 'Getting started';
+  let lowest=null;
+  SKILLS.forEach(s=>{
+    const v=latest.skills[s.key]; if(v==null) return;
+    const idx=STAGE_INDEX[v]??99;
+    if(!lowest || idx<lowest.idx) lowest={label:s.label, idx};
+  });
+  return lowest?lowest.label:'Getting started';
+}
+function athleteCardHTML(a){
+  const latest=assessByAthlete[a.id];
+  const stale=!latest || daysSince(latest.date)>7;
+  const initials=(a.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const age=a.birthYear ? (new Date().getFullYear()-a.birthYear) : null;
+  const others=(a.otherSports||[]).filter(Boolean);
+  return `<div class="ath-card" onclick="openDetail('${esc(a.id)}')" style="cursor:pointer;">
+    <div class="top">
+      <div class="ath-avatar ${stale?'stale':''}">${esc(initials)}</div>
+      <div style="flex:1;min-width:0;">
+        <h4>${esc(a.name)}</h4>
+        <div class="info">${age?`Age ${age} · `:''}Focus: ${esc(athleteFocusSkill(latest))}${others.length?` · also ${others.map(esc).join(', ')}`:''}</div>
+      </div>
+    </div>
+    <div class="foot">
+      <span class="last"><span class="ldot"></span>${latest?`Last session ${esc(fmtDay(latest.date))}`:'No sessions yet'}</span>
+      <button class="btn small mic" onclick="event.stopPropagation();openDetail('${esc(a.id)}',{startAssessment:true})">🎙 Update</button>
+    </div>
+  </div>`;
+}
 function renderRoster(){
   const box=document.getElementById('rosterBox');
-  if(!roster.length){ box.innerHTML='<div class="empty">No athletes yet — add your first athlete to generate their code.</div>'; return; }
-  box.innerHTML=`<div class="tbl-wrap"><table>
-    <thead><tr><th>Athlete</th><th>Code</th><th>Team</th><th>Athlete Acct</th><th>Parents</th><th>Status</th></tr></thead>
-    <tbody>${roster.map(a=>`
-      <tr onclick="openDetail('${esc(a.id)}')">
-        <td><b>${esc(a.name)}</b>${a.birthYear?` <span class="tag-dim">’${String(a.birthYear).slice(2)}</span>`:''}</td>
-        <td><span class="code-badge">${esc(a.id)}</span></td>
-        <td>${esc(a.team||'—')}</td>
-        <td>${a.uid?'<span class="tag-ok">Linked ✓</span>':'<span class="tag-dim">Not linked</span>'}</td>
-        <td>${(a.parentUids||[]).length||'—'}</td>
-        <td>${a.active===false?'<span class="tag-off">Inactive</span>':'<span class="tag-ok">Active</span>'}</td>
-      </tr>`).join('')}
-    </tbody></table></div>`;
+  const active=roster.filter(a=>a.active!==false && (a.sport||'hockey')===CURRENT_SPORT);
+  box.innerHTML = active.length
+    ? active.map(athleteCardHTML).join('')
+    : '<div class="empty">No hockey athletes yet — add your first athlete to generate their code.</div>';
 }
 function openAddAthlete(){
   document.getElementById('addAthleteForm').hidden=false;
   document.getElementById('addAthleteDone').hidden=true;
   document.getElementById('naName').value=''; document.getElementById('naYear').value='';
-  document.getElementById('naTeam').value='';
+  document.getElementById('naTeam').value=''; document.getElementById('naOther').value='';
   document.getElementById('addAthleteBack').hidden=false;
 }
+function parseOtherSports(v){ return v.split(',').map(s=>s.trim()).filter(Boolean); }
 async function saveNewAthlete(){
   const name=document.getElementById('naName').value.trim();
   if(!name){ toast('Enter the athlete’s name.'); return; }
@@ -592,7 +709,8 @@ async function saveNewAthlete(){
       code=genCode();
     }
     await db.collection('ah_athletes').doc(code).set({
-      name,
+      name, sport:CURRENT_SPORT,
+      otherSports: parseOtherSports(document.getElementById('naOther').value),
       birthYear: Number(document.getElementById('naYear').value)||null,
       position: document.getElementById('naPos').value,
       team: document.getElementById('naTeam').value.trim(),
@@ -608,7 +726,7 @@ async function saveNewAthlete(){
 }
 
 /* ============================== Athlete detail ============================== */
-async function openDetail(id){
+async function openDetail(id, opts){
   detailId=id;
   const a=roster.find(x=>x.id===id); if(!a) return;
   document.getElementById('dName').textContent=a.name;
@@ -618,11 +736,13 @@ async function openDetail(id){
   document.getElementById('dEditYear').value=a.birthYear||'';
   document.getElementById('dEditPos').value=a.position||'Forward';
   document.getElementById('dEditTeam').value=a.team||'';
+  document.getElementById('dEditOther').value=(a.otherSports||[]).join(', ');
   document.getElementById('dToggleActive').textContent=a.active===false?'Reactivate Athlete':'Deactivate Athlete';
   toggleAssessForm(false);
   document.getElementById('detailBack').hidden=false;
   loadDetailAccounts(a);
-  loadDetailAssessments(id);
+  await loadDetailAssessments(id);
+  if(opts && opts.startAssessment) toggleAssessForm(true);
 }
 async function loadDetailAccounts(a){
   const box=document.getElementById('dAccounts');
@@ -655,6 +775,7 @@ async function saveAthleteEdits(){
       birthYear:Number(document.getElementById('dEditYear').value)||null,
       position:document.getElementById('dEditPos').value,
       team:document.getElementById('dEditTeam').value.trim(),
+      otherSports:parseOtherSports(document.getElementById('dEditOther').value),
       updatedAt:FV.serverTimestamp()
     });
     toast('Profile saved.');
@@ -687,13 +808,18 @@ async function removeParent(pu){
 }
 
 /* ---------- Assessments ---------- */
-function buildAssessSliders(){
+function buildAssessStages(){
   document.getElementById('afSliders').innerHTML=SKILLS.map(s=>`
-    <div class="slider-row">
-      <span class="lbl">${s.label}</span>
-      <input type="range" min="1" max="5" step="1" value="3" id="af_${s.key}" oninput="document.getElementById('afv_${s.key}').textContent=this.value">
-      <span class="val" id="afv_${s.key}">3</span>
+    <div class="stage-row">
+      <span class="lbl">${esc(s.label)}</span>
+      <div class="stage-picker" data-skill="${s.key}">
+        ${STAGES.map(st=>`<button type="button" class="stage-btn" data-stage="${st.key}" onclick="setStage('${s.key}','${st.key}',this)">${esc(st.label)}</button>`).join('')}
+      </div>
     </div>`).join('');
+}
+function setStage(skillKey, stageKey, btn){
+  assessDraft[skillKey]=stageKey;
+  btn.parentElement.querySelectorAll('.stage-btn').forEach(b=>b.classList.toggle('active', b===btn));
 }
 function toggleAssessForm(show){
   document.getElementById('assessForm').hidden=!show;
@@ -701,7 +827,13 @@ function toggleAssessForm(show){
   if(show){
     document.getElementById('afDate').value=todayStr();
     document.getElementById('afNotes').value='';
-    SKILLS.forEach(s=>{document.getElementById('af_'+s.key).value=3;document.getElementById('afv_'+s.key).textContent='3';});
+    const prevSkills = detailAssessments.length ? detailAssessments[detailAssessments.length-1].skills : null;
+    assessDraft={};
+    SKILLS.forEach(s=>{ assessDraft[s.key] = (prevSkills && prevSkills[s.key]) || 'beginning'; });
+    document.querySelectorAll('#afSliders .stage-picker').forEach(picker=>{
+      const skillKey=picker.dataset.skill;
+      picker.querySelectorAll('.stage-btn').forEach(btn=>btn.classList.toggle('active', btn.dataset.stage===assessDraft[skillKey]));
+    });
   }
 }
 async function saveAssessment(){
@@ -709,7 +841,7 @@ async function saveAssessment(){
   const btn=document.getElementById('afBtn'); btn.disabled=true;
   try{
     const skills={};
-    SKILLS.forEach(s=>skills[s.key]=Number(document.getElementById('af_'+s.key).value));
+    SKILLS.forEach(s=>skills[s.key]=assessDraft[s.key]||'beginning');
     await db.collection('ah_assessments').add({
       athleteId:detailId, athleteName:a.name,
       date:document.getElementById('afDate').value||todayStr(),
@@ -719,7 +851,8 @@ async function saveAssessment(){
     });
     toast('Assessment saved.');
     toggleAssessForm(false);
-    loadDetailAssessments(detailId);
+    await loadDetailAssessments(detailId);
+    await loadRoster();
   }catch(err){ console.error(err); toast('Save failed.'); }
   btn.disabled=false;
 }
@@ -730,16 +863,12 @@ async function loadDetailAssessments(id){
     const snap=await db.collection('ah_assessments').where('athleteId','==',id).get();
     detailAssessments=[]; snap.forEach(d=>detailAssessments.push({id:d.id,...d.data()}));
     detailAssessments.sort((a,b)=>(a.date||'')<(b.date||'')?-1:1);
-    document.getElementById('dChart').innerHTML = detailAssessments.length>=2
-      ? `<div style="margin-top:14px;"><div class="chart-box">${progressChart(detailAssessments)}</div>
-         <div class="legend">${SKILLS.map((s,i)=>`<span class="li"><span class="sw" style="background:${SKILL_COLORS[i]}"></span>${s.label}</span>`).join('')}</div></div>`
-      : '';
     list.innerHTML = detailAssessments.length
       ? detailAssessments.slice().reverse().map(r=>`
         <div class="assess-item">
           <span class="d">${esc(fmtDay(r.date))}</span><span class="c">${esc(r.coachName||'')}</span>
           <button class="btn small dangerghost" style="float:right;" onclick="deleteAssessment('${esc(r.id)}')">Delete</button>
-          <div class="mini-skills">${SKILLS.map(s=>r.skills&&r.skills[s.key]!=null?`<span class="chip">${s.label} ${r.skills[s.key]}</span>`:'').join('')}</div>
+          <div class="mini-skills">${SKILLS.map(s=>r.skills&&r.skills[s.key]?`<span class="chip">${esc(s.label)}: ${esc(stageLabel(r.skills[s.key]))}</span>`:'').join('')}</div>
           ${r.notes?`<div class="notes">${esc(r.notes)}</div>`:''}
         </div>`).join('')
       : '<div class="tag-dim" style="padding:10px 0;">No assessments yet.</div>';
@@ -750,30 +879,9 @@ async function deleteAssessment(id){
   try{
     await db.collection('ah_assessments').doc(id).delete();
     toast('Assessment deleted.');
-    loadDetailAssessments(detailId);
+    await loadDetailAssessments(detailId);
+    await loadRoster();
   }catch(err){ console.error(err); toast('Delete failed.'); }
-}
-function progressChart(rows){
-  const W=640,H=250,L=28,R=12,T=12,B=26;
-  const n=rows.length;
-  const x=i=>L+(W-L-R)*(n===1?0.5:i/(n-1));
-  const y=v=>T+(H-T-B)*(1-(v-1)/4);
-  let g='';
-  for(let v=1;v<=5;v++){
-    g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#EEF0F4"/><text x="${L-8}" y="${y(v)+4}" font-size="10" fill="#A0AABB" text-anchor="end">${v}</text>`;
-  }
-  const step=Math.max(1,Math.ceil(n/6));
-  rows.forEach((r,i)=>{
-    if(i%step===0||i===n-1) g+=`<text x="${x(i)}" y="${H-8}" font-size="10" fill="#A0AABB" text-anchor="middle">${(r.date||'').slice(5).replace('-','/')}</text>`;
-  });
-  SKILLS.forEach((s,si)=>{
-    const pts=[];
-    rows.forEach((r,i)=>{ if(r.skills&&r.skills[s.key]!=null) pts.push([x(i),y(r.skills[s.key])]); });
-    if(!pts.length) return;
-    g+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${SKILL_COLORS[si]}" stroke-width="2" stroke-linejoin="round"/>`;
-    pts.forEach(p=>{g+=`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${SKILL_COLORS[si]}"/>`;});
-  });
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:420px;display:block;">${g}</svg>`;
 }
 
 /* ============================== Training feed ============================== */
