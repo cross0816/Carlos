@@ -1,15 +1,20 @@
 # CXA Athlete Hub
 
-A training hub for Colorado Extreme Academy athletes, parents, and coaches.
-Coaches share training analysis (with video), track athlete progress with
-skill assessments, and message athletes and parents directly. Athletes get a
-home feed, a progress tracker, and a video/drill library to grow their
-knowledge of the game.
+A training hub for Colorado Extreme **Sports Academy** athletes, parents,
+and coaches. Coaches share training analysis (with video), track athlete
+progress with skill assessments, and message athletes and parents directly.
+Athletes get a home feed, a progress tracker, and a video/drill library to
+grow their knowledge of the game.
 
 Like the Learn to Skate app, it's plain static HTML hosted on GitHub Pages
 and uses the **same Firebase project** (`cxa-parent-portal`) — Firebase Auth
 for logins and new `ah_*` Firestore collections for data. No new Firebase
 project or server is required.
+
+The academy is expanding beyond hockey, so the data model has room for
+multiple sports (an athlete's `sport` + `otherSports` fields) even though
+**Hockey is the only sport wired up today** — the header's sport switcher
+is a placeholder until more sports launch.
 
 ## Pages
 
@@ -17,22 +22,36 @@ project or server is required.
   create an account with a 6-character **athlete code** from a coach. Tabs:
   - **Home** — feed of announcements plus training analysis shared with the
     athlete (or with everyone), including embedded video.
-  - **My Progress** — the latest skill assessment, a progress-over-time
-    chart, and full assessment history with coach notes. Parents with more
-    than one athlete get a picker.
+  - **My Progress** — the latest skill assessment (12 hockey skills, each on
+    a five-stage scale — see below) and full assessment history with coach
+    notes. Parents with more than one athlete get a picker.
   - **Library** — coach-curated videos and drills, filterable by type,
     category, and search.
   - **Messages** — direct messaging with coaches (live updates).
 - `coach.html` — the **Coach Console** (coach/admin accounts only):
-  - **Athletes** — roster management. Adding an athlete generates their
-    code; the detail view edits their profile, shows linked
-    athlete/parent accounts (with unlink), and records skill assessments
-    (1–5 sliders per skill + notes) with a history chart.
+  - **Dashboard** — a daily-briefing home screen: a greeting, the day's date
+    and program/season name (click to rename), three roster stats (total
+    athletes, updated this week, need an update), and a card per athlete
+    showing their age, weakest skill ("Focus"), other sports, and last
+    session date. Each card opens the athlete's full profile, or jumps
+    straight to a new assessment via its **Update** button.
   - **Training Feed** — publish analysis posts (title, notes, YouTube link)
-    to all athletes or specific ones; delete old posts.
+    to all athletes or specific ones; edit or delete old posts.
   - **Library** — add/edit/delete videos and drills (category + level).
   - **Messages** — chat with any registered athlete or parent.
-  - **Announcements** — broadcast to everyone in the hub.
+  - **Announcements** — broadcast to everyone in the hub; editable/deletable.
+
+### Skill assessments
+
+Each assessment rates 12 skills — Skating, Stickhandling, Passing, Shooting,
+Puck Control, Hockey IQ, Mental Game, Sportsmanship, Athletic Movement,
+Confidence, Focus, and Effort & Attitude — on a five-stage scale:
+**Beginning → Developing → Improving → Consistent → Advanced**. Starting a
+new assessment pre-fills every skill with the athlete's most recent levels,
+so a coach only has to touch what changed. A season-over-time chart (the
+heatmap-style view coaches and parents will recognize from the mockups) is
+planned for a follow-up phase — for now, Progress shows the latest levels
+plus full history.
 
 Videos are YouTube embeds — upload clips as **unlisted** YouTube videos and
 paste the link. Nothing is stored in Firebase Storage, so there are no
@@ -76,9 +95,13 @@ tight.
 **`ah_athletes/{code}`** — one doc per athlete, keyed by their code:
 ```
 { name, birthYear, position, team, active: true,
+  sport: 'hockey', otherSports: ['Golf', 'Lacrosse'],
   uid: <athlete's auth uid or null>, parentUids: [<uid>, ...],
   createdAt, updatedAt }
 ```
+`sport` is always `'hockey'` today (see the multi-sport note above);
+`otherSports` is a free-text list the coach types in, shown on the
+dashboard as "also Golf, Lacrosse".
 
 **`ah_posts/{id}`** — training analysis:
 ```
@@ -89,9 +112,15 @@ tight.
 **`ah_assessments/{id}`** — one skill assessment:
 ```
 { athleteId, athleteName, date: 'YYYY-MM-DD',
-  skills: { skating, puckHandling, shooting, passing, hockeyIQ, compete }, // 1–5
+  skills: { skating, stickhandling, passing, shooting, puckControl, hockeyIQ,
+            mentalGame, sportsmanship, athleticMovement, confidence, focus,
+            effortAttitude },   // each: 'beginning'|'developing'|'improving'|'consistent'|'advanced'
   notes, coachUid, coachName, createdAt }
 ```
+Older assessments created before this skill/scale change used different
+keys and a 1–5 number — the app only renders skills it recognizes by
+today's key names, so pre-existing data (if any) won't show under the new
+labels.
 
 **`ah_library/{id}`** — videos & drills:
 ```

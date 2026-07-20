@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/jpeg" href="cxa-logo.jpg">
 <link rel="apple-touch-icon" href="cxa-logo.jpg">
-<title>CXA Athlete Hub — Colorado Extreme Academy</title>
+<title>Athlete Hub — Colorado Extreme Sports Academy</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -76,9 +76,14 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 .topbar img{width:36px;height:36px;object-fit:contain;border-radius:6px;background:#fff;}
 .topbar .titles{flex:1;min-width:0;}
 .topbar .t-org{font-family:'Arial Narrow',Arial,sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#B9C2D0;}
-.topbar h1{font-family:'Arial Narrow',Arial,sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar h1{font-size:19px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .topbar .who{font-size:12px;color:#B9C2D0;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .topbar .signout{background:rgba(255,255,255,.12);border:none;color:#fff;padding:7px 12px;border-radius:var(--r);font-size:12.5px;font-weight:700;}
+.sport-switch{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:none;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;}
+.sport-switch .sdot{width:7px;height:7px;border-radius:50%;background:#5B9EE8;flex-shrink:0;}
+.sport-switch .car{color:#8894A8;font-size:15px;margin-left:2px;}
+.app-badge{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#5B9EE8;white-space:nowrap;}
+.app-badge .adot{width:7px;height:7px;border-radius:50%;background:#5B9EE8;}
 .staff-banner{background:#FFF9EE;border-bottom:1px solid #EAD9AE;color:#7A5A10;font-size:13.5px;padding:9px 18px;text-align:center;}
 .staff-banner a{color:#7A5A10;font-weight:700;}
 .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 18px;overflow-x:auto;position:sticky;top:60px;z-index:39;}
@@ -108,15 +113,11 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 /* ---------- Progress ---------- */
 .prog-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
 .prog-head select{padding:9px 12px;border:1px solid var(--border);border-radius:var(--r);background:#fff;}
-.skill-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.skill-row .lbl{width:120px;font-size:13px;font-weight:700;color:var(--t2);flex-shrink:0;}
-.skill-row .bar{flex:1;height:10px;background:#EEF0F4;border-radius:999px;overflow:hidden;}
-.skill-row .bar i{display:block;height:100%;background:var(--gold);border-radius:999px;transition:width .4s;}
-.skill-row .val{width:34px;text-align:right;font-weight:800;font-size:14px;}
-.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
-.legend .li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);font-weight:600;}
-.legend .sw{width:12px;height:12px;border-radius:3px;}
-.chart-box{overflow-x:auto;}
+.stage-row{margin-bottom:14px;}
+.stage-row .lbl{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:6px;display:block;}
+.stage-picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+.stage-btn{padding:9px 4px;border:1px solid var(--border);background:#FAFBFC;border-radius:var(--r);font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--t3);text-align:center;line-height:1.25;overflow-wrap:anywhere;cursor:default;}
+.stage-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .assess-item{border-top:1px solid var(--border);padding:14px 0;}
 .assess-item:first-child{border-top:none;}
 .assess-item .d{font-weight:800;font-size:14px;}
@@ -181,6 +182,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--t1);color:#fff;padding:11px 20px;border-radius:999px;font-size:13.5px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:opacity .3s;opacity:0;pointer-events:none;max-width:90vw;text-align:center;}
 #toast.show{opacity:1;}
 .loading{text-align:center;color:var(--t3);padding:40px 0;font-size:14px;}
+.app-footer{text-align:center;font-family:'Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);padding:30px 18px 10px;}
 
 @media(max-width:680px){
   .msg-wrap{grid-template-columns:1fr;height:calc(100vh - 210px);}
@@ -189,6 +191,8 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
   .msg-wrap.show-thread .thread-pane{display:flex;}
   .tp-head .back{display:block;}
   .topbar .who{display:none;}
+  .app-badge{display:none;}
+  .sport-switch .car{display:none;}
 }
 </style>
 </head>
@@ -198,7 +202,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 <div id="authScreen">
   <div class="login-box">
     <img class="logo" src="cxa-logo.jpg" alt="Colorado Extreme">
-    <h1>Colorado Extreme Academy</h1>
+    <h1>Colorado Extreme Sports Academy</h1>
     <h2>Athlete Hub</h2>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tabSignin" onclick="showAuthTab('signin')">Sign In</button>
@@ -236,9 +240,11 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
   <div class="topbar">
     <img src="cxa-logo.jpg" alt="">
     <div class="titles">
-      <div class="t-org">Colorado Extreme Academy</div>
-      <h1>Athlete Hub</h1>
+      <div class="t-org">Sports Academy</div>
+      <h1>Colorado Extreme</h1>
     </div>
+    <button class="sport-switch" onclick="toast('More sports are coming soon — Hockey is live today.')"><span class="sdot"></span> 🏒 Hockey <span class="car">›</span></button>
+    <span class="app-badge"><span class="adot"></span>Athlete Hub</span>
     <span class="who" id="whoAmI"></span>
     <button class="signout" onclick="auth.signOut()">Sign Out</button>
   </div>
@@ -303,6 +309,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
       </div>
     </section>
   </div>
+  <div class="app-footer">Colorado Extreme Sports Academy · Building Better Young Athletes</div>
 </div>
 
 <!-- Library / video modal -->
@@ -329,14 +336,27 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 <script>
 /* ============================== Shared constants ============================== */
 const SKILLS = [
-  {key:'skating',      label:'Skating'},
-  {key:'puckHandling', label:'Puck Handling'},
-  {key:'shooting',     label:'Shooting'},
-  {key:'passing',      label:'Passing'},
-  {key:'hockeyIQ',     label:'Hockey IQ'},
-  {key:'compete',      label:'Compete Level'},
+  {key:'skating',          label:'Skating'},
+  {key:'stickhandling',    label:'Stickhandling'},
+  {key:'passing',          label:'Passing'},
+  {key:'shooting',         label:'Shooting'},
+  {key:'puckControl',      label:'Puck Control'},
+  {key:'hockeyIQ',         label:'Hockey IQ'},
+  {key:'mentalGame',       label:'Mental Game'},
+  {key:'sportsmanship',    label:'Sportsmanship'},
+  {key:'athleticMovement', label:'Athletic Movement'},
+  {key:'confidence',       label:'Confidence'},
+  {key:'focus',            label:'Focus'},
+  {key:'effortAttitude',   label:'Effort & Attitude'},
 ];
-const SKILL_COLORS = ['#1A2535','#C4880A','#2E7D32','#B3261E','#5A6A80','#7B1FA2'];
+const STAGES = [
+  {key:'beginning',  label:'Beginning'},
+  {key:'developing', label:'Developing'},
+  {key:'improving',  label:'Improving'},
+  {key:'consistent', label:'Consistent'},
+  {key:'advanced',   label:'Advanced'},
+];
+function stageLabel(key){ const s=STAGES.find(x=>x.key===key); return s?s.label:'—'; }
 
 /* ============================== Helpers ============================== */
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -625,22 +645,20 @@ async function renderProgress(){
     let html = `<div class="card">
       <div class="kicker">Latest Assessment · ${esc(fmtDay(latest.date))}</div>
       ${SKILLS.map(s=>{
-        const v = latest.skills && latest.skills[s.key] != null ? latest.skills[s.key] : null;
-        return v==null?'':`<div class="skill-row"><span class="lbl">${s.label}</span><span class="bar"><i style="width:${v/5*100}%"></i></span><span class="val">${v}/5</span></div>`;
+        const v = latest.skills && latest.skills[s.key];
+        if(!v) return '';
+        return `<div class="stage-row"><span class="lbl">${esc(s.label)}</span>
+          <div class="stage-picker">${STAGES.map(st=>`<span class="stage-btn ${st.key===v?'active':''}">${esc(st.label)}</span>`).join('')}</div>
+        </div>`;
       }).join('')}
       ${latest.notes?`<div class="assess-item" style="border-top:1px solid var(--border);margin-top:10px;"><div class="notes">${esc(latest.notes)}</div></div>`:''}
       <div class="meta">Assessed by ${esc(latest.coachName||'CXA Staff')}</div>
     </div>`;
 
-    if(rows.length>=2){
-      html += `<div class="card"><div class="kicker">Progress Over Time</div><div class="chart-box">${progressChart(rows)}</div>
-        <div class="legend">${SKILLS.map((s,i)=>`<span class="li"><span class="sw" style="background:${SKILL_COLORS[i]}"></span>${s.label}</span>`).join('')}</div>
-      </div>`;
-    }
     html += `<div class="card"><div class="kicker">Assessment History</div>` + rows.slice().reverse().map(r=>`
       <div class="assess-item">
         <span class="d">${esc(fmtDay(r.date))}</span><span class="c">${esc(r.coachName||'')}</span>
-        <div class="mini-skills">${SKILLS.map(s=> r.skills&&r.skills[s.key]!=null?`<span class="chip">${s.label} ${r.skills[s.key]}</span>`:'').join('')}</div>
+        <div class="mini-skills">${SKILLS.map(s=> r.skills&&r.skills[s.key]?`<span class="chip">${esc(s.label)}: ${esc(stageLabel(r.skills[s.key]))}</span>`:'').join('')}</div>
         ${r.notes?`<div class="notes">${esc(r.notes)}</div>`:''}
       </div>`).join('') + `</div>`;
     box.innerHTML=html;
@@ -648,32 +666,6 @@ async function renderProgress(){
     console.error(err);
     box.innerHTML='<div class="empty">Couldn’t load progress data.</div>';
   }
-}
-function progressChart(rows){
-  const W=640,H=250,L=28,R=12,T=12,B=26;
-  const n=rows.length;
-  const x=i=> L+(W-L-R)*(n===1?0.5:i/(n-1));
-  const y=v=> T+(H-T-B)*(1-(v-1)/4);
-  let g='';
-  for(let v=1;v<=5;v++){
-    g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#EEF0F4" stroke-width="1"/>
-        <text x="${L-8}" y="${y(v)+4}" font-size="10" fill="#A0AABB" text-anchor="end">${v}</text>`;
-  }
-  const step=Math.max(1,Math.ceil(n/6));
-  rows.forEach((r,i)=>{
-    if(i%step===0 || i===n-1){
-      const lbl=(r.date||'').slice(5).replace('-','/');
-      g+=`<text x="${x(i)}" y="${H-8}" font-size="10" fill="#A0AABB" text-anchor="middle">${lbl}</text>`;
-    }
-  });
-  SKILLS.forEach((s,si)=>{
-    const pts=[];
-    rows.forEach((r,i)=>{ if(r.skills&&r.skills[s.key]!=null) pts.push([x(i),y(r.skills[s.key])]); });
-    if(pts.length<1) return;
-    g+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${SKILL_COLORS[si]}" stroke-width="2" stroke-linejoin="round"/>`;
-    pts.forEach(p=>{ g+=`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${SKILL_COLORS[si]}"/>`; });
-  });
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:420px;display:block;">${g}</svg>`;
 }
 
 /* ============================== Library ============================== */
