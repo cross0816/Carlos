@@ -592,17 +592,21 @@ async function editMyName(){
 }
 
 /* ============================== Dashboard hero ============================== */
-function loadSettings(){
-  try{ settings.programName = localStorage.getItem('ah_program_'+CURRENT_SPORT) || settings.programName; }catch(_){}
+async function loadSettings(){
+  try{
+    const snap = await db.collection('ah_settings').doc(CURRENT_SPORT).get();
+    if(snap.exists) settings.programName = snap.data().programName || settings.programName;
+  }catch(err){ console.error(err); }
   renderHero();
 }
-function editProgram(){
-  const val = prompt('Program / season name — shown on your dashboard:', settings.programName||'');
+async function editProgram(){
+  const val = prompt('Program / season name — shown to coaches and athletes:', settings.programName||'');
   if(val==null) return;
   const trimmed=val.trim(); if(!trimmed) return;
   settings.programName=trimmed;
-  try{ localStorage.setItem('ah_program_'+CURRENT_SPORT, trimmed); }catch(_){}
   renderHero();
+  try{ await db.collection('ah_settings').doc(CURRENT_SPORT).set({programName:trimmed, updatedAt:FV.serverTimestamp()},{merge:true}); }
+  catch(err){ console.error(err); toast('Couldn’t save the program name — check the ah_settings Firestore rule.'); }
 }
 function renderHero(){
   const hour=new Date().getHours();
