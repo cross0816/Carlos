@@ -22,9 +22,12 @@ is a placeholder until more sports launch.
   create an account with a 6-character **athlete code** from a coach. Tabs:
   - **Home** — feed of announcements plus training analysis shared with the
     athlete (or with everyone), including embedded video.
-  - **My Progress** — the latest skill assessment (12 hockey skills, each on
-    a five-stage scale — see below) and full assessment history with coach
-    notes. Parents with more than one athlete get a picker.
+  - **My Progress** — a **Player Portfolio** hero (sessions, current streak,
+    skills growing since last check-in, and badges earned — see below),
+    this week's levels for all 12 skills as a compact card grid, a
+    week-by-week development heatmap once 2+ assessments exist, and full
+    assessment history with coach notes. Parents with more than one athlete
+    get a picker.
   - **Library** — coach-curated videos and drills, filterable by type,
     category, and search.
   - **Messages** — direct messaging with coaches (live updates).
@@ -48,10 +51,27 @@ Puck Control, Hockey IQ, Mental Game, Sportsmanship, Athletic Movement,
 Confidence, Focus, and Effort & Attitude — on a five-stage scale:
 **Beginning → Developing → Improving → Consistent → Advanced**. Starting a
 new assessment pre-fills every skill with the athlete's most recent levels,
-so a coach only has to touch what changed. A season-over-time chart (the
-heatmap-style view coaches and parents will recognize from the mockups) is
-planned for a follow-up phase — for now, Progress shows the latest levels
-plus full history.
+so a coach only has to touch what changed.
+
+### Streak & badges
+
+Computed automatically from assessment history — there's no separate
+coach workflow to fill these in:
+- **Sessions** — total assessments logged.
+- **Streak** — consecutive calendar weeks (Sunday–Saturday) with at least
+  one assessment, counted back from the most recent one.
+- **Skills Growing** — skills whose stage moved up between the two most
+  recent assessments.
+- **Badges** — First Session, 5 Sessions, 10 Sessions, 3-Week Streak, Most
+  Improved (any skill up 2+ stages from the athlete's first assessment to
+  their latest), and Reached Advanced. The hero shows the count earned;
+  extending this to a per-badge display (or letting coaches award custom
+  ones) is a natural next step if it'd be useful.
+
+The Coach Console's Dashboard tab is still the older list-view (Phase 2 of
+the redesign brings its own Weekly Metrics/Season tabs and the "View as
+Parent" preview) — the Player Portfolio above is the athlete/parent side
+only for now.
 
 Videos are YouTube embeds — upload clips as **unlisted** YouTube videos and
 paste the link. Nothing is stored in Firebase Storage, so there are no
@@ -132,6 +152,11 @@ labels.
 
 **`ah_staff/{uid}`** — coach directory for the message picker:
 `{ name, email, updatedAt }` (auto-created when a coach opens the console).
+
+**`ah_settings/{sportKey}`** — small per-sport settings doc, currently just
+`{ programName, updatedAt }` (e.g. `ah_settings/hockey`). Shown on both the
+Coach Dashboard hero and the athlete's Player Portfolio hero; a coach edits
+it by clicking the program-name line on the dashboard.
 
 **`ah_threads/{uidA_uidB}`** — one DM thread per user pair (id is both uids
 sorted and joined with `_`, which prevents duplicate threads):
@@ -222,6 +247,10 @@ match /ah_library/{id} {
   allow create, update, delete: if ahIsStaff();
 }
 match /ah_staff/{uid} {
+  allow read: if ahSignedIn();
+  allow write: if ahIsStaff();
+}
+match /ah_settings/{sportKey} {
   allow read: if ahSignedIn();
   allow write: if ahIsStaff();
 }

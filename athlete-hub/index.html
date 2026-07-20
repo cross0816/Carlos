@@ -119,6 +119,41 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
 .stage-btn{padding:9px 4px;border:1px solid var(--border);background:#FAFBFC;border-radius:var(--r);font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--t3);text-align:center;line-height:1.25;overflow-wrap:anywhere;cursor:default;}
 .stage-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .assess-item{border-top:1px solid var(--border);padding:14px 0;}
+
+/* ---------- Player Portfolio hero ---------- */
+.portfolio-hero{background:linear-gradient(135deg,#1A2535 0%,#0F1928 100%);border-radius:14px;padding:24px;margin-bottom:16px;color:#fff;position:relative;overflow:hidden;}
+.portfolio-eyebrow{display:flex;align-items:center;gap:8px;font-family:'Arial Narrow',Arial,sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#8FA3C7;margin-bottom:14px;}
+.portfolio-eyebrow .edot{width:7px;height:7px;border-radius:50%;background:#5B9EE8;flex-shrink:0;}
+.portfolio-logo{position:absolute;top:20px;right:20px;width:40px;height:40px;border-radius:8px;object-fit:contain;background:#fff;padding:4px;}
+.portfolio-top{display:flex;gap:14px;align-items:center;margin-bottom:20px;padding-right:50px;}
+.portfolio-avatar{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:var(--accent);background:#EEF0F4;border:3px solid var(--gold);}
+.portfolio-name{font-size:20px;font-weight:800;margin-bottom:2px;}
+.portfolio-sub{font-size:13.5px;color:#B9C2D0;}
+.portfolio-stats{display:flex;gap:28px;flex-wrap:wrap;}
+.portfolio-stats>div{display:flex;flex-direction:column;gap:2px;}
+.portfolio-stats .n{font-family:'Arial Narrow',Arial,sans-serif;font-size:26px;font-weight:900;}
+.portfolio-stats .l{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#8FA3C7;}
+
+/* ---------- This Week's Levels ---------- */
+.lvl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:10px;}
+.lvl-card{background:#FAFBFC;border:1px solid var(--border);border-radius:8px;padding:12px;}
+.lvl-name{font-size:12.5px;font-weight:700;margin-bottom:8px;}
+.lvl-bar{display:flex;gap:3px;margin-bottom:6px;}
+.lvl-bar .seg{flex:1;height:6px;border-radius:3px;background:#E4E7EC;}
+.lvl-bar .seg.filled{background:var(--accent);}
+.lvl-stage{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--t2);}
+.lvl-caption{font-size:12.5px;color:var(--t3);line-height:1.5;}
+
+/* ---------- Week-by-week heatmap ---------- */
+.chart-box{overflow-x:auto;}
+.heatmap{display:grid;gap:4px;}
+.hm-cell{min-height:22px;display:flex;align-items:center;font-size:10px;}
+.hm-lbl{font-size:11.5px;font-weight:700;color:var(--t2);padding-right:8px;white-space:nowrap;}
+.hm-date{color:var(--t3);justify-content:center;text-align:center;}
+.hm-swatch{border-radius:4px;height:20px;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.legend .li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);font-weight:600;}
+.legend .sw{width:12px;height:12px;border-radius:3px;}
 .assess-item:first-child{border-top:none;}
 .assess-item .d{font-weight:800;font-size:14px;}
 .assess-item .c{font-size:12px;color:var(--t3);margin-left:8px;}
@@ -267,7 +302,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--t1);}
     <!-- PROGRESS -->
     <section id="view-progress" hidden>
       <div class="prog-head">
-        <div class="section-h" style="margin:0;">Progress for</div>
+        <div class="section-h" style="margin:0;">Viewing</div>
         <select id="progAthlete" onchange="renderProgress()"></select>
       </div>
       <div id="progBody"><div class="loading">Loading…</div></div>
@@ -356,7 +391,11 @@ const STAGES = [
   {key:'consistent', label:'Consistent'},
   {key:'advanced',   label:'Advanced'},
 ];
+const STAGE_INDEX = Object.fromEntries(STAGES.map((s,i)=>[s.key,i]));
+const STAGE_COLORS = ['#D7DCE5','#B9C4DD','#8CA0CC','#3E5488','#0E1730'];
 function stageLabel(key){ const s=STAGES.find(x=>x.key===key); return s?s.label:'—'; }
+const SPORTS = { hockey: {label:'Hockey', icon:'🏒'} };
+const CURRENT_SPORT = 'hockey';
 
 /* ============================== Helpers ============================== */
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -402,6 +441,7 @@ function authError(code){
 let profile=null, isStaffUser=false, signingUp=false;
 let myAthletes=[];            // [{id, ...data}] athletes linked to this account
 let assessCache={};           // athleteId -> [assessments]
+let hubSettings={programName:'Development Program'};
 let libItems=[], libKind='all';
 let threads=[], unsubThreads=null, unsubMsgs=null, currentThreadId=null;
 let staffList=null;
@@ -536,7 +576,7 @@ async function initApp(user){
     document.getElementById('authScreen').hidden=true;
     document.getElementById('app').hidden=false;
     showView('home');
-    loadFeed(); loadLibrary(); subThreads(); buildProgressPicker();
+    loadFeed(); loadLibrary(); subThreads(); buildProgressPicker(); loadHubSettings();
   }catch(err){
     console.error(err);
     setAuthMsg('Could not load your account. Check your connection and try again.','err');
@@ -613,20 +653,132 @@ function playVideo(el, id){
 }
 
 /* ============================== Progress ============================== */
+async function loadHubSettings(){
+  try{
+    const snap = await db.collection('ah_settings').doc(CURRENT_SPORT).get();
+    if(snap.exists) hubSettings.programName = snap.data().programName || hubSettings.programName;
+  }catch(err){ console.error(err); }
+}
 function buildProgressPicker(){
   const sel=document.getElementById('progAthlete');
   sel.innerHTML = myAthletes.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
   if(myAthletes.length) renderProgress();
   else document.getElementById('progBody').innerHTML='<div class="empty">No athlete is linked to this account yet.</div>';
-  sel.parentElement.style.display = myAthletes.length>1 ? '' : 'flex';
-  sel.hidden = myAthletes.length<=1;
-  if(myAthletes.length===1){
-    document.querySelector('#view-progress .section-h').textContent = 'Progress — ' + myAthletes[0].name;
+  document.querySelector('#view-progress .prog-head').hidden = myAthletes.length<=1;
+}
+function weekKey(dateStr){
+  const [y,m,d]=dateStr.split('-').map(Number);
+  const dt=new Date(Date.UTC(y,m-1,d));
+  dt.setUTCDate(dt.getUTCDate()-dt.getUTCDay()); // back to the Sunday that starts this week
+  return dt.toISOString().slice(0,10);
+}
+function fmtWeekShort(dateStr){ const [,m,d]=dateStr.split('-').map(Number); return `${m}/${d}`; }
+function computeStreak(rows){
+  if(!rows.length) return 0;
+  const weeks=[...new Set(rows.map(r=>weekKey(r.date)))].sort().reverse();
+  let streak=1;
+  for(let i=1;i<weeks.length;i++){
+    const gap=(new Date(weeks[i-1]+'T00:00:00Z')-new Date(weeks[i]+'T00:00:00Z'))/86400000;
+    if(gap===7) streak++; else break;
   }
+  return streak;
+}
+function computeSkillsGrowing(rows){
+  if(rows.length<2) return 0;
+  const latest=rows[rows.length-1].skills||{}, prev=rows[rows.length-2].skills||{};
+  return SKILLS.filter(s=>{
+    const a=STAGE_INDEX[prev[s.key]], b=STAGE_INDEX[latest[s.key]];
+    return a!=null && b!=null && b>a;
+  }).length;
+}
+function computeBadges(rows){
+  const badges=[];
+  if(rows.length>=1) badges.push('First Session');
+  if(rows.length>=5) badges.push('5 Sessions');
+  if(rows.length>=10) badges.push('10 Sessions');
+  if(computeStreak(rows)>=3) badges.push('3-Week Streak');
+  if(rows.length>=2){
+    const first=rows[0].skills||{}, latest=rows[rows.length-1].skills||{};
+    if(SKILLS.some(s=>{ const a=STAGE_INDEX[first[s.key]], b=STAGE_INDEX[latest[s.key]]; return a!=null && b!=null && (b-a)>=2; }))
+      badges.push('Most Improved');
+  }
+  const latestSkills=(rows[rows.length-1]||{}).skills||{};
+  if(SKILLS.some(s=>latestSkills[s.key]==='advanced')) badges.push('Reached Advanced');
+  return badges;
+}
+function portfolioHeroHTML(athlete, rows){
+  const initials=(athlete.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const age=athlete.birthYear ? (new Date().getFullYear()-athlete.birthYear) : null;
+  const sp=SPORTS[CURRENT_SPORT];
+  const stats=[
+    {n:rows.length, l:'Sessions'},
+    {n:computeStreak(rows), l:'Streak'},
+    {n:computeSkillsGrowing(rows), l:'Skills Growing'},
+    {n:computeBadges(rows).length, l:'Badges'},
+  ];
+  return `<div class="portfolio-hero">
+    <img class="portfolio-logo" src="cxa-logo.jpg" alt="">
+    <div class="portfolio-eyebrow"><span class="edot"></span>${sp.icon} ${esc(sp.label.toUpperCase())} · PLAYER PORTFOLIO</div>
+    <div class="portfolio-top">
+      <div class="portfolio-avatar">${esc(initials)}</div>
+      <div>
+        <div class="portfolio-name">${esc(athlete.name)}</div>
+        <div class="portfolio-sub">${age?`Age ${age} · `:''}${esc(sp.label)} · ${esc(hubSettings.programName)}</div>
+      </div>
+    </div>
+    <div class="portfolio-stats">${stats.map(s=>`<div><span class="n">${s.n}</span><span class="l">${esc(s.l)}</span></div>`).join('')}</div>
+  </div>`;
+}
+function levelsGridHTML(latest){
+  const cards=SKILLS.map(s=>{
+    const v=latest.skills && latest.skills[s.key];
+    if(!v) return '';
+    const idx=STAGE_INDEX[v]??0;
+    return `<div class="lvl-card">
+      <div class="lvl-name">${esc(s.label)}</div>
+      <div class="lvl-bar">${STAGES.map((_,i)=>`<i class="seg ${i<=idx?'filled':''}"></i>`).join('')}</div>
+      <div class="lvl-stage">${esc(stageLabel(v))}</div>
+    </div>`;
+  }).join('');
+  return `<div class="card">
+    <div class="kicker">This Week's Levels · ${esc(fmtDay(latest.date))}</div>
+    <div class="lvl-grid">${cards}</div>
+    <div class="lvl-caption">Beginning → Developing → Improving → Consistent → Advanced. Every athlete moves at their own pace.</div>
+    ${latest.notes?`<div class="assess-item" style="border-top:1px solid var(--border);margin-top:12px;"><div class="notes">${esc(latest.notes)}</div></div>`:''}
+    <div class="meta">Assessed by ${esc(latest.coachName||'CXA Staff')}</div>
+  </div>`;
+}
+function heatmapHTML(rows){
+  if(rows.length<2) return '';
+  const firstWeek=weekKey(rows[0].date), lastWeek=weekKey(rows[rows.length-1].date);
+  let weeks=[], cur=firstWeek;
+  while(cur<=lastWeek){
+    weeks.push(cur);
+    const d=new Date(cur+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+7);
+    cur=d.toISOString().slice(0,10);
+  }
+  if(weeks.length>10) weeks=weeks.slice(-10);
+  const snaps=weeks.map(w=>{ let last=null; for(const r of rows){ if(weekKey(r.date)<=w) last=r; else break; } return last; });
+  const cols=`134px repeat(${weeks.length},minmax(26px,1fr))`;
+  let grid = `<div class="hm-cell hm-lbl"></div>` + weeks.map(w=>`<div class="hm-cell hm-date">${fmtWeekShort(w)}</div>`).join('');
+  SKILLS.forEach(s=>{
+    grid += `<div class="hm-cell hm-lbl">${esc(s.label)}</div>`;
+    grid += snaps.map(snap=>{
+      const v=snap && snap.skills ? snap.skills[s.key] : null;
+      const color=v!=null && STAGE_INDEX[v]!=null ? STAGE_COLORS[STAGE_INDEX[v]] : '#F0F2F5';
+      return `<div class="hm-cell hm-swatch" style="background:${color}" title="${v?esc(stageLabel(v)):'No data yet'}"></div>`;
+    }).join('');
+  });
+  return `<div class="card">
+    <div class="kicker">Week-by-Week Development</div>
+    <div class="chart-box"><div class="heatmap" style="grid-template-columns:${cols};">${grid}</div></div>
+    <div class="legend">${STAGES.map((st,i)=>`<span class="li"><span class="sw" style="background:${STAGE_COLORS[i]}"></span>${esc(st.label)}</span>`).join('')}</div>
+  </div>`;
 }
 async function renderProgress(){
   const id=document.getElementById('progAthlete').value || (myAthletes[0]&&myAthletes[0].id);
   if(!id) return;
+  const athlete=myAthletes.find(a=>a.id===id);
   const box=document.getElementById('progBody');
   box.innerHTML='<div class="loading">Loading…</div>';
   try{
@@ -637,24 +789,14 @@ async function renderProgress(){
       assessCache[id]=rows;
     }
     const rows=assessCache[id];
+    let html = portfolioHeroHTML(athlete, rows);
     if(!rows.length){
-      box.innerHTML='<div class="empty">No assessments yet.<br>When your coach evaluates your skills, your progress will appear here.</div>';
+      html += '<div class="empty">No assessments yet.<br>When your coach evaluates your skills, your progress will appear here.</div>';
+      box.innerHTML=html;
       return;
     }
-    const latest=rows[rows.length-1];
-    let html = `<div class="card">
-      <div class="kicker">Latest Assessment · ${esc(fmtDay(latest.date))}</div>
-      ${SKILLS.map(s=>{
-        const v = latest.skills && latest.skills[s.key];
-        if(!v) return '';
-        return `<div class="stage-row"><span class="lbl">${esc(s.label)}</span>
-          <div class="stage-picker">${STAGES.map(st=>`<span class="stage-btn ${st.key===v?'active':''}">${esc(st.label)}</span>`).join('')}</div>
-        </div>`;
-      }).join('')}
-      ${latest.notes?`<div class="assess-item" style="border-top:1px solid var(--border);margin-top:10px;"><div class="notes">${esc(latest.notes)}</div></div>`:''}
-      <div class="meta">Assessed by ${esc(latest.coachName||'CXA Staff')}</div>
-    </div>`;
-
+    html += levelsGridHTML(rows[rows.length-1]);
+    html += heatmapHTML(rows);
     html += `<div class="card"><div class="kicker">Assessment History</div>` + rows.slice().reverse().map(r=>`
       <div class="assess-item">
         <span class="d">${esc(fmtDay(r.date))}</span><span class="c">${esc(r.coachName||'')}</span>
